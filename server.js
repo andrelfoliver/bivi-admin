@@ -101,9 +101,6 @@ app.get('/company-registration', (req, res) => {
   res.send('Página de cadastro da empresa');
 });
 
-// Servir arquivos estáticos (por exemplo, a página de login)
-app.use(express.static('public'));
-
 // Servir arquivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -119,7 +116,6 @@ app.post('/register-company', async (req, res) => {
   }
 });
 
-// testeRota de teste para inserir um documento simples na coleção Company
 // Por fim, qualquer rota que não seja de API deve retornar o index.html
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
