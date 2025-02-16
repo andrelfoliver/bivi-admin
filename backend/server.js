@@ -8,8 +8,8 @@ import mongoose from 'mongoose';
 import session from 'express-session';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import User from './backend/models/User.js';
-import Company from './backend/models/Company.js';
+import User from './models/User.js';
+import Company from './models/Company.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
