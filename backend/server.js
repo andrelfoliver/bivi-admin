@@ -1,3 +1,5 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -8,6 +10,9 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import User from './models/User.js';
 import Company from './models/Company.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -99,6 +104,9 @@ app.get('/company-registration', (req, res) => {
 // Servir arquivos estáticos (por exemplo, a página de login)
 app.use(express.static('public'));
 
+// Servir arquivos estáticos
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Rota para cadastrar a empresa com todos os inputs recebidos via JSON
 app.post('/register-company', async (req, res) => {
   try {
@@ -112,14 +120,9 @@ app.post('/register-company', async (req, res) => {
 });
 
 // Rota de teste para inserir um documento simples na coleção Company
-app.post('/test-db', async (req, res) => {
-  try {
-    const newCompany = new Company({ name: "Empresa Teste" });
-    await newCompany.save();
-    res.send("Documento inserido com sucesso!");
-  } catch (err) {
-    res.status(500).send("Erro ao inserir documento: " + err.message);
-  }
+// Por fim, qualquer rota que não seja de API deve retornar o index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 const PORT = process.env.PORT || 5000;
