@@ -1,3 +1,8 @@
-import React from "react"; import TestInput from "./TestInput";
+import React from "react";
+import ConfigEmpresa from "./ConfigEmpresa";
 
-export default function App() { return <TestInput />; }
+function App() {
+  return <ConfigEmpresa />;
+}
+
+export default App;
