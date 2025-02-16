@@ -119,7 +119,7 @@ app.post('/register-company', async (req, res) => {
   }
 });
 
-// Rota de teste para inserir um documento simples na coleção Company
+// testeRota de teste para inserir um documento simples na coleção Company
 // Por fim, qualquer rota que não seja de API deve retornar o index.html
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
