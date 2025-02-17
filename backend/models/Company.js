@@ -2,7 +2,7 @@
 import mongoose from 'mongoose';
 
 const companySchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  nome: { type: String, required: true },
   apiKey: { type: String },
   telefone: { type: String },
   email: { type: String },
@@ -32,4 +32,4 @@ const companySchema = new mongoose.Schema({
   exemplosAtendimento: { type: String },
 });
 
-export default mongoose.model('companies', companySchema);
+export default mongoose.model('Company', companySchema);
