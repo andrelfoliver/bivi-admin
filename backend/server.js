@@ -84,7 +84,7 @@ app.get(
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
     // Login bem-sucedido, redireciona para a página de cadastro da empresa
-    res.redirect('/company-registration');
+    res.redirect('/');
   }
 );
 
