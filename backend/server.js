@@ -29,11 +29,12 @@ mongoose
 // Configura sessão para persistir dados de login
 app.use(
   session({
-    secret: 'seu-segredo-de-sessao',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
   })
 );
+
 
 // Inicializa o Passport e a sessão
 app.use(passport.initialize());
