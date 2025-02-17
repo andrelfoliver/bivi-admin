@@ -272,9 +272,12 @@ function ConfigEmpresa() {
   // Função de envio do formulário atualizada para chamar a API
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    console.log("handleSubmit acionado"); // teste
+    if (!validateForm()){
+      console.log("Validação falhou", errors); 
+      return;
     console.log("Dados da empresa:", empresa);
-
+    }
     try {
       const response = await fetch('/register-company', {
         method: 'POST',
