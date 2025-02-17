@@ -91,24 +91,60 @@ const translations = {
     regrasRespostaPlaceholder:
       "Digite as regras de resposta para a assistente virtual",
     linkCalendly: "Link de Calendly",
-    linkCalendlyPlaceholder:
-      "Cole o link do Calendly aqui",
+    linkCalendlyPlaceholder: "Cole o link do Calendly aqui",
     linkSite: "Link do Site",
-    linkSitePlaceholder:
-      "Cole o link do site aqui",
+    linkSitePlaceholder: "Cole o link do site aqui",
     exemplosAtendimento: "Exemplos de Perguntas e Respostas",
     exemplosAtendimentoPlaceholder:
       "Digite exemplos de perguntas e respostas para o atendimento",
   },
   en: {
-    // Traduções em inglês...
+    // Traduções em inglês, se necessário
   },
 };
 
 function ConfigEmpresa() {
-  console.log('ConfigEmpresa renderizado!');
+  console.log("ConfigEmpresa renderizado!");
   const [language, setLanguage] = useState('pt');
   const t = translations[language];
+
+  // Definição dos estilos
+  const inputStyle = {
+    width: '100%',
+    padding: '0.75rem',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+  };
+
+  const labelStyle = { display: 'block', marginBottom: '0.5rem', color: '#272631' };
+
+  const errorStyle = { color: 'red', fontSize: '0.875rem', marginTop: '0.25rem' };
+
+  const dropZoneStyle = {
+    border: '2px dashed #ccc',
+    borderRadius: '4px',
+    padding: '1rem',
+    textAlign: 'center',
+    cursor: 'pointer',
+    position: 'relative',
+  };
+
+  const explanationIconStyle = {
+    marginLeft: '8px',
+    color: '#007bff',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+  };
+
+  const explanationTextStyle = {
+    display: 'block',
+    fontSize: '0.8rem',
+    color: '#555',
+    marginTop: '0.5rem',
+    backgroundColor: '#f1f1f1',
+    padding: '0.5rem',
+    borderRadius: '4px',
+  };
 
   // Estado que armazena as configurações da empresa
   const [empresa, setEmpresa] = useState({
@@ -193,23 +229,6 @@ function ConfigEmpresa() {
       "Forneça exemplos de perguntas e respostas comuns, para personalizar o atendimento e agilizar o fluxo de conversação.",
   };
 
-  const explanationIconStyle = {
-    marginLeft: '8px',
-    color: '#007bff',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-  };
-
-  const explanationTextStyle = {
-    display: 'block',
-    fontSize: '0.8rem',
-    color: '#555',
-    marginTop: '0.5rem',
-    backgroundColor: '#f1f1f1',
-    padding: '0.5rem',
-    borderRadius: '4px',
-  };
-
   const toggleEnvExplanation = (field) => {
     setEnvExplanations((prev) => ({ ...prev, [field]: !prev[field] }));
   };
@@ -227,15 +246,9 @@ function ConfigEmpresa() {
     window.location.href = '/login';
   };
 
-  // Função de envio do formulário
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("handleSubmit acionado");
-    // Para teste, desative temporariamente a validação:
-    // if (!validateForm()) {
-    //   console.log("Validação falhou", errors);
-    //   return;
-    // }
     console.log("Dados da empresa a serem enviados:", empresa);
 
     try {
@@ -895,13 +908,7 @@ function ConfigEmpresa() {
               >
                 {t.envSectionTitle}
               </h3>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem',
-                }}
-              >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {[
                   { label: 'VERIFY_TOKEN', name: 'verifyToken' },
                   { label: 'WHATSAPP_API_TOKEN', name: 'whatsappApiToken' },
@@ -957,13 +964,7 @@ function ConfigEmpresa() {
               >
                 {t.instrucoesPersonalizadas}
               </h3>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem',
-                }}
-              >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {[
                   {
                     label: t.regrasResposta,
