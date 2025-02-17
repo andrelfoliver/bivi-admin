@@ -118,12 +118,17 @@ app.post('/register-company', async (req, res) => {
 
 // Rota para verificar se o usuário está autenticado
 app.get('/api/current-user', (req, res) => {
+  console.log('req.session:', req.session);
+  console.log('req.user:', req.user);
+  console.log('req.headers.cookie:', req.headers.cookie);
+
   if (req.isAuthenticated()) {
     res.json({ loggedIn: true, user: req.user });
   } else {
     res.json({ loggedIn: false });
   }
 });
+
 
 // Serve arquivos estáticos da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
