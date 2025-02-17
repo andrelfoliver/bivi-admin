@@ -16,8 +16,6 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Indica que o Express deve confiar no proxy (necessário em ambientes como o Heroku)
-app.set('trust proxy', 1);
 
 // Middleware para interpretar JSON e dados de formulário (urlencoded)
 app.use(express.json());
@@ -29,17 +27,18 @@ mongoose
   .then(() => console.log("Conectado ao MongoDB"))
   .catch((err) => console.error("Erro ao conectar ao MongoDB:", err));
 
-// Configura sessão para persistir dados de login com cookies seguros em produção
+// Indica que o Express deve confiar no proxy (necessário em ambientes como o Heroku)
+app.set('trust proxy', 1);
+
+// Configura sessão para persistir dados de login com cookies seguros
 app.use(
   session({
-    secret: process.env.SESSION_SECRET, // Certifique-se de que SESSION_SECRET esteja definido
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // true em produção (HTTPS)
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      // Defina o domínio somente se necessário; se seu app estiver em um domínio personalizado, ajuste aqui
-      // domain: process.env.NODE_ENV === 'production' ? 'bivi-empresas-28885d192e15.herokuapp.com' : undefined,
+      secure: true,            // Força HTTPS
+      sameSite: 'none',        // Permite cookies cross-site
     },
   })
 );
