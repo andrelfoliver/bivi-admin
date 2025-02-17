@@ -8,33 +8,41 @@ function LoginPage({ onLogin }) {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    // Faça a autenticação, por exemplo, enviando uma requisição para sua API:
-    // Aqui, simulamos o sucesso da autenticação:
+    console.log("LoginPage: handleLogin acionado");
+    // Simulação de autenticação: substitua pela lógica real se necessário
     const userData = { email, token: 'exemplo-token' };
     onLogin(userData);
     localStorage.setItem('authToken', 'exemplo-token');
-    navigate('/'); // redireciona para a página principal
+    navigate('/');
   };
 
   return (
-    <div>
+    <div style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto' }}>
       <h1>Login</h1>
       <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="Digite seu e-mail"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Digite sua senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Entrar</button>
+        <div style={{ marginBottom: '1rem' }}>
+          <input
+            type="email"
+            placeholder="Digite seu e-mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={{ width: '100%', padding: '0.5rem' }}
+          />
+        </div>
+        <div style={{ marginBottom: '1rem' }}>
+          <input
+            type="password"
+            placeholder="Digite sua senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={{ width: '100%', padding: '0.5rem' }}
+          />
+        </div>
+        <button type="submit" style={{ padding: '0.5rem 1rem' }}>
+          Entrar
+        </button>
       </form>
     </div>
   );
