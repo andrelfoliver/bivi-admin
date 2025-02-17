@@ -1,3 +1,6 @@
+import mongoose from 'mongoose';
+
+
 const companySchema = new mongoose.Schema({
   nome: { type: String, required: true },
   apiKey: { type: String },
