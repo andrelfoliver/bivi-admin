@@ -900,6 +900,7 @@ function ConfigEmpresa() {
                 {t.salvar}
               </button>
             </div>
+            <button type="submit">Salvar Configuração</button>
           </form>
         </div>
       </main>
