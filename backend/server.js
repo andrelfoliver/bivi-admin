@@ -20,7 +20,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Conecta ao MongoDB utilizando a connection string definida na variável de ambiente MONGO_URI_EMPRESAS
+// Conecta ao MongoDB utilizando a connection string definida na variável de ambiente
 mongoose
   .connect(process.env.MONGO_URI_EMPRESAS)
   .then(() => console.log("Conectado ao MongoDB"))
@@ -29,12 +29,11 @@ mongoose
 // Configura sessão para persistir dados de login
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET, // Use a variável de ambiente SESSION_SECRET
     resave: false,
     saveUninitialized: false,
   })
 );
-
 
 // Inicializa o Passport e a sessão
 app.use(passport.initialize());
@@ -83,17 +82,16 @@ app.get(
   '/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
-    // Login bem-sucedido, redireciona para a página de cadastro da empresa
+    // Login bem-sucedido: redireciona para a rota principal que o frontend usará
     res.redirect('/');
   }
 );
 
-// Rota protegida para cadastro da empresa (apenas para usuários autenticados)
+// Rota protegida para cadastro da empresa (aqui o frontend deve cuidar da verificação do usuário)
 app.get('/company-registration', (req, res) => {
   if (!req.user) {
     return res.redirect('/login');
   }
-  // Serve o arquivo index.html (que contém o app React)
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -108,6 +106,15 @@ app.post('/register-company', async (req, res) => {
   } catch (err) {
     console.error("Erro ao cadastrar empresa:", err);
     res.status(500).send({ error: "Erro ao cadastrar empresa: " + err.message });
+  }
+});
+
+// Rota para verificar se o usuário está autenticado
+app.get('/api/current-user', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json({ loggedIn: true, user: req.user });
+  } else {
+    res.json({ loggedIn: false });
   }
 });
 

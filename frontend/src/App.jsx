@@ -11,12 +11,20 @@ import ConfigEmpresa from './ConfigEmpresa';
 function App() {
   const [user, setUser] = useState(null);
 
-  // Verifica se há um token armazenado no localStorage para simular autenticação
+  // Verifica a sessão no backend ao montar o componente
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      setUser({ token });
+    async function checkUser() {
+      try {
+        const response = await fetch('/api/current-user');
+        const data = await response.json();
+        if (data.loggedIn) {
+          setUser(data.user);
+        }
+      } catch (error) {
+        console.error('Erro ao verificar usuário:', error);
+      }
     }
+    checkUser();
   }, []);
 
   return (
