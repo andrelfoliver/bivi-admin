@@ -104,13 +104,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Rota para cadastrar a empresa com os dados enviados via JSON ou formulário
 app.post('/register-company', async (req, res) => {
-  console.log("Recebida requisição para cadastro:", req.body);
+  console.log("Requisição recebida em /register-company:", req.body);
   try {
-    const companyData = req.body; // Espera receber um objeto com todos os campos
+    const companyData = req.body; // Dados enviados pelo formulário
     const newCompany = new Company(companyData);
-    await newCompany.save();
-    console.log("Empresa cadastrada:", newCompany);
-    res.status(201).send({ message: "Empresa cadastrada com sucesso!", company: newCompany });
+    const savedCompany = await newCompany.save();
+    console.log("Empresa cadastrada:", savedCompany);
+    res.status(201).send({ message: "Empresa cadastrada com sucesso!", company: savedCompany });
   } catch (err) {
     console.error("Erro ao cadastrar empresa:", err);
     res.status(500).send({ error: "Erro ao cadastrar empresa: " + err.message });
