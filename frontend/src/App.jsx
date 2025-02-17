@@ -11,26 +11,34 @@ import ConfigEmpresa from './ConfigEmpresa';
 
 function AppContent() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
 
   useEffect(() => {
-    console.log("useEffect: verificando /api/current-user...", location);
-    fetch('/api/current-user', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        console.log("Retorno /api/current-user:", data);
+    async function checkUser() {
+      try {
+        console.log("Fetching /api/current-user...");
+        const response = await fetch('/api/current-user', { credentials: 'include' });
+        const data = await response.json();
+        console.log("Response from /api/current-user:", data);
         if (data.loggedIn) {
-          console.log("Definindo user:", data.user);
+          console.log("Setting user:", data.user);
           setUser(data.user);
         } else {
-          console.log("Nenhum usuário autenticado");
           setUser(null);
         }
-      })
-      .catch(err => console.error("Erro ao buscar /api/current-user:", err));
+      } catch (error) {
+        console.error("Error fetching /api/current-user:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    checkUser();
   }, [location]);
 
-  console.log("Render App, user =", user);
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Routes>
