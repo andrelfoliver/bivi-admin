@@ -273,10 +273,10 @@ function ConfigEmpresa() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("handleSubmit acionado"); // teste
-    if (!validateForm()){
-      console.log("Validação falhou", errors); 
-      return;
-    }
+    //if (!validateForm()){
+      //console.log("Validação falhou", errors); 
+      //return;
+    //}
     console.log("Dados da empresa a serem enviados:", empresa);
 
     try {
