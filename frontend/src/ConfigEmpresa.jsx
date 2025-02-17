@@ -106,6 +106,7 @@ const translations = {
 };
 
 function ConfigEmpresa() {
+  console.log('ConfigEmpresa renderizado!');
   const [language, setLanguage] = useState('pt');
   const t = translations[language];
 

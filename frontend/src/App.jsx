@@ -19,7 +19,9 @@ function App() {
           credentials: 'include'
         });
         const data = await response.json();
+        console.log('Retorno de /api/current-user:', data); // <-- Adicione este log
         if (data.loggedIn) {
+          console.log('Setando user no state');
           setUser(data.user);
         }
       } catch (error) {
@@ -28,6 +30,7 @@ function App() {
     }
     checkUser();
   }, []);
+  
 
   return (
     <Router>
