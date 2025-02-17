@@ -882,24 +882,7 @@ function ConfigEmpresa() {
               </div>
             </section>
 
-            {/* Botão de Envio */}
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <button
-                type="submit"
-                style={{
-                  padding: '1rem 2rem',
-                  backgroundColor: '#272631',
-                  color: 'white',
-                  fontWeight: 'bold',
-                  borderRadius: '6px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.3s',
-                }}
-              >
-                {t.salvar}
-              </button>
-            </div>
+          
             <button type="submit">Salvar Configuração</button>
           </form>
         </div>
