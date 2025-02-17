@@ -276,18 +276,26 @@ function ConfigEmpresa() {
     if (!validateForm()){
       console.log("Validação falhou", errors); 
       return;
-    console.log("Dados da empresa:", empresa);
     }
+    console.log("Dados da empresa a serem enviados:", empresa);
+
     try {
       const response = await fetch('/register-company', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(empresa),
       });
+      
+      console.log("Status da resposta:", response.status);
       const data = await response.json();
       console.log("Resposta do servidor:", data);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+
+      if (response.ok) {
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 3000);
+      } else {
+        console.error("Erro na resposta do servidor:", data);
+      }
     } catch (error) {
       console.error("Erro ao enviar dados:", error);
     }
