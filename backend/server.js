@@ -31,21 +31,18 @@ mongoose
   .catch((err) => console.error("Erro ao conectar ao MongoDB:", err));
 
 // Configura sessão para persistir dados de login com cookies seguros
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URI_EMPRESAS,
-      collectionName: 'sessions', // nome da coleção de sessões
-    }),
-    cookie: {
-      secure: true,      // 'production' e HTTPS
-      sameSite: 'none',  
-    },
-  })
-);
+app.use(session({
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI_EMPRESAS }),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: true,     // pois está em produção/HTTPS
+    sameSite: 'none', // fluxo OAuth cross-site
+    // NÃO defina 'domain', deixe o Express gerir
+  }
+}));
+
 
 // Inicializa o Passport e a sessão
 app.use(passport.initialize());
