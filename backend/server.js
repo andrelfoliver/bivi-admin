@@ -16,8 +16,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Middleware para interpretar JSON no corpo das requisições
+// Middleware para interpretar JSON e dados de formulário (urlencoded)
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Conecta ao MongoDB utilizando a connection string definida na variável de ambiente MONGO_URI_EMPRESAS
 mongoose
@@ -59,18 +60,15 @@ passport.use(
       if (!profile.emails[0].value.endsWith('@gmail.com')) {
         return done(null, false, { message: 'Apenas contas Gmail são permitidas.' });
       }
-
       // Procura se o usuário já existe
       const existingUser = await User.findOne({ googleId: profile.id });
       if (existingUser) return done(null, existingUser);
-
       // Cria um novo usuário se não existir
       const newUser = await new User({
         googleId: profile.id,
         email: profile.emails[0].value,
         name: profile.displayName,
       }).save();
-
       done(null, newUser);
     }
   )
@@ -92,31 +90,34 @@ app.get(
   }
 );
 
-// Rota protegida para cadastro da empresa (acesso apenas para usuários autenticados)
+// Rota protegida para cadastro da empresa (apenas para usuários autenticados)
 app.get('/company-registration', (req, res) => {
   if (!req.user) {
     return res.redirect('/login');
   }
-  // Aqui você pode renderizar sua página de cadastro (por exemplo, enviar um HTML ou renderizar seu app React)
+  // Aqui você pode renderizar sua página de cadastro ou enviar um HTML
   res.send('Página de cadastro da empresa');
 });
 
-// Servir arquivos estáticos
+// Servir arquivos estáticos da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Rota para cadastrar a empresa com todos os inputs recebidos via JSON
+// Rota para cadastrar a empresa com os dados enviados via JSON ou formulário
 app.post('/register-company', async (req, res) => {
+  console.log("Recebida requisição para cadastro:", req.body);
   try {
-    const companyData = req.body; // Espera receber um objeto JSON com todos os campos
+    const companyData = req.body; // Espera receber um objeto com todos os campos
     const newCompany = new Company(companyData);
     await newCompany.save();
+    console.log("Empresa cadastrada:", newCompany);
     res.status(201).send({ message: "Empresa cadastrada com sucesso!", company: newCompany });
   } catch (err) {
+    console.error("Erro ao cadastrar empresa:", err);
     res.status(500).send({ error: "Erro ao cadastrar empresa: " + err.message });
   }
 });
 
-// Por fim, qualquer rota que não seja de API deve retornar o index.html
+// Qualquer rota que não seja de API retorna o index.html (para SPA)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
