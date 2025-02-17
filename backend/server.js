@@ -16,6 +16,8 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Indica que o Express deve confiar no proxy (necessário para Heroku)
+app.set('trust proxy', 1);
 
 // Middleware para interpretar JSON e dados de formulário (urlencoded)
 app.use(express.json());
@@ -27,19 +29,16 @@ mongoose
   .then(() => console.log("Conectado ao MongoDB"))
   .catch((err) => console.error("Erro ao conectar ao MongoDB:", err));
 
-// Indica que o Express deve confiar no proxy (necessário em ambientes como o Heroku)
-app.set('trust proxy', 1);
-
 // Configura sessão para persistir dados de login com cookies seguros
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET, // Certifique-se de que SESSION_SECRET esteja definido
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // true em produção
-      sameSite: 'lax',
-      },
+      secure: process.env.NODE_ENV === 'production', // true em produção (HTTPS)
+      sameSite: 'lax', // 'lax' funciona melhor quando frontend e backend estão na mesma origem
+    },
   })
 );
 
@@ -64,11 +63,14 @@ passport.use(
       callbackURL: "https://bivi-empresas-28885d192e15.herokuapp.com/auth/google/callback"
     },
     async (accessToken, refreshToken, profile, done) => {
+      // Verifica se o e‑mail é do Gmail
       if (!profile.emails[0].value.endsWith('@gmail.com')) {
         return done(null, false, { message: 'Apenas contas Gmail são permitidas.' });
       }
+      // Procura se o usuário já existe
       const existingUser = await User.findOne({ googleId: profile.id });
       if (existingUser) return done(null, existingUser);
+      // Cria um novo usuário se não existir
       const newUser = await new User({
         googleId: profile.id,
         email: profile.emails[0].value,
@@ -87,12 +89,12 @@ app.get(
   '/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
-    // Login bem-sucedido: redireciona para a rota principal
+    // Login bem-sucedido: redireciona para a rota principal (onde o frontend decide)
     res.redirect('/');
   }
 );
 
-// Rota protegida para cadastro da empresa (aqui o frontend deve gerenciar a visualização)
+// Rota protegida para cadastro da empresa (o frontend gerencia a exibição com base na sessão)
 app.get('/company-registration', (req, res) => {
   if (!req.user) {
     return res.redirect('/login');
