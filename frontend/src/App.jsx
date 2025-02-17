@@ -11,11 +11,13 @@ import ConfigEmpresa from './ConfigEmpresa';
 function App() {
   const [user, setUser] = useState(null);
 
-  // Verifica a sessão no backend ao montar o componente
+  // Verifica a sessão no backend incluindo credentials (cookies)
   useEffect(() => {
     async function checkUser() {
       try {
-        const response = await fetch('/api/current-user');
+        const response = await fetch('/api/current-user', {
+          credentials: 'include' // Importante: envia os cookies junto com a requisição
+        });
         const data = await response.json();
         if (data.loggedIn) {
           setUser(data.user);
