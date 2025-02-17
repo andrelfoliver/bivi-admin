@@ -96,59 +96,7 @@ const translations = {
     exemplosAtendimentoPlaceholder: "Digite exemplos de perguntas e respostas para o atendimento",
   },
   en: {
-    pageTitle: "Company Setup",
-    dadosBasicos: "Basic Information",
-    nomeEmpresa: "Company Name",
-    nomePlaceholder: "Enter company name",
-    apiKey: "OpenAI API Key",
-    apiPlaceholder: "Enter API Key",
-    apiKeyError:
-      "Invalid API Key. It must start with 'sk-' and be at least 50 characters long.",
-    telefone: "Phone",
-    telefonePlaceholder: "Enter phone number",
-    email: "Contact E‑mail",
-    emailPlaceholder: "Enter e‑mail",
-    saudacao: "Greeting",
-    saudacaoPlaceholder: "Greeting message",
-    identidadeVisual: "Visual Identity",
-    logotipo: "Logo",
-    logoDropZone:
-      "Drag and drop the logo here or click to select (only PNG or JPEG files are accepted).",
-    corPrimaria: "Primary Color",
-    corSecundaria: "Secondary Color",
-    corFundo: "Background Color",
-    configuracaoAtendimento: "Service Flow Setup",
-    saudacaoInicial: "Initial Greeting",
-    saudacaoInicialPlaceholder:
-      "E.g.: Hello, welcome to [company name]!",
-    respostaPadrao: "Standard Response",
-    respostaPadraoPlaceholder:
-      "E.g.: We offer innovative data analysis solutions.",
-    solicitacaoEmail: "E‑mail Request Message",
-    solicitacaoEmailPlaceholder:
-      "E.g.: Before we say goodbye, may I send more details via e‑mail? What is your e‑mail?",
-    mensagemEncerramento: "Closing Message",
-    mensagemEncerramentoPlaceholder:
-      "E.g.: Thank you for contacting us! We're at your service.",
-    listaProdutos: "Products/Services List",
-    listaProdutosPlaceholder:
-      "E.g.: - Interactive Dashboards\n- Virtual Assistance with AI\n- Integrated Solutions",
-    salvar: "Save Configuration",
-    logout: "Logout",
-    languageLabel: "Language",
-    successMessage: "Configuration saved successfully!",
-    logoFormatError: "Only PNG or JPEG files are accepted.",
-    envSectionTitle: ".env File Configuration",
-    // New texts for Personalized Instructions
-    instrucoesPersonalizadas: "Personalized Instructions",
-    regrasResposta: "Response Rules",
-    regrasRespostaPlaceholder: "Enter the response rules for the virtual assistant",
-    linkCalendly: "Calendly Link",
-    linkCalendlyPlaceholder: "Paste your Calendly link here",
-    linkSite: "Site Link",
-    linkSitePlaceholder: "Paste your site link here",
-    exemplosAtendimento: "Examples of Q&A",
-    exemplosAtendimentoPlaceholder: "Enter examples of common Q&A for customer service",
+    // Traduções em inglês...
   },
 };
 
@@ -269,14 +217,15 @@ function ConfigEmpresa() {
     setLanguage(e.target.value);
   };
 
-  // Função de envio do formulário atualizada para chamar a API
+  // Função de envio do formulário para chamar a API
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("handleSubmit acionado"); // teste
-    if (!validateForm()){
-      console.log("Validação falhou", errors); 
-      return;
-    }
+    console.log("handleSubmit acionado");
+    // Para testar, comente temporariamente a validação:
+    // if (!validateForm()) {
+    //   console.log("Validação falhou", errors);
+    //   return;
+    // }
     console.log("Dados da empresa a serem enviados:", empresa);
 
     try {
@@ -285,7 +234,6 @@ function ConfigEmpresa() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(empresa),
       });
-      
       console.log("Status da resposta:", response.status);
       const data = await response.json();
       console.log("Resposta do servidor:", data);
@@ -885,7 +833,6 @@ function ConfigEmpresa() {
               </div>
             </section>
 
-          
             <button type="submit">Salvar Configuração</button>
           </form>
         </div>

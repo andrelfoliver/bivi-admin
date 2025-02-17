@@ -1,6 +1,3 @@
-// models/Company.js
-import mongoose from 'mongoose';
-
 const companySchema = new mongoose.Schema({
   nome: { type: String, required: true },
   apiKey: { type: String },
@@ -16,7 +13,7 @@ const companySchema = new mongoose.Schema({
   solicitacaoEmail: { type: String },
   mensagemEncerramento: { type: String },
   listaProdutos: { type: String },
-  // Variáveis do .env (se necessário armazenar para cada empresa)
+  // Variáveis do .env
   verifyToken: { type: String },
   whatsappApiToken: { type: String },
   openaiApiKey: { type: String },
@@ -25,11 +22,11 @@ const companySchema = new mongoose.Schema({
   emailUser: { type: String },
   emailPass: { type: String },
   emailGestor: { type: String },
-  // Campos para Instruções Personalizadas
+  // Instruções Personalizadas
   regrasResposta: { type: String },
   linkCalendly: { type: String },
   linkSite: { type: String },
   exemplosAtendimento: { type: String },
-});
+}, { timestamps: true });
 
-export default mongoose.model('Company', companySchema);
+export default mongoose.model('Company', companySchema, 'companies');
