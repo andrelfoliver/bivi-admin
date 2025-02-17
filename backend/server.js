@@ -29,18 +29,25 @@ mongoose
   .then(() => console.log("Conectado ao MongoDB"))
   .catch((err) => console.error("Erro ao conectar ao MongoDB:", err));
 
+// Indica que o Express deve confiar no proxy (necessário para Heroku)
+app.set('trust proxy', 1);
+
 // Configura sessão para persistir dados de login com cookies seguros em produção
 app.use(
   session({
-    secret: process.env.SESSION_SECRET, // Certifique-se de que essa variável esteja definida nas Config Vars do Heroku
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // Usa secure: true em produção (HTTPS)
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
-    }
+      secure: process.env.NODE_ENV === 'production', // true em produção (HTTPS)
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      domain: process.env.NODE_ENV === 'production' 
+                ? 'bivi-empresas-28885d192e15.herokuapp.com'
+                : undefined,
+    },
   })
 );
+
 
 // Inicializa o Passport e a sessão
 app.use(passport.initialize());
