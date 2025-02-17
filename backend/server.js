@@ -36,8 +36,8 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // true em produção (HTTPS)
-      sameSite: 'lax', // 'lax' funciona melhor quando frontend e backend estão na mesma origem
+      secure: true, // true em produção (HTTPS)
+      sameSite: 'none', // 'lax' funciona melhor quando frontend e backend estão na mesma origem
     },
   })
 );
