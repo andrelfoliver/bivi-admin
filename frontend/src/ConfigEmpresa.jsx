@@ -273,10 +273,10 @@ function ConfigEmpresa() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("handleSubmit acionado"); // teste
-    //if (!validateForm()){
-      //console.log("Validação falhou", errors); 
-      //return;
-    //}
+    if (!validateForm()){
+      console.log("Validação falhou", errors); 
+      return;
+    }
     console.log("Dados da empresa a serem enviados:", empresa);
 
     try {
@@ -289,13 +289,8 @@ function ConfigEmpresa() {
       console.log("Status da resposta:", response.status);
       const data = await response.json();
       console.log("Resposta do servidor:", data);
-
-      if (response.ok) {
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
-      } else {
-        console.error("Erro na resposta do servidor:", data);
-      }
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
     } catch (error) {
       console.error("Erro ao enviar dados:", error);
     }
