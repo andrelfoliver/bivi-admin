@@ -2,9 +2,7 @@ import React, { useState, useRef } from 'react';
 
 // Função para calcular a distância de Levenshtein entre duas strings
 function levenshteinDistance(a, b) {
-  const dp = Array(a.length + 1)
-    .fill(null)
-    .map(() => Array(b.length + 1).fill(null));
+  const dp = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(null));
   for (let i = 0; i <= a.length; i++) dp[i][0] = i;
   for (let j = 0; j <= b.length; j++) dp[0][j] = j;
   for (let i = 1; i <= a.length; i++) {
@@ -32,10 +30,7 @@ function getClosestDomain(typedDomain) {
   let closest = null;
   let minDistance = Infinity;
   popularDomains.forEach((domain) => {
-    const distance = levenshteinDistance(
-      typedDomain.toLowerCase(),
-      domain
-    );
+    const distance = levenshteinDistance(typedDomain.toLowerCase(), domain);
     if (distance < minDistance) {
       minDistance = distance;
       closest = domain;
@@ -161,7 +156,7 @@ function ConfigEmpresa() {
   const [language, setLanguage] = useState('pt');
   const t = translations[language];
 
-  // Estado que armazena todas as configurações da empresa, agora com os novos campos
+  // Estado que armazena as configurações da empresa
   const [empresa, setEmpresa] = useState({
     nome: '',
     apiKey: '',
@@ -186,7 +181,7 @@ function ConfigEmpresa() {
     emailUser: '',
     emailPass: '',
     emailGestor: '',
-    // Novos campos para configurar as instruções
+    // Instruções Personalizadas
     regrasResposta: '',
     linkCalendly: '',
     linkSite: '',
@@ -197,7 +192,7 @@ function ConfigEmpresa() {
   const [success, setSuccess] = useState(false);
   const logoInputRef = useRef(null);
 
-  // Estados para controle das explicações (tooltips) dos campos .env e Instruções
+  // Estados para as explicações (tooltips)
   const [envExplanations, setEnvExplanations] = useState({
     verifyToken: false,
     whatsappApiToken: false,
@@ -274,6 +269,27 @@ function ConfigEmpresa() {
     setLanguage(e.target.value);
   };
 
+  // Função de envio do formulário atualizada para chamar a API
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    console.log("Dados da empresa:", empresa);
+
+    try {
+      const response = await fetch('/register-company', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(empresa),
+      });
+      const data = await response.json();
+      console.log("Resposta do servidor:", data);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (error) {
+      console.error("Erro ao enviar dados:", error);
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
     if (type === 'file') {
@@ -314,10 +330,7 @@ function ConfigEmpresa() {
     switch (name) {
       case 'nome':
         if (!value.trim())
-          error =
-            language === 'pt'
-              ? 'Nome é obrigatório.'
-              : 'Name is required.';
+          error = language === 'pt' ? 'Nome é obrigatório.' : 'Name is required.';
         break;
       case 'apiKey':
         if (!value.trim() || !/^sk-(proj-)?[A-Za-z0-9_-]+$/.test(value) || value.length < 50) {
@@ -327,10 +340,9 @@ function ConfigEmpresa() {
       case 'telefone': {
         const digits = value.replace(/\D/g, '');
         if (digits.length < 10 || digits.length > 15)
-          error =
-            language === 'pt'
-              ? 'Telefone inválido. Insira entre 10 e 15 dígitos.'
-              : 'Invalid phone. Enter between 10 and 15 digits.';
+          error = language === 'pt'
+            ? 'Telefone inválido. Insira entre 10 e 15 dígitos.'
+            : 'Invalid phone. Enter between 10 and 15 digits.';
         break;
       }
       case 'email': {
@@ -341,48 +353,40 @@ function ConfigEmpresa() {
           const domain = value.split('@')[1];
           const suggestion = getClosestDomain(domain);
           if (suggestion && suggestion !== domain.toLowerCase()) {
-            error =
-              language === 'pt'
-                ? `Você quis dizer ${value.split('@')[0]}@${suggestion}?`
-                : `Did you mean ${value.split('@')[0]}@${suggestion}?`;
+            error = language === 'pt'
+              ? `Você quis dizer ${value.split('@')[0]}@${suggestion}?`
+              : `Did you mean ${value.split('@')[0]}@${suggestion}?`;
           }
         }
         break;
       }
       case 'saudacao':
         if (!value.trim())
-          error =
-            language === 'pt'
-              ? 'Saudação é obrigatória.'
-              : 'Greeting is required.';
+          error = language === 'pt' ? 'Saudação é obrigatória.' : 'Greeting is required.';
         break;
       case 'saudacaoInicial':
         if (!value.trim())
-          error =
-            language === 'pt'
-              ? 'Saudação Inicial é obrigatória.'
-              : 'Initial Greeting is required.';
+          error = language === 'pt'
+            ? 'Saudação Inicial é obrigatória.'
+            : 'Initial Greeting is required.';
         break;
       case 'respostaPadrao':
         if (!value.trim())
-          error =
-            language === 'pt'
-              ? 'Resposta Padrão é obrigatória.'
-              : 'Standard Response is required.';
+          error = language === 'pt'
+            ? 'Resposta Padrão é obrigatória.'
+            : 'Standard Response is required.';
         break;
       case 'mensagemEncerramento':
         if (!value.trim())
-          error =
-            language === 'pt'
-              ? 'Mensagem de Encerramento é obrigatória.'
-              : 'Closing Message is required.';
+          error = language === 'pt'
+            ? 'Mensagem de Encerramento é obrigatória.'
+            : 'Closing Message is required.';
         break;
       case 'listaProdutos':
         if (!value.trim())
-          error =
-            language === 'pt'
-              ? 'Lista de Produtos/Serviços é obrigatória.'
-              : 'Products/Services List is required.';
+          error = language === 'pt'
+            ? 'Lista de Produtos/Serviços é obrigatória.'
+            : 'Products/Services List is required.';
         break;
       // Validação dos campos do .env
       case 'verifyToken':
@@ -394,39 +398,34 @@ function ConfigEmpresa() {
       case 'emailPass':
       case 'emailGestor':
         if (!value.trim())
-          error =
-            language === 'pt'
-              ? `${name.toUpperCase()} é obrigatório.`
-              : `${name.toUpperCase()} is required.`;
+          error = language === 'pt'
+            ? `${name.toUpperCase()} é obrigatório.`
+            : `${name.toUpperCase()} is required.`;
         break;
       // Validação dos novos campos de Instruções Personalizadas
       case 'regrasResposta':
         if (!value.trim())
-          error =
-            language === 'pt'
-              ? 'Regras de Resposta são obrigatórias.'
-              : 'Response rules are required.';
+          error = language === 'pt'
+            ? 'Regras de Resposta são obrigatórias.'
+            : 'Response rules are required.';
         break;
       case 'linkCalendly':
         if (!value.trim())
-          error =
-            language === 'pt'
-              ? 'Link de Calendly é obrigatório.'
-              : 'Calendly link is required.';
+          error = language === 'pt'
+            ? 'Link de Calendly é obrigatório.'
+            : 'Calendly link is required.';
         break;
       case 'linkSite':
         if (!value.trim())
-          error =
-            language === 'pt'
-              ? 'Link do Site é obrigatório.'
-              : 'Site link is required.';
+          error = language === 'pt'
+            ? 'Link do Site é obrigatório.'
+            : 'Site link is required.';
         break;
       case 'exemplosAtendimento':
         if (!value.trim())
-          error =
-            language === 'pt'
-              ? 'Exemplos de Perguntas e Respostas são obrigatórios.'
-              : 'Examples of Q&A are required.';
+          error = language === 'pt'
+            ? 'Exemplos de Perguntas e Respostas são obrigatórios.'
+            : 'Examples of Q&A are required.';
         break;
       default:
         break;
@@ -510,56 +509,6 @@ function ConfigEmpresa() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    console.log("Dados da empresa:", empresa);
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 3000);
-  };
-
-  const inputStyle = {
-    width: '100%',
-    padding: '0.75rem',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-  };
-
-  const labelStyle = {
-    display: 'block',
-    marginBottom: '0.5rem',
-    color: '#272631',
-  };
-  const errorStyle = {
-    color: 'red',
-    fontSize: '0.875rem',
-    marginTop: '0.25rem',
-  };
-
-  const selectStyle = {
-    padding: '0.5rem',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
-    backgroundColor: '#fff',
-    color: '#333',
-    marginRight: '0.5rem',
-  };
-
-  const languageContainerStyle = {
-    display: 'flex',
-    alignItems: 'center',
-  };
-
-  // Estilo para a área de drop do logo
-  const dropZoneStyle = {
-    border: '2px dashed #ccc',
-    borderRadius: '4px',
-    padding: '1rem',
-    textAlign: 'center',
-    cursor: 'pointer',
-    position: 'relative',
-  };
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       {/* Header */}
@@ -579,9 +528,9 @@ function ConfigEmpresa() {
             BiVisualizer
           </h1>
         </div>
-        <div style={languageContainerStyle}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
           <label style={{ marginRight: '0.5rem' }}>{t.languageLabel}:</label>
-          <select style={selectStyle} value={language} onChange={handleLanguageChange}>
+          <select style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', backgroundColor: '#fff', color: '#333', marginRight: '0.5rem' }} value={language} onChange={handleLanguageChange}>
             <option value="pt">Português</option>
             <option value="en">English</option>
           </select>
@@ -603,38 +552,12 @@ function ConfigEmpresa() {
 
       {/* Conteúdo Principal */}
       <main style={{ flexGrow: 1, backgroundColor: '#f5fafd', padding: '2rem' }}>
-        <div
-          style={{
-            maxWidth: '800px',
-            margin: '0 auto',
-            backgroundColor: '#ffffff',
-            padding: '2rem',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          }}
-        >
-          <h2
-            style={{
-              fontSize: '2.5rem',
-              fontWeight: 'bold',
-              marginBottom: '1rem',
-              textAlign: 'center',
-              color: '#272631',
-            }}
-          >
+        <div style={{ maxWidth: '800px', margin: '0 auto', backgroundColor: '#ffffff', padding: '2rem', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}>
+          <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1rem', textAlign: 'center', color: '#272631' }}>
             {t.pageTitle}
           </h2>
           {success && (
-            <div
-              style={{
-                backgroundColor: '#5de5d9',
-                color: 'white',
-                textAlign: 'center',
-                padding: '1rem',
-                borderRadius: '6px',
-                marginBottom: '1rem',
-              }}
-            >
+            <div style={{ backgroundColor: '#5de5d9', color: 'white', textAlign: 'center', padding: '1rem', borderRadius: '6px', marginBottom: '1rem' }}>
               {t.successMessage}
             </div>
           )}
@@ -646,7 +569,7 @@ function ConfigEmpresa() {
               </h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
                 <div style={{ flex: '1 1 300px' }}>
-                  <label style={labelStyle}>{t.nomeEmpresa}</label>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', color: '#272631' }}>{t.nomeEmpresa}</label>
                   <input
                     type="text"
                     name="nome"
