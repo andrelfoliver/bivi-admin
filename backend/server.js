@@ -2,6 +2,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 dotenv.config();
+import MongoStore from 'connect-mongo';
 
 import express from 'express';
 import mongoose from 'mongoose';
@@ -32,12 +33,16 @@ mongoose
 // Configura sessão para persistir dados de login com cookies seguros
 app.use(
   session({
-    secret: process.env.SESSION_SECRET, // Certifique-se de que SESSION_SECRET esteja definido
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI_EMPRESAS,
+      collectionName: 'sessions', // nome da coleção de sessões
+    }),
     cookie: {
-      secure: true, // true em produção (HTTPS)
-      sameSite: 'none', // 'lax' funciona melhor quando frontend e backend estão na mesma origem
+      secure: true,      // 'production' e HTTPS
+      sameSite: 'none',  
     },
   })
 );
