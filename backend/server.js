@@ -29,25 +29,20 @@ mongoose
   .then(() => console.log("Conectado ao MongoDB"))
   .catch((err) => console.error("Erro ao conectar ao MongoDB:", err));
 
-// Indica que o Express deve confiar no proxy (necessário para Heroku)
-app.set('trust proxy', 1);
-
 // Configura sessão para persistir dados de login com cookies seguros em produção
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET, // Certifique-se de que SESSION_SECRET esteja definido
     resave: false,
     saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === 'production', // true em produção (HTTPS)
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      domain: process.env.NODE_ENV === 'production' 
-                ? 'bivi-empresas-28885d192e15.herokuapp.com'
-                : undefined,
+      // Defina o domínio somente se necessário; se seu app estiver em um domínio personalizado, ajuste aqui
+      // domain: process.env.NODE_ENV === 'production' ? 'bivi-empresas-28885d192e15.herokuapp.com' : undefined,
     },
   })
 );
-
 
 // Inicializa o Passport e a sessão
 app.use(passport.initialize());
@@ -70,14 +65,11 @@ passport.use(
       callbackURL: "https://bivi-empresas-28885d192e15.herokuapp.com/auth/google/callback"
     },
     async (accessToken, refreshToken, profile, done) => {
-      // Verifica se o e‑mail é do Gmail
       if (!profile.emails[0].value.endsWith('@gmail.com')) {
         return done(null, false, { message: 'Apenas contas Gmail são permitidas.' });
       }
-      // Procura se o usuário já existe
       const existingUser = await User.findOne({ googleId: profile.id });
       if (existingUser) return done(null, existingUser);
-      // Cria um novo usuário se não existir
       const newUser = await new User({
         googleId: profile.id,
         email: profile.emails[0].value,
@@ -101,7 +93,7 @@ app.get(
   }
 );
 
-// Rota protegida para cadastro da empresa (aqui o frontend cuida da verificação do usuário)
+// Rota protegida para cadastro da empresa (aqui o frontend deve gerenciar a visualização)
 app.get('/company-registration', (req, res) => {
   if (!req.user) {
     return res.redirect('/login');
@@ -135,7 +127,7 @@ app.get('/api/current-user', (req, res) => {
 // Serve arquivos estáticos da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Rota curinga: para qualquer rota que não seja de API, retorna o index.html (para SPA)
+// Rota curinga para SPA: para qualquer rota que não seja de API, retorna o index.html
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
