@@ -11,40 +11,34 @@ import ConfigEmpresa from './ConfigEmpresa';
 function App() {
   const [user, setUser] = useState(null);
 
-
-  console.log("Iniciando checkUser...");
-
-  // Verifica a sessão no backend e envia os cookies com a requisição
   useEffect(() => {
-    console.log("useEffect disparado");
-    async function checkUser() {
-      console.log("Tentando buscar /api/current-user...");
-      const response = await fetch('/api/current-user', { credentials: 'include' });
-      const data = await response.json();
-      console.log("Retorno /api/current-user:", data);
-      if (data.loggedIn) {
-        setUser(data.user);
-      }
-    }
-    checkUser();
+    console.log("useEffect: verificando /api/current-user...");
+    fetch('/api/current-user', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        console.log("Retorno /api/current-user:", data);
+        if (data.loggedIn) {
+          console.log("Definindo user:", data.user);
+          setUser(data.user);
+        }
+      })
+      .catch(err => console.error("Erro ao buscar /api/current-user:", err));
   }, []);
 
-  
+  console.log("Render App, user =", user);
 
   return (
     <Router>
       <Routes>
-        <Route 
-          path="/login" 
-          element={<LoginPage onLogin={(userData) => setUser(userData)} />} 
-        />
-        <Route 
-          path="/" 
-          element={user ? <ConfigEmpresa /> : <Navigate to="/login" replace />} 
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/"
+          element={user ? <ConfigEmpresa /> : <Navigate to="/login" replace />}
         />
       </Routes>
     </Router>
   );
 }
+
 
 export default App;
