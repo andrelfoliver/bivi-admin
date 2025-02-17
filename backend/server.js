@@ -75,17 +75,14 @@ passport.use(
 );
 
 // Rota para iniciar a autenticação com o Google
-app.get(
-  '/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 // Callback após autenticação com o Google
 app.get(
   '/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
-    // Login bem-sucedido, redireciona para a página de cadastro da empresa.
+    // Login bem-sucedido, redireciona para a página de cadastro da empresa
     res.redirect('/company-registration');
   }
 );
@@ -95,19 +92,15 @@ app.get('/company-registration', (req, res) => {
   if (!req.user) {
     return res.redirect('/login');
   }
-  // Aqui você pode renderizar sua página de cadastro ou enviar um HTML
-  res.send('Página de cadastro da empresa');
+  // Serve o arquivo index.html (que contém o app React)
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
-// Servir arquivos estáticos da pasta 'public'
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Rota para cadastrar a empresa com os dados enviados via JSON ou formulário
 app.post('/register-company', async (req, res) => {
   console.log("Requisição recebida em /register-company:", req.body);
   try {
-    const companyData = req.body; // Dados enviados pelo formulário
-    const newCompany = new Company(companyData);
+    const newCompany = new Company(req.body);
     const savedCompany = await newCompany.save();
     console.log("Empresa cadastrada:", savedCompany);
     res.status(201).send({ message: "Empresa cadastrada com sucesso!", company: savedCompany });
@@ -117,7 +110,10 @@ app.post('/register-company', async (req, res) => {
   }
 });
 
-// Qualquer rota que não seja de API retorna o index.html (para SPA)
+// Serve arquivos estáticos da pasta 'public'
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Rota curinga: para qualquer rota que não seja de API, retorna o index.html (para SPA)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
