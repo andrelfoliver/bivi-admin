@@ -37,9 +37,8 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: true,            // Força HTTPS
-      sameSite: 'none',        // Permite cookies cross-site
-    },
+      secure: process.env.NODE_ENV === true, // true em produção
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',    },
   })
 );
 
