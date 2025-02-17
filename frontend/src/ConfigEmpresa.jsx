@@ -221,13 +221,15 @@ function ConfigEmpresa() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("handleSubmit acionado");
-    // Para testar, comente temporariamente a validação:
+    
+    // Temporariamente, para teste, desative a validação:
     // if (!validateForm()) {
     //   console.log("Validação falhou", errors);
     //   return;
     // }
+  
     console.log("Dados da empresa a serem enviados:", empresa);
-
+  
     try {
       const response = await fetch('/register-company', {
         method: 'POST',
@@ -243,6 +245,7 @@ function ConfigEmpresa() {
       console.error("Erro ao enviar dados:", error);
     }
   };
+  
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
