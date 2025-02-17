@@ -32,4 +32,4 @@ const companySchema = new mongoose.Schema({
   exemplosAtendimento: { type: String },
 });
 
-export default mongoose.model('Company', companySchema);
+export default mongoose.model('companies', companySchema);
