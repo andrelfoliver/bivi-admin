@@ -37,8 +37,9 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === true, // true em produção
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',    },
+      secure: process.env.NODE_ENV === 'production', // true em produção
+      sameSite: 'lax'
+      },
   })
 );
 
