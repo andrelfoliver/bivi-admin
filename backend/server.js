@@ -8,7 +8,7 @@ import mongoose from 'mongoose';
 import session from 'express-session';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import bcrypt from 'bcrypt'; // Para hash de senha
+import bcrypt from 'bcrypt';
 import User from './models/User.js';
 import Company from './models/Company.js';
 
@@ -61,24 +61,25 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "https://app.bivisualizer.com/auth/google/callback"
+      callbackURL: "https://app.bivisualizer.com/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       // Verifica se o e‑mail é do Gmail
       if (!profile.emails[0].value.endsWith('@gmail.com')) {
         return done(null, false, { message: 'Apenas contas Gmail são permitidas.' });
       }
-      // Procura se o usuário já existe
-      const existingUser = await User.findOne({ googleId: profile.id });
+      // Procura se o usuário já existe (Google)
+      const existingUser = await User.findOne({ googleId: profile.id, provider: 'google' });
       if (existingUser) return done(null, existingUser);
-      // Cria um novo usuário se não existir
-      const newUser = await new User({
+      // Cria um novo usuário Google se não existir
+      const newUser = new User({
         googleId: profile.id,
         email: profile.emails[0].value,
         name: profile.displayName,
-        provider: 'google'
-      }).save();
-      done(null, newUser);
+        provider: 'google',
+      });
+      const savedUser = await newUser.save();
+      done(null, savedUser);
     }
   )
 );
@@ -101,6 +102,7 @@ app.post('/api/auth/register', async (req, res) => {
   if (!username || !email || !password) {
     return res.status(400).send({ error: "Campos obrigatórios não preenchidos." });
   }
+  // Verifica se o usuário já existe para o provider local
   const existingUser = await User.findOne({ email, provider: 'local' });
   if (existingUser) {
     return res.status(400).send({ error: "Usuário já existe." });
@@ -161,7 +163,7 @@ app.post('/register-company', async (req, res) => {
   }
 });
 
-// Rota protegida para servir o frontend (por exemplo, para a página de configuração da empresa)
+// Rota protegida para servir o frontend (página de configuração da empresa)
 app.get('/company-registration', (req, res) => {
   if (!req.isAuthenticated()) {
     return res.redirect('/login');

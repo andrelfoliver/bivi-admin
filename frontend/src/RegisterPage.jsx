@@ -1,26 +1,40 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 
 function RegisterPage() {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-    confirmPassword: '',
-  });
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState('');
+  const [message, setMessage] = useState('');
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  // Função que verifica se a senha atende aos requisitos (mínimo 8 caracteres, 
+  // pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial)
+  const validatePasswordStrength = (pass) => {
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return strongPasswordRegex.test(pass);
+  };
+
+  const handlePasswordChange = (e) => {
+    const pass = e.target.value;
+    setPassword(pass);
+    if (validatePasswordStrength(pass)) {
+      setPasswordStrength('Senha forte');
+    } else {
+      setPasswordStrength('Senha fraca');
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage('');
 
-    if (formData.password !== formData.confirmPassword) {
-      setErrorMessage('As senhas não coincidem!');
+    if (password !== confirmPassword) {
+      setMessage('As senhas não coincidem.');
+      return;
+    }
+
+    if (!validatePasswordStrength(password)) {
+      setMessage('A senha não atende aos requisitos de segurança.');
       return;
     }
 
@@ -28,141 +42,90 @@ function RegisterPage() {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          username: formData.username, 
-          password: formData.password 
-        }),
+        body: JSON.stringify({ username, password }),
       });
-
+      const data = await response.json();
       if (response.ok) {
-        setSuccessMessage('Usuário cadastrado com sucesso!');
-        setErrorMessage('');
-        setFormData({ username: '', password: '', confirmPassword: '' });
-        // Redireciona para a página de login após 2 segundos
-        setTimeout(() => navigate('/login'), 2000);
+        setMessage('Usuário cadastrado com sucesso!');
+        // Limpa os inputs
+        setUsername('');
+        setPassword('');
+        setConfirmPassword('');
+        setPasswordStrength('');
       } else {
-        setErrorMessage('Erro ao cadastrar usuário!');
-        setSuccessMessage('');
+        setMessage(data.error || 'Erro ao cadastrar usuário.');
       }
     } catch (error) {
-      console.error(error);
-      setErrorMessage('Erro ao cadastrar usuário!');
-      setSuccessMessage('');
+      console.error('Erro ao cadastrar:', error);
+      setMessage('Erro de conexão.');
     }
   };
 
   return (
-    <>
-      <style>
-        {`
-          /* Override dos estilos do Bootstrap para manter a identidade visual */
-          .btn-register {
-            background-color: #5de5d9;
-            color: #fff;
-            border: none;
-            font-weight: bold;
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
-            transition: background-color 0.3s;
-          }
-          .btn-register:hover {
-            background-color: #4cc9c0;
-          }
-          header {
-            background-color: #272631;
-          }
-          footer {
-            background-color: #4cc9c0;
-          }
-        `}
-      </style>
-      <div className="d-flex flex-column min-vh-100">
-        {/* Cabeçalho */}
-        <header className="py-3 text-white">
-          <div className="container d-flex align-items-center justify-content-between">
-            <div className="d-flex align-items-center">
-              <img src="logo.png" alt="BiVisualizer Logo" style={{ height: '60px' }} />
-              <h1 className="ms-3 h4 mb-0">BiVisualizer</h1>
-            </div>
-          </div>
-        </header>
-
-        {/* Conteúdo Principal */}
-        <main className="flex-grow-1 d-flex align-items-center justify-content-center">
-          <div className="container" style={{ maxWidth: '400px' }}>
-            <div className="card shadow">
-              <div className="card-body">
-                <h2 className="text-center mb-4" style={{ color: '#5de5d9', fontSize: '2rem', fontWeight: 'bold' }}>
-                  Crie sua Conta
-                </h2>
-                <p className="text-center text-muted mb-4">
-                  Preencha os dados abaixo para se cadastrar
-                </p>
-                <form onSubmit={handleSubmit} className="space-y-3">
-                  <div className="mb-3">
-                    <label htmlFor="username" className="form-label">Usuário</label>
-                    <input
-                      type="text"
-                      id="username"
-                      name="username"
-                      required
-                      placeholder="Digite seu usuário"
-                      className="form-control"
-                      value={formData.username}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="password" className="form-label">Senha</label>
-                    <input
-                      type="password"
-                      id="password"
-                      name="password"
-                      required
-                      placeholder="Digite sua senha"
-                      className="form-control"
-                      value={formData.password}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="confirmPassword" className="form-label">Confirme a Senha</label>
-                    <input
-                      type="password"
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      required
-                      placeholder="Confirme sua senha"
-                      className="form-control"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <button type="submit" className="btn-register">Cadastrar</button>
-                  {errorMessage && (
-                    <p className="text-danger text-center mt-3">{errorMessage}</p>
-                  )}
-                  {successMessage && (
-                    <p className="text-success text-center mt-3">{successMessage}</p>
-                  )}
-                </form>
-                <div className="mt-4 text-center">
-                  <p className="small text-muted">
-                    Já tem uma conta? <Link to="/login" className="text-primary">Faça login</Link>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-
-        {/* Rodapé */}
-        <footer className="py-3 text-white text-center">
-          &copy; 2025 BiVisualizer. Todos os direitos reservados.
-        </footer>
+    <div className="container mt-5">
+      <h2 className="text-center" style={{ color: '#5de5d9' }}>Crie sua Conta</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label htmlFor="username" className="form-label">Usuário</label>
+          <input
+            type="text"
+            id="username"
+            className="form-control"
+            placeholder="Digite seu usuário"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="password" className="form-label">Senha</label>
+          <input
+            type="password"
+            id="password"
+            className="form-control"
+            placeholder="Digite sua senha"
+            value={password}
+            onChange={handlePasswordChange}
+            required
+          />
+          <div className="form-text">{passwordStrength}</div>
+        </div>
+        <div className="mb-3">
+          <label htmlFor="confirmPassword" className="form-label">Confirme a Senha</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            className="form-control"
+            placeholder="Confirme sua senha"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit" className="btn btn-entrar w-100">Cadastrar</button>
+      </form>
+      {message && <div className="mt-3 text-center">{message}</div>}
+      <div className="mt-3 text-center">
+        <p className="small text-muted">
+          Já tem uma conta? <a href="/login" className="text-primary">Faça login</a>
+        </p>
       </div>
-    </>
+      {/* Estilos customizados para o botão, seguindo a identidade visual */}
+      <style jsx="true">{`
+        .btn-entrar {
+          background-color: #5de5d9;
+          color: #fff;
+          border: none;
+          font-weight: bold;
+          padding: 0.75rem 1rem;
+          border-radius: 6px;
+          transition: background-color 0.3s;
+        }
+        .btn-entrar:hover {
+          background-color: #4cc9c0;
+        }
+      `}</style>
+    </div>
   );
 }
 
