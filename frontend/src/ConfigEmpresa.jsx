@@ -518,39 +518,70 @@ function ConfigEmpresa({ user }) {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
+  const headerStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#272631',
+    padding: '1rem 2rem',
+    color: 'white',
+  };
   return (
-    <div>
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          backgroundColor: '#272631',
-          padding: '1rem 2rem',
-          color: 'white',
-        }}
-      >
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      {/* Header */}
+      <header style={headerStyle}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <img src="logo.png" alt="BiVisualizer Logo" style={{ height: '60px' }} />
-          <h1 style={{ marginLeft: '1rem', fontSize: '1.5rem', fontWeight: 'bold' }}>BiVisualizer</h1>
+          <h1 style={{ marginLeft: '1rem', fontSize: '1.5rem', fontWeight: 'bold' }}>
+            BiVisualizer
+          </h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
+          {/* Exibe a foto e o nome do usuário se estiver logado */}
           {user && (
             <div style={{ display: 'flex', alignItems: 'center', marginRight: '1rem' }}>
               <img
-                src={user.picture ? user.picture : '/default-avatar.png'}
-                alt={user.name}
+                src={
+                  // Se user.picture existir, usamos ele; se não, cai no fallback
+                  user.picture
+                    ? user.picture
+                    : '/default-avatar.png'
+                }
+                alt={user.name || 'Usuário'}
                 style={{
                   height: '40px',
                   width: '40px',
                   borderRadius: '50%',
                   marginRight: '8px',
+                  objectFit: 'cover',
+                }}
+                onError={(e) => {
+                  // Caso a URL da foto esteja realmente quebrada,
+                  // podemos forçar o fallback default aqui
+                  e.currentTarget.src = '/default-avatar.png';
                 }}
               />
               <span>{user.name}</span>
             </div>
           )}
+
+          {/* Botão de Sair */}
+          <button
+            style={{
+              backgroundColor: '#e3342f',
+              border: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '4px',
+              color: 'white',
+              cursor: 'pointer',
+            }}
+            onClick={() => {
+              localStorage.removeItem('authToken');
+              window.location.href = '/login';
+            }}
+          >
+            Sair
+          </button>
         </div>
       </header>
 
