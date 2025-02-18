@@ -121,19 +121,22 @@ app.post('/api/auth/register', async (req, res) => {
 
 
 // Endpoint para login manual de usuário
+// Endpoint para login manual de usuário
 app.post('/api/auth/login', async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email, provider: 'local' });
-    if (!user) return res.status(401).send({ error: "Credenciais inválidas." });
-    
+    if (!user) {
+      return res.status(401).send({ error: "Credenciais inválidas." });
+    }
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).send({ error: "Credenciais inválidas." });
-    
-    // Limpa qualquer sessão anterior antes de realizar o login
-    req.logout(function(err) {
+    if (!isMatch) {
+      return res.status(401).send({ error: "Credenciais inválidas." });
+    }
+    // Regenera a sessão para limpar os dados anteriores
+    req.session.regenerate(function (err) {
       if (err) return next(err);
-      req.login(user, (err) => {
+      req.login(user, function (err) {
         if (err) return next(err);
         res.send({ message: "Login efetuado com sucesso!", user });
       });
@@ -142,6 +145,7 @@ app.post('/api/auth/login', async (req, res, next) => {
     res.status(500).send({ error: err.message });
   }
 });
+
 
 
 // Endpoint para verificar se o usuário está autenticado
