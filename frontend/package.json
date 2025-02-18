@@ -9,6 +9,7 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "bcrypt": "^5.1.1",
         "bootstrap": "^5.3.3",
         "connect-mongo": "^5.1.0",
         "react": "^19.0.0",

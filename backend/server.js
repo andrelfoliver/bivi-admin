@@ -2,13 +2,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 dotenv.config();
-import MongoStore from 'connect-mongo';
 
 import express from 'express';
 import mongoose from 'mongoose';
 import session from 'express-session';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import bcrypt from 'bcrypt'; // Para hash de senha
 import User from './models/User.js';
 import Company from './models/Company.js';
 
@@ -17,7 +17,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Indica que o Express deve confiar no proxy (necessário para Heroku)
+// Indica que o Express deve confiar no proxy (necessário para ambientes como o Heroku)
 app.set('trust proxy', 1);
 
 // Middleware para interpretar JSON e dados de formulário (urlencoded)
@@ -30,19 +30,18 @@ mongoose
   .then(() => console.log("Conectado ao MongoDB"))
   .catch((err) => console.error("Erro ao conectar ao MongoDB:", err));
 
-// Configura sessão para persistir dados de login com cookies seguros
-app.use(session({
-  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI_EMPRESAS }),
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: true,     // pois está em produção/HTTPS
-    sameSite: 'none', // fluxo OAuth cross-site
-    // NÃO defina 'domain', deixe o Express gerir
-  }
-}));
-
+// Configura sessão para persistir dados de login
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production', // true se estiver em produção (HTTPS)
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    },
+  })
+);
 
 // Inicializa o Passport e a sessão
 app.use(passport.initialize());
@@ -57,7 +56,6 @@ passport.deserializeUser((id, done) => {
 });
 
 // Configura a estratégia do Google OAuth (permitindo apenas contas Gmail)
-// No seu server.js (ou arquivo onde a GoogleStrategy está configurada)
 passport.use(
   new GoogleStrategy(
     {
@@ -66,61 +64,90 @@ passport.use(
       callbackURL: "https://app.bivisualizer.com/auth/google/callback"
     },
     async (accessToken, refreshToken, profile, done) => {
-      // Extraia a URL da foto
-      const picture = profile.photos && profile.photos[0] ? profile.photos[0].value : null;
-
       // Verifica se o e‑mail é do Gmail
       if (!profile.emails[0].value.endsWith('@gmail.com')) {
         return done(null, false, { message: 'Apenas contas Gmail são permitidas.' });
       }
-
       // Procura se o usuário já existe
-      let existingUser = await User.findOne({ googleId: profile.id });
-      if (existingUser) {
-        // Atualiza o campo 'picture' se necessário
-        if (picture && existingUser.picture !== picture) {
-          existingUser.picture = picture;
-          await existingUser.save();
-        }
-        return done(null, existingUser);
-      }
-
+      const existingUser = await User.findOne({ googleId: profile.id });
+      if (existingUser) return done(null, existingUser);
       // Cria um novo usuário se não existir
       const newUser = await new User({
         googleId: profile.id,
         email: profile.emails[0].value,
         name: profile.displayName,
-        picture, // salva a URL da foto
+        provider: 'google'
       }).save();
-
       done(null, newUser);
     }
   )
 );
 
-
-// Rota para iniciar a autenticação com o Google
+// Endpoint para login com Google
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-// Callback após autenticação com o Google
 app.get(
   '/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
-    // Login bem-sucedido: redireciona para a rota principal (onde o frontend decide)
+    // Login bem-sucedido: redireciona para a página principal
     res.redirect('/');
   }
 );
 
-// Rota protegida para cadastro da empresa (o frontend gerencia a exibição com base na sessão)
-app.get('/company-registration', (req, res) => {
-  if (!req.user) {
-    return res.redirect('/login');
+// Endpoint para registro manual de usuário
+app.post('/api/auth/register', async (req, res) => {
+  const { username, email, password, name } = req.body;
+  if (!username || !email || !password) {
+    return res.status(400).send({ error: "Campos obrigatórios não preenchidos." });
   }
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  const existingUser = await User.findOne({ email, provider: 'local' });
+  if (existingUser) {
+    return res.status(400).send({ error: "Usuário já existe." });
+  }
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword,
+      name: name || username,
+      provider: 'local'
+    });
+    const savedUser = await newUser.save();
+    res.status(201).send({ message: "Usuário registrado com sucesso!", user: savedUser });
+  } catch (err) {
+    res.status(500).send({ error: err.message });
+  }
 });
 
-// Rota para cadastrar a empresa com os dados enviados via JSON ou formulário
+// Endpoint para login manual de usuário
+app.post('/api/auth/login', async (req, res, next) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email, provider: 'local' });
+    if (!user) return res.status(401).send({ error: "Credenciais inválidas." });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).send({ error: "Credenciais inválidas." });
+    req.login(user, (err) => {
+      if (err) return next(err);
+      res.send({ message: "Login efetuado com sucesso!", user });
+    });
+  } catch (err) {
+    res.status(500).send({ error: err.message });
+  }
+});
+
+// Endpoint para verificar se o usuário está autenticado
+app.get('/api/current-user', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json({ loggedIn: true, user: req.user });
+  } else {
+    res.json({ loggedIn: false });
+  }
+});
+
+// Endpoint para cadastro de empresas
 app.post('/register-company', async (req, res) => {
   console.log("Requisição recebida em /register-company:", req.body);
   try {
@@ -134,28 +161,18 @@ app.post('/register-company', async (req, res) => {
   }
 });
 
-// Rota para verificar se o usuário está autenticado
-app.get('/api/current-user', (req, res) => {
-  console.log('--- /api/current-user LOGS ---');
-  console.log('req.headers.cookie:', req.headers.cookie);
-  console.log('req.sessionID:', req.sessionID);
-  console.log('req.session:', req.session);
-  console.log('req.user:', req.user);
-  console.log('req.isAuthenticated():', req.isAuthenticated());
-  
-  if (req.isAuthenticated()) {
-    res.json({ loggedIn: true, user: req.user });
-  } else {
-    res.json({ loggedIn: false });
+// Rota protegida para servir o frontend (por exemplo, para a página de configuração da empresa)
+app.get('/company-registration', (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.redirect('/login');
   }
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
-
 
 // Serve arquivos estáticos da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Rota curinga para SPA: para qualquer rota que não seja de API, retorna o index.html
+// Rota curinga para SPA
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
