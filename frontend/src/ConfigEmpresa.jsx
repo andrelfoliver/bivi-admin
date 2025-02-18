@@ -816,7 +816,6 @@ function ConfigEmpresa({ user }) {
                   {[
                     { label: 'VERIFY_TOKEN', name: 'verifyToken' },
                     { label: 'WHATSAPP_API_TOKEN', name: 'whatsappApiToken' },
-                    { label: 'OPENAI_API_KEY', name: 'openaiApiKey' },
                     { label: 'MONGO_URI', name: 'mongoUri' },
                     { label: 'PHONE_NUMBER_ID', name: 'phoneNumberId' },
                     { label: 'EMAIL_USER', name: 'emailUser' },
