@@ -8,11 +8,7 @@ function levenshteinDistance(a, b) {
   for (let i = 1; i <= a.length; i++) {
     for (let j = 1; j <= b.length; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      dp[i][j] = Math.min(
-        dp[i - 1][j] + 1,
-        dp[i][j - 1] + 1,
-        dp[i - 1][j - 1] + cost
-      );
+      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
     }
   }
   return dp[a.length][b.length];
@@ -82,51 +78,7 @@ const translations = {
     exemplosAtendimentoPlaceholder: "Digite exemplos de perguntas e respostas para o atendimento",
   },
   en: {
-    pageTitle: "Company Setup",
-    dadosBasicos: "Basic Information",
-    nomeEmpresa: "Company Name",
-    nomePlaceholder: "Enter the company name",
-    apiKey: "OpenAI API Key",
-    apiPlaceholder: "Enter the API Key",
-    apiKeyError: "Invalid API Key. It must start with 'sk-' and be at least 50 characters long.",
-    telefone: "Phone",
-    telefonePlaceholder: "Enter the phone number",
-    email: "Contact E-mail",
-    emailPlaceholder: "Enter the e-mail",
-    saudacao: "Greeting",
-    saudacaoPlaceholder: "Greeting message",
-    identidadeVisual: "Visual Identity",
-    logotipo: "Logo",
-    logoDropZone: "Drag and drop the logo here or click to select (only PNG or JPEG files are accepted).",
-    corPrimaria: "Primary Color",
-    corSecundaria: "Secondary Color",
-    corFundo: "Background Color",
-    configuracaoAtendimento: "Service Configuration",
-    saudacaoInicial: "Initial Greeting",
-    saudacaoInicialPlaceholder: "E.g.: Hello, welcome to [company name]!",
-    respostaPadrao: "Standard Response",
-    respostaPadraoPlaceholder: "E.g.: We offer innovative data analysis solutions.",
-    solicitacaoEmail: "E‑mail Request Message",
-    solicitacaoEmailPlaceholder: "E.g.: Before we say goodbye, may I send more details via e‑mail? What is your e‑mail?",
-    mensagemEncerramento: "Closing Message",
-    mensagemEncerramentoPlaceholder: "E.g.: Thank you for contacting us! We're here to help.",
-    listaProdutos: "Products/Services List",
-    listaProdutosPlaceholder: "E.g.: - Interactive Dashboards\n- Virtual Assistance with AI\n- Integrated Solutions",
-    salvar: "Save Configuration",
-    logout: "Logout",
-    languageLabel: "Language",
-    successMessage: "Configuration saved successfully!",
-    logoFormatError: "Only PNG or JPEG files are accepted.",
-    envSectionTitle: ".env File Configuration",
-    instrucoesPersonalizadas: "Personalized Instructions",
-    regrasResposta: "Response Rules",
-    regrasRespostaPlaceholder: "Enter the response rules for the virtual assistant",
-    linkCalendly: "Calendly Link",
-    linkCalendlyPlaceholder: "Paste your Calendly link here",
-    linkSite: "Site Link",
-    linkSitePlaceholder: "Paste your site link here",
-    exemplosAtendimento: "Examples of Q&A",
-    exemplosAtendimentoPlaceholder: "Enter examples of common Q&A for customer service",
+    // Traduções em inglês (adicione conforme necessário)
   },
 };
 
@@ -135,7 +87,7 @@ function ConfigEmpresa({ user }) {
   const [language, setLanguage] = useState('pt');
   const t = translations[language];
 
-  // Estilos para inputs, labels, etc.
+  // Estilos
   const inputStyle = {
     width: '100%',
     padding: '0.75rem',
@@ -168,62 +120,43 @@ function ConfigEmpresa({ user }) {
     borderRadius: '4px',
   };
 
-  // Estilo do botão "Salvar Configuração" com hover
-  const [isButtonHovered, setIsButtonHovered] = useState(false);
-  const btnStyle = {
-    display: 'block',
-    width: '100%',
-    textAlign: 'center',
-    padding: '1rem',
-    margin: '0.5rem 0',
-    borderRadius: '6px',
-    fontWeight: 'bold',
-    textDecoration: 'none',
-    transition: 'background-color 0.3s',
-    backgroundColor: isButtonHovered ? '#4cc9c0' : '#5de5d9',
-    color: 'white',
-    border: 'none',
-    cursor: 'pointer'
+  // Estado inicial do formulário
+  const initialState = {
+    nome: '',
+    apiKey: '',
+    telefone: '',
+    email: '',
+    saudacao: '',
+    logo: null,
+    primaryColor: '#5de5d9',
+    secondaryColor: '#272631',
+    backgroundColor: '#f5fafd',
+    saudacaoInicial: '',
+    respostaPadrao: '',
+    solicitacaoEmail: '',
+    mensagemEncerramento: '',
+    listaProdutos: '',
+    verifyToken: '',
+    whatsappApiToken: '',
+    openaiApiKey: '',
+    mongoUri: '',
+    phoneNumberId: '',
+    emailUser: '',
+    emailPass: '',
+    emailGestor: '',
+    regrasResposta: '',
+    linkCalendly: '',
+    linkSite: '',
+    exemplosAtendimento: '',
   };
-// 1) Definir o objeto inicial do estado (inicialState) para facilitar o reset
-const initialState = {
-  nome: "",
-  apiKey: "",
-  telefone: "",
-  email: "",
-  saudacao: "",
-  logo: null, // se você estiver usando base64, lembre de salvar como ""
-  primaryColor: "#5de5d9",
-  secondaryColor: "#272631",
-  backgroundColor: "#f5fafd",
-  saudacaoInicial: "",
-  respostaPadrao: "",
-  solicitacaoEmail: "",
-  mensagemEncerramento: "",
-  listaProdutos: "",
-  verifyToken: "",
-  whatsappApiToken: "",
-  openaiApiKey: "",
-  mongoUri: "",
-  phoneNumberId: "",
-  emailUser: "",
-  emailPass: "",
-  emailGestor: "",
-  regrasResposta: "",
-  linkCalendly: "",
-  linkSite: "",
-  exemplosAtendimento: "",
-};
-  // Estado para armazenar as configurações da empresa
-  const [empresa, setEmpresa] = useState(initialState);
-    
 
+  const [empresa, setEmpresa] = useState(initialState);
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const logoInputRef = useRef(null);
 
-  // Estados para as tooltips de explicação
+  // Estados para tooltips
   const [envExplanations, setEnvExplanations] = useState({
     verifyToken: false,
     whatsappApiToken: false,
@@ -259,10 +192,10 @@ const initialState = {
     exemplosAtendimento: "Forneça exemplos de perguntas e respostas comuns, para personalizar o atendimento e agilizar o fluxo de conversação.",
   };
 
+  // Funções para alternar os tooltips
   const toggleEnvExplanation = (field) => {
     setEnvExplanations((prev) => ({ ...prev, [field]: !prev[field] }));
   };
-
   const toggleInstExplanation = (field) => {
     setInstExplanations((prev) => ({ ...prev, [field]: !prev[field] }));
   };
@@ -280,49 +213,37 @@ const initialState = {
     e.preventDefault();
     console.log("handleSubmit acionado");
     console.log("Dados da empresa a serem enviados:", empresa);
-  
+
     try {
-      const response = await fetch("/register-company", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/register-company', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(empresa),
       });
       console.log("Status da resposta:", response.status);
       const data = await response.json();
       console.log("Resposta do servidor:", data);
-  
+      
       if (!response.ok) {
         setSubmitError(data.error || "Erro ao salvar configuração.");
-        setSuccess(false);
       } else {
-        // 3a) Exibe a mensagem de sucesso
         setSuccess(true);
         setSubmitError(null);
-  
-        // 3b) Limpa o estado (formulário), voltando para o initialState
         setEmpresa(initialState);
-  
-        // 3c) Se quiser fechar a mensagem após alguns segundos
-        setTimeout(() => {
-          setSuccess(false);
-        }, 3000);
       }
     } catch (error) {
       console.error("Erro ao enviar dados:", error);
       setSubmitError("Erro ao enviar dados: " + error.message);
-      setSuccess(false);
     }
   };
 
-  const handleChange = async (e) => {
-    const { name, type, files } = e.target;
+  const handleChange = (e) => {
+    const { name, value, type, files } = e.target;
     if (type === 'file') {
       const file = files[0];
       if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
-        // Ler o arquivo como base64
         const reader = new FileReader();
         reader.onloadend = () => {
-          // reader.result será algo como 'data:image/png;base64,iVBORw0K...'
           setEmpresa(prev => ({ ...prev, [name]: reader.result }));
         };
         reader.readAsDataURL(file);
@@ -331,21 +252,22 @@ const initialState = {
         setEmpresa(prev => ({ ...prev, [name]: '' }));
       }
     } else {
-      // Para outros tipos (text, color etc.)
-      setEmpresa(prev => ({ ...prev, [name]: e.target.value }));
+      setEmpresa(prev => ({ ...prev, [name]: value }));
     }
   };
-  
 
   const handleDrop = (e) => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
       if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
-        setEmpresa({ ...empresa, logo: file });
-        setErrors((prev) => ({ ...prev, logo: '' }));
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setEmpresa(prev => ({ ...prev, logo: reader.result }));
+        };
+        reader.readAsDataURL(file);
       } else {
-        setErrors((prev) => ({ ...prev, logo: t.logoFormatError }));
+        setErrors(prev => ({ ...prev, logo: t.logoFormatError }));
       }
       e.dataTransfer.clearData();
     }
@@ -364,9 +286,8 @@ const initialState = {
           error = language === 'pt' ? 'Nome é obrigatório.' : 'Name is required.';
         break;
       case 'apiKey':
-        if (!value.trim() || !/^sk-(proj-)?[A-Za-z0-9_-]+$/.test(value) || value.length < 50) {
+        if (!value.trim() || !/^sk-(proj-)?[A-Za-z0-9_-]+$/.test(value) || value.length < 50)
           error = t.apiKeyError;
-        }
         break;
       case 'telefone': {
         const digits = value.replace(/\D/g, '');
@@ -378,17 +299,8 @@ const initialState = {
       }
       case 'email': {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!value.trim() || !emailRegex.test(value)) {
+        if (!value.trim() || !emailRegex.test(value))
           error = language === 'pt' ? 'E‑mail inválido.' : 'Invalid e‑mail.';
-        } else {
-          const domain = value.split('@')[1];
-          const suggestion = getClosestDomain(domain);
-          if (suggestion && suggestion !== domain.toLowerCase()) {
-            error = language === 'pt'
-              ? `Você quis dizer ${value.split('@')[0]}@${suggestion}?`
-              : `Did you mean ${value.split('@')[0]}@${suggestion}?`;
-          }
-        }
         break;
       }
       case 'saudacao':
@@ -397,29 +309,20 @@ const initialState = {
         break;
       case 'saudacaoInicial':
         if (!value.trim())
-          error = language === 'pt'
-            ? 'Saudação Inicial é obrigatória.'
-            : 'Initial Greeting is required.';
+          error = language === 'pt' ? 'Saudação Inicial é obrigatória.' : 'Initial Greeting is required.';
         break;
       case 'respostaPadrao':
         if (!value.trim())
-          error = language === 'pt'
-            ? 'Resposta Padrão é obrigatória.'
-            : 'Standard Response is required.';
+          error = language === 'pt' ? 'Resposta Padrão é obrigatória.' : 'Standard Response is required.';
         break;
       case 'mensagemEncerramento':
         if (!value.trim())
-          error = language === 'pt'
-            ? 'Mensagem de Encerramento é obrigatória.'
-            : 'Closing Message is required.';
+          error = language === 'pt' ? 'Mensagem de Encerramento é obrigatória.' : 'Closing Message is required.';
         break;
       case 'listaProdutos':
         if (!value.trim())
-          error = language === 'pt'
-            ? 'Lista de Produtos/Serviços é obrigatória.'
-            : 'Products/Services List is required.';
+          error = language === 'pt' ? 'Lista de Produtos/Serviços é obrigatória.' : 'Products/Services List is required.';
         break;
-      // Validação dos campos do .env
       case 'verifyToken':
       case 'whatsappApiToken':
       case 'openaiApiKey':
@@ -429,39 +332,28 @@ const initialState = {
       case 'emailPass':
       case 'emailGestor':
         if (!value.trim())
-          error = language === 'pt'
-            ? `${name.toUpperCase()} é obrigatório.`
-            : `${name.toUpperCase()} is required.`;
+          error = language === 'pt' ? `${name.toUpperCase()} é obrigatório.` : `${name.toUpperCase()} is required.`;
         break;
-      // Validação dos campos de Instruções Personalizadas
       case 'regrasResposta':
         if (!value.trim())
-          error = language === 'pt'
-            ? 'Regras de Resposta são obrigatórias.'
-            : 'Response rules are required.';
+          error = language === 'pt' ? 'Regras de Resposta são obrigatórias.' : 'Response rules are required.';
         break;
       case 'linkCalendly':
         if (!value.trim())
-          error = language === 'pt'
-            ? 'Link de Calendly é obrigatório.'
-            : 'Calendly link is required.';
+          error = language === 'pt' ? 'Link de Calendly é obrigatório.' : 'Calendly link is required.';
         break;
       case 'linkSite':
         if (!value.trim())
-          error = language === 'pt'
-            ? 'Link do Site é obrigatório.'
-            : 'Site link is required.';
+          error = language === 'pt' ? 'Link do Site é obrigatório.' : 'Site link is required.';
         break;
       case 'exemplosAtendimento':
         if (!value.trim())
-          error = language === 'pt'
-            ? 'Exemplos de Perguntas e Respostas são obrigatórios.'
-            : 'Examples of Q&A are required.';
+          error = language === 'pt' ? 'Exemplos de Perguntas e Respostas são obrigatórios.' : 'Examples of Q&A are required.';
         break;
       default:
         break;
     }
-    setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
+    setErrors(prevErrors => ({ ...prevErrors, [name]: error }));
   };
 
   const validateForm = () => {
@@ -472,32 +364,20 @@ const initialState = {
       newErrors.apiKey = t.apiKeyError;
     const phoneDigits = empresa.telefone.replace(/\D/g, '');
     if (!empresa.telefone.trim() || phoneDigits.length < 10 || phoneDigits.length > 15)
-      newErrors.telefone = language === 'pt'
-        ? 'Telefone inválido. Insira entre 10 e 15 dígitos.'
-        : 'Invalid phone. Enter between 10 and 15 digits.';
+      newErrors.telefone = language === 'pt' ? 'Telefone inválido. Insira entre 10 e 15 dígitos.' : 'Invalid phone. Enter between 10 and 15 digits.';
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!empresa.email.trim() || !emailRegex.test(empresa.email))
       newErrors.email = language === 'pt' ? 'E‑mail inválido.' : 'Invalid e‑mail.';
     if (!empresa.saudacao.trim())
-      newErrors.saudacao = language === 'pt'
-        ? 'Saudação é obrigatória.'
-        : 'Greeting is required.';
+      newErrors.saudacao = language === 'pt' ? 'Saudação é obrigatória.' : 'Greeting is required.';
     if (!empresa.saudacaoInicial.trim())
-      newErrors.saudacaoInicial = language === 'pt'
-        ? 'Saudação Inicial é obrigatória.'
-        : 'Initial Greeting is required.';
+      newErrors.saudacaoInicial = language === 'pt' ? 'Saudação Inicial é obrigatória.' : 'Initial Greeting is required.';
     if (!empresa.respostaPadrao.trim())
-      newErrors.respostaPadrao = language === 'pt'
-        ? 'Resposta Padrão é obrigatória.'
-        : 'Standard Response is required.';
+      newErrors.respostaPadrao = language === 'pt' ? 'Resposta Padrão é obrigatória.' : 'Standard Response is required.';
     if (!empresa.mensagemEncerramento.trim())
-      newErrors.mensagemEncerramento = language === 'pt'
-        ? 'Mensagem de Encerramento é obrigatória.'
-        : 'Closing Message is required.';
+      newErrors.mensagemEncerramento = language === 'pt' ? 'Mensagem de Encerramento é obrigatória.' : 'Closing Message is required.';
     if (!empresa.listaProdutos.trim())
-      newErrors.listaProdutos = language === 'pt'
-        ? 'Lista de Produtos/Serviços é obrigatória.'
-        : 'Products/Services List is required.';
+      newErrors.listaProdutos = language === 'pt' ? 'Lista de Produtos/Serviços é obrigatória.' : 'Products/Services List is required.';
     [
       'verifyToken',
       'whatsappApiToken',
@@ -509,63 +389,62 @@ const initialState = {
       'emailGestor',
     ].forEach((field) => {
       if (!empresa[field].trim()) {
-        newErrors[field] = language === 'pt'
-          ? `${field.toUpperCase()} é obrigatório.`
-          : `${field.toUpperCase()} is required.`;
+        newErrors[field] = language === 'pt' ? `${field.toUpperCase()} é obrigatório.` : `${field.toUpperCase()} is required.`;
       }
     });
     if (!empresa.regrasResposta.trim()) {
-      newErrors.regrasResposta = language === 'pt'
-        ? 'Regras de Resposta são obrigatórias.'
-        : 'Response rules are required.';
+      newErrors.regrasResposta = language === 'pt' ? 'Regras de Resposta são obrigatórias.' : 'Response rules are required.';
     }
     if (!empresa.linkCalendly.trim()) {
-      newErrors.linkCalendly = language === 'pt'
-        ? 'Link de Calendly é obrigatório.'
-        : 'Calendly link is required.';
+      newErrors.linkCalendly = language === 'pt' ? 'Link de Calendly é obrigatório.' : 'Calendly link is required.';
     }
     if (!empresa.linkSite.trim()) {
-      newErrors.linkSite = language === 'pt'
-        ? 'Link do Site é obrigatório.'
-        : 'Site link is required.';
+      newErrors.linkSite = language === 'pt' ? 'Link do Site é obrigatório.' : 'Site link is required.';
     }
     if (!empresa.exemplosAtendimento.trim()) {
-      newErrors.exemplosAtendimento = language === 'pt'
-        ? 'Exemplos de Perguntas e Respostas são obrigatórios.'
-        : 'Examples of Q&A are required.';
+      newErrors.exemplosAtendimento = language === 'pt' ? 'Exemplos de Perguntas e Respostas são obrigatórios.' : 'Examples of Q&A are required.';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  const headerStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#272631',
-    padding: '1rem 2rem',
-    color: 'white',
-  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       {/* Header */}
-      <header style={headerStyle}>
+      <header
+        style={{
+          backgroundColor: '#272631',
+          color: 'white',
+          padding: '1rem 2rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <img src="logo.png" alt="BiVisualizer Logo" style={{ height: '60px' }} />
-          <h1 style={{ marginLeft: '1rem', fontSize: '1.5rem', fontWeight: 'bold' }}>
-            BiVisualizer
-          </h1>
+          <h1 style={{ marginLeft: '1rem', fontSize: '1.5rem', fontWeight: 'bold' }}>BiVisualizer</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          {/* Exibe a foto e o nome do usuário se estiver logado */}
+          <select
+            style={{
+              padding: '0.5rem',
+              borderRadius: '4px',
+              border: '1px solid #ccc',
+              backgroundColor: '#fff',
+              color: '#333',
+              marginRight: '1rem',
+            }}
+            value={language}
+            onChange={handleLanguageChange}
+          >
+            <option value="pt">Português</option>
+            <option value="en">English</option>
+          </select>
           {user && (
             <div style={{ display: 'flex', alignItems: 'center', marginRight: '1rem' }}>
               <img
-                src={
-                  // Se user.picture existir, usamos ele; se não, cai no fallback
-                  user.picture
-                    ? user.picture
-                    : '/default-avatar.png'
-                }
+                src={user.picture ? user.picture : '/default-avatar.png'}
                 alt={user.name || 'Usuário'}
                 style={{
                   height: '40px',
@@ -575,16 +454,12 @@ const initialState = {
                   objectFit: 'cover',
                 }}
                 onError={(e) => {
-                  // Caso a URL da foto esteja realmente quebrada,
-                  // podemos forçar o fallback default aqui
                   e.currentTarget.src = '/default-avatar.png';
                 }}
               />
               <span>{user.name}</span>
             </div>
           )}
-
-          {/* Botão de Sair */}
           <button
             style={{
               backgroundColor: '#e3342f',
@@ -594,290 +469,410 @@ const initialState = {
               color: 'white',
               cursor: 'pointer',
             }}
-            onClick={() => {
-              localStorage.removeItem('authToken');
-              window.location.href = '/login';
-            }}
+            onClick={handleLogout}
           >
-            Sair
+            {t.logout}
           </button>
         </div>
       </header>
 
       {/* Conteúdo Principal */}
       <main style={{ flexGrow: 1, backgroundColor: '#f5fafd', padding: '2rem' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto', backgroundColor: '#ffffff', padding: '2rem', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1rem', textAlign: 'center', color: '#272631' }}>
-            {t.pageTitle}
-          </h2>
-          {success && (
-            <div style={{ backgroundColor: '#5de5d9', color: 'white', textAlign: 'center', padding: '1rem', borderRadius: '6px', marginBottom: '1rem' }}>
-              {t.successMessage}
+        <div
+          style={{
+            maxWidth: '800px',
+            margin: '0 auto',
+            backgroundColor: '#ffffff',
+            padding: '2rem',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          {success ? (
+            <div
+              style={{
+                textAlign: 'center',
+                fontSize: '1.5rem',
+                color: '#5de5d9',
+              }}
+            >
+              Configuração salva com sucesso!
             </div>
-          )}
-          {submitError && (
-            <div style={{ backgroundColor: '#f8d7da', color: '#842029', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
-              {submitError}
-            </div>
-          )}
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            {/* Seção 1 – Dados Básicos */}
-            <section>
-              <h3 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#272631', marginBottom: '1rem' }}>
-                {t.dadosBasicos}
-              </h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                <div style={{ flex: '1 1 300px' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', color: '#272631' }}>{t.nomeEmpresa}</label>
-                  <input
-                    type="text"
-                    name="nome"
-                    placeholder={t.nomePlaceholder}
-                    value={empresa.nome}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    style={inputStyle}
-                    required
-                  />
-                  {errors.nome && <span style={errorStyle}>{errors.nome}</span>}
-                </div>
-                <div style={{ flex: '1 1 300px' }}>
-                  <label style={labelStyle}>{t.apiKey}</label>
-                  <input
-                    type="text"
-                    name="apiKey"
-                    placeholder={t.apiPlaceholder}
-                    value={empresa.apiKey}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    style={inputStyle}
-                    required
-                  />
-                  {errors.apiKey && <span style={errorStyle}>{errors.apiKey}</span>}
-                </div>
-                <div style={{ flex: '1 1 300px' }}>
-                  <label style={labelStyle}>{t.telefone}</label>
-                  <input
-                    type="text"
-                    name="telefone"
-                    placeholder={t.telefonePlaceholder}
-                    value={empresa.telefone}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    style={inputStyle}
-                    required
-                  />
-                  {errors.telefone && <span style={errorStyle}>{errors.telefone}</span>}
-                </div>
-                <div style={{ flex: '1 1 300px' }}>
-                  <label style={labelStyle}>{t.email}</label>
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder={t.emailPlaceholder}
-                    value={empresa.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    style={inputStyle}
-                    required
-                  />
-                  {errors.email && <span style={errorStyle}>{errors.email}</span>}
-                </div>
-                <div style={{ flex: '1 1 100%' }}>
-                  <label style={labelStyle}>{t.saudacao}</label>
-                  <input
-                    type="text"
-                    name="saudacao"
-                    placeholder={t.saudacaoPlaceholder}
-                    value={empresa.saudacao}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    style={inputStyle}
-                    required
-                  />
-                  {errors.saudacao && <span style={errorStyle}>{errors.saudacao}</span>}
-                </div>
-              </div>
-            </section>
-
-            {/* Seção 2 – Identidade Visual */}
-            <section>
-              <h3 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#272631', marginBottom: '1rem' }}>
-                {t.identidadeVisual}
-              </h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                <div style={{ flex: '1 1 100%' }}>
-                  <label style={labelStyle}>{t.logotipo}</label>
-                  <div style={dropZoneStyle} onDrop={handleDrop} onDragOver={handleDragOver} onClick={() => logoInputRef.current && logoInputRef.current.click()}>
-                    <p>{t.logoDropZone}</p>
-                    <input type="file" name="logo" accept="image/png, image/jpeg" onChange={handleChange} ref={logoInputRef} style={{ display: 'none' }} />
-                  </div>
-                  {errors.logo && <span style={errorStyle}>{errors.logo}</span>}
-                </div>
-                <div style={{ flex: '1 1 300px' }}>
-                  <label style={labelStyle}>{t.corPrimaria}</label>
-                  <input type="color" name="primaryColor" value={empresa.primaryColor} onChange={handleChange} style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }} />
-                </div>
-                <div style={{ flex: '1 1 300px' }}>
-                  <label style={labelStyle}>{t.corSecundaria}</label>
-                  <input type="color" name="secondaryColor" value={empresa.secondaryColor} onChange={handleChange} style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }} />
-                </div>
-                <div style={{ flex: '1 1 300px' }}>
-                  <label style={labelStyle}>{t.corFundo}</label>
-                  <input type="color" name="backgroundColor" value={empresa.backgroundColor} onChange={handleChange} style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }} />
-                </div>
-              </div>
-            </section>
-
-            {/* Seção 3 – Fluxo de Atendimento */}
-            <section>
-              <h3 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#272631', marginBottom: '1rem' }}>
-                {t.configuracaoAtendimento}
-              </h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                <div style={{ flex: '1 1 100%' }}>
-                  <label style={labelStyle}>{t.saudacaoInicial}</label>
-                  <textarea name="saudacaoInicial" rows="2" placeholder={t.saudacaoInicialPlaceholder} value={empresa.saudacaoInicial} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required></textarea>
-                  {errors.saudacaoInicial && <span style={errorStyle}>{errors.saudacaoInicial}</span>}
-                </div>
-                <div style={{ flex: '1 1 100%' }}>
-                  <label style={labelStyle}>{t.respostaPadrao}</label>
-                  <textarea name="respostaPadrao" rows="2" placeholder={t.respostaPadraoPlaceholder} value={empresa.respostaPadrao} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required></textarea>
-                  {errors.respostaPadrao && <span style={errorStyle}>{errors.respostaPadrao}</span>}
-                </div>
-                <div style={{ flex: '1 1 100%' }}>
-                  <label style={labelStyle}>{t.solicitacaoEmail}</label>
-                  <textarea name="solicitacaoEmail" rows="2" placeholder={t.solicitacaoEmailPlaceholder} value={empresa.solicitacaoEmail} onChange={handleChange} style={inputStyle}></textarea>
-                </div>
-                <div style={{ flex: '1 1 100%' }}>
-                  <label style={labelStyle}>{t.mensagemEncerramento}</label>
-                  <textarea name="mensagemEncerramento" rows="2" placeholder={t.mensagemEncerramentoPlaceholder} value={empresa.mensagemEncerramento} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required></textarea>
-                  {errors.mensagemEncerramento && <span style={errorStyle}>{errors.mensagemEncerramento}</span>}
-                </div>
-                <div style={{ flex: '1 1 100%' }}>
-                  <label style={labelStyle}>{t.listaProdutos}</label>
-                  <textarea name="listaProdutos" rows="3" placeholder={t.listaProdutosPlaceholder} value={empresa.listaProdutos} onChange={handleChange} onBlur={handleBlur} style={{ ...inputStyle, whiteSpace: 'pre-wrap' }} required></textarea>
-                  {errors.listaProdutos && <span style={errorStyle}>{errors.listaProdutos}</span>}
-                </div>
-              </div>
-            </section>
-
-            {/* Seção 4 – Variáveis do Ambiente (.env) */}
-            <section>
-              <h3 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#272631', marginBottom: '1rem' }}>
-                {t.envSectionTitle}
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {[
-                  { label: 'VERIFY_TOKEN', name: 'verifyToken' },
-                  { label: 'WHATSAPP_API_TOKEN', name: 'whatsappApiToken' },
-                  { label: 'OPENAI_API_KEY', name: 'openaiApiKey' },
-                  { label: 'MONGO_URI', name: 'mongoUri' },
-                  { label: 'PHONE_NUMBER_ID', name: 'phoneNumberId' },
-                  { label: 'EMAIL_USER', name: 'emailUser' },
-                  { label: 'EMAIL_PASS', name: 'emailPass', type: 'password' },
-                  { label: 'EMAIL_GESTOR', name: 'emailGestor' },
-                ].map((field) => (
-                  <div key={field.name} style={{ flex: '1 1 100%' }}>
-                    <label style={labelStyle}>
-                      {field.label}
-                      <span style={explanationIconStyle} onClick={() => toggleEnvExplanation(field.name)}>
-                        ?
-                      </span>
-                    </label>
+          ) : (
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              {/* Seção 1 – Dados Básicos */}
+              <section>
+                <h3 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#272631', marginBottom: '1rem' }}>
+                  {t.dadosBasicos}
+                </h3>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                  <div style={{ flex: '1 1 300px' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#272631' }}>{t.nomeEmpresa}</label>
                     <input
-                      type={field.type ? field.type : 'text'}
-                      name={field.name}
-                      placeholder={field.label}
-                      value={empresa[field.name]}
+                      type="text"
+                      name="nome"
+                      placeholder={t.nomePlaceholder}
+                      value={empresa.nome}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       style={inputStyle}
                       required
                     />
-                    {errors[field.name] && <span style={errorStyle}>{errors[field.name]}</span>}
-                    {envExplanations[field.name] && (
-                      <span style={explanationTextStyle}>
-                        {envExplanationsTexts[field.name]}
-                      </span>
-                    )}
+                    {errors.nome && <span style={errorStyle}>{errors.nome}</span>}
                   </div>
-                ))}
-              </div>
-            </section>
+                  <div style={{ flex: '1 1 300px' }}>
+                    <label style={labelStyle}>{t.apiKey}</label>
+                    <input
+                      type="text"
+                      name="apiKey"
+                      placeholder={t.apiPlaceholder}
+                      value={empresa.apiKey}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      style={inputStyle}
+                      required
+                    />
+                    {errors.apiKey && <span style={errorStyle}>{errors.apiKey}</span>}
+                  </div>
+                  <div style={{ flex: '1 1 300px' }}>
+                    <label style={labelStyle}>{t.telefone}</label>
+                    <input
+                      type="text"
+                      name="telefone"
+                      placeholder={t.telefonePlaceholder}
+                      value={empresa.telefone}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      style={inputStyle}
+                      required
+                    />
+                    {errors.telefone && <span style={errorStyle}>{errors.telefone}</span>}
+                  </div>
+                  <div style={{ flex: '1 1 300px' }}>
+                    <label style={labelStyle}>{t.email}</label>
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder={t.emailPlaceholder}
+                      value={empresa.email}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      style={inputStyle}
+                      required
+                    />
+                    {errors.email && <span style={errorStyle}>{errors.email}</span>}
+                  </div>
+                  <div style={{ flex: '1 1 100%' }}>
+                    <label style={labelStyle}>{t.saudacao}</label>
+                    <input
+                      type="text"
+                      name="saudacao"
+                      placeholder={t.saudacaoPlaceholder}
+                      value={empresa.saudacao}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      style={inputStyle}
+                      required
+                    />
+                    {errors.saudacao && <span style={errorStyle}>{errors.saudacao}</span>}
+                  </div>
+                </div>
+              </section>
 
-            {/* Seção 5 – Instruções Personalizadas */}
-            <section>
-              <h3 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#272631', marginBottom: '1rem' }}>
-                {t.instrucoesPersonalizadas}
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {[
-                  { label: t.regrasResposta, name: 'regrasResposta', placeholder: t.regrasRespostaPlaceholder },
-                  { label: t.linkCalendly, name: 'linkCalendly', placeholder: t.linkCalendlyPlaceholder },
-                  { label: t.linkSite, name: 'linkSite', placeholder: t.linkSitePlaceholder },
-                  { label: t.exemplosAtendimento, name: 'exemplosAtendimento', placeholder: t.exemplosAtendimentoPlaceholder },
-                ].map((field) => (
-                  <div key={field.name} style={{ flex: '1 1 100%' }}>
-                    <label style={labelStyle}>
-                      {field.label}
-                      <span style={explanationIconStyle} onClick={() => toggleInstExplanation(field.name)}>
-                        ?
-                      </span>
-                    </label>
-                    {field.name === 'regrasResposta' || field.name === 'exemplosAtendimento' ? (
-                      <textarea
-                        name={field.name}
-                        rows="5"
-                        placeholder={field.placeholder}
-                        value={empresa[field.name]}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        style={inputStyle}
-                        required
-                      ></textarea>
-                    ) : (
+              {/* Seção 2 – Identidade Visual */}
+              <section>
+                <h3 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#272631', marginBottom: '1rem' }}>
+                  {t.identidadeVisual}
+                </h3>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                  <div style={{ flex: '1 1 100%' }}>
+                    <label style={labelStyle}>{t.logotipo}</label>
+                    <div
+                      style={dropZoneStyle}
+                      onDrop={handleDrop}
+                      onDragOver={handleDragOver}
+                      onClick={() => logoInputRef.current && logoInputRef.current.click()}
+                    >
+                      <p>{t.logoDropZone}</p>
                       <input
-                        type="text"
+                        type="file"
+                        name="logo"
+                        accept="image/png, image/jpeg"
+                        onChange={handleChange}
+                        ref={logoInputRef}
+                        style={{ display: 'none' }}
+                      />
+                    </div>
+                    {errors.logo && <span style={errorStyle}>{errors.logo}</span>}
+                  </div>
+                  <div style={{ flex: '1 1 300px' }}>
+                    <label style={labelStyle}>{t.corPrimaria}</label>
+                    <input
+                      type="color"
+                      name="primaryColor"
+                      value={empresa.primaryColor}
+                      onChange={handleChange}
+                      style={{
+                        width: '100%',
+                        height: '3rem',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: '1 1 300px' }}>
+                    <label style={labelStyle}>{t.corSecundaria}</label>
+                    <input
+                      type="color"
+                      name="secondaryColor"
+                      value={empresa.secondaryColor}
+                      onChange={handleChange}
+                      style={{
+                        width: '100%',
+                        height: '3rem',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: '1 1 300px' }}>
+                    <label style={labelStyle}>{t.corFundo}</label>
+                    <input
+                      type="color"
+                      name="backgroundColor"
+                      value={empresa.backgroundColor}
+                      onChange={handleChange}
+                      style={{
+                        width: '100%',
+                        height: '3rem',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                      }}
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Seção 3 – Fluxo de Atendimento */}
+              <section>
+                <h3 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#272631', marginBottom: '1rem' }}>
+                  {t.configuracaoAtendimento}
+                </h3>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                  <div style={{ flex: '1 1 100%' }}>
+                    <label style={labelStyle}>{t.saudacaoInicial}</label>
+                    <textarea
+                      name="saudacaoInicial"
+                      rows="2"
+                      placeholder={t.saudacaoInicialPlaceholder}
+                      value={empresa.saudacaoInicial}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      style={inputStyle}
+                      required
+                    ></textarea>
+                    {errors.saudacaoInicial && <span style={errorStyle}>{errors.saudacaoInicial}</span>}
+                  </div>
+                  <div style={{ flex: '1 1 100%' }}>
+                    <label style={labelStyle}>{t.respostaPadrao}</label>
+                    <textarea
+                      name="respostaPadrao"
+                      rows="2"
+                      placeholder={t.respostaPadraoPlaceholder}
+                      value={empresa.respostaPadrao}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      style={inputStyle}
+                      required
+                    ></textarea>
+                    {errors.respostaPadrao && <span style={errorStyle}>{errors.respostaPadrao}</span>}
+                  </div>
+                  <div style={{ flex: '1 1 100%' }}>
+                    <label style={labelStyle}>{t.solicitacaoEmail}</label>
+                    <textarea
+                      name="solicitacaoEmail"
+                      rows="2"
+                      placeholder={t.solicitacaoEmailPlaceholder}
+                      value={empresa.solicitacaoEmail}
+                      onChange={handleChange}
+                      style={inputStyle}
+                    ></textarea>
+                  </div>
+                  <div style={{ flex: '1 1 100%' }}>
+                    <label style={labelStyle}>{t.mensagemEncerramento}</label>
+                    <textarea
+                      name="mensagemEncerramento"
+                      rows="2"
+                      placeholder={t.mensagemEncerramentoPlaceholder}
+                      value={empresa.mensagemEncerramento}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      style={inputStyle}
+                      required
+                    ></textarea>
+                    {errors.mensagemEncerramento && <span style={errorStyle}>{errors.mensagemEncerramento}</span>}
+                  </div>
+                  <div style={{ flex: '1 1 100%' }}>
+                    <label style={labelStyle}>{t.listaProdutos}</label>
+                    <textarea
+                      name="listaProdutos"
+                      rows="3"
+                      placeholder={t.listaProdutosPlaceholder}
+                      value={empresa.listaProdutos}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      style={{ ...inputStyle, whiteSpace: 'pre-wrap' }}
+                      required
+                    ></textarea>
+                    {errors.listaProdutos && <span style={errorStyle}>{errors.listaProdutos}</span>}
+                  </div>
+                </div>
+              </section>
+
+              {/* Seção 4 – Variáveis do Ambiente (.env) */}
+              <section>
+                <h3 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#272631', marginBottom: '1rem' }}>
+                  {t.envSectionTitle}
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {[
+                    { label: 'VERIFY_TOKEN', name: 'verifyToken' },
+                    { label: 'WHATSAPP_API_TOKEN', name: 'whatsappApiToken' },
+                    { label: 'OPENAI_API_KEY', name: 'openaiApiKey' },
+                    { label: 'MONGO_URI', name: 'mongoUri' },
+                    { label: 'PHONE_NUMBER_ID', name: 'phoneNumberId' },
+                    { label: 'EMAIL_USER', name: 'emailUser' },
+                    { label: 'EMAIL_PASS', name: 'emailPass', type: 'password' },
+                    { label: 'EMAIL_GESTOR', name: 'emailGestor' },
+                  ].map((field) => (
+                    <div key={field.name} style={{ flex: '1 1 100%' }}>
+                      <label style={labelStyle}>
+                        {field.label}
+                        <span style={explanationIconStyle} onClick={() => toggleEnvExplanation(field.name)}>
+                          ?
+                        </span>
+                      </label>
+                      <input
+                        type={field.type ? field.type : 'text'}
                         name={field.name}
-                        placeholder={field.placeholder}
+                        placeholder={field.label}
                         value={empresa[field.name]}
                         onChange={handleChange}
                         onBlur={handleBlur}
                         style={inputStyle}
                         required
                       />
-                    )}
-                    {errors[field.name] && <span style={errorStyle}>{errors[field.name]}</span>}
-                    {instExplanations[field.name] && (
-                      <span style={explanationTextStyle}>
-                        {field.name === 'regrasResposta'
-                          ? instExplanationsTexts.regrasResposta
-                          : field.name === 'linkCalendly'
-                          ? instExplanationsTexts.linkCalendly
-                          : field.name === 'linkSite'
-                          ? instExplanationsTexts.linkSite
-                          : instExplanationsTexts.exemplosAtendimento}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
+                      {errors[field.name] && <span style={errorStyle}>{errors[field.name]}</span>}
+                      {envExplanations[field.name] && (
+                        <span style={explanationTextStyle}>{envExplanationsTexts[field.name]}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
 
-            <button
-              type="submit"
-              style={btnStyle}
-              onMouseEnter={() => setIsButtonHovered(true)}
-              onMouseLeave={() => setIsButtonHovered(false)}
+              {/* Seção 5 – Instruções Personalizadas */}
+              <section>
+                <h3 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#272631', marginBottom: '1rem' }}>
+                  {t.instrucoesPersonalizadas}
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {[
+                    { label: t.regrasResposta, name: 'regrasResposta', placeholder: t.regrasRespostaPlaceholder },
+                    { label: t.linkCalendly, name: 'linkCalendly', placeholder: t.linkCalendlyPlaceholder },
+                    { label: t.linkSite, name: 'linkSite', placeholder: t.linkSitePlaceholder },
+                    { label: t.exemplosAtendimento, name: 'exemplosAtendimento', placeholder: t.exemplosAtendimentoPlaceholder },
+                  ].map((field) => (
+                    <div key={field.name} style={{ flex: '1 1 100%' }}>
+                      <label style={labelStyle}>
+                        {field.label}
+                        <span style={explanationIconStyle} onClick={() => toggleInstExplanation(field.name)}>
+                          ?
+                        </span>
+                      </label>
+                      {field.name === 'regrasResposta' || field.name === 'exemplosAtendimento' ? (
+                        <textarea
+                          name={field.name}
+                          rows="5"
+                          placeholder={field.placeholder}
+                          value={empresa[field.name]}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          style={inputStyle}
+                          required
+                        ></textarea>
+                      ) : (
+                        <input
+                          type="text"
+                          name={field.name}
+                          placeholder={field.placeholder}
+                          value={empresa[field.name]}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          style={inputStyle}
+                          required
+                        />
+                      )}
+                      {errors[field.name] && <span style={errorStyle}>{errors[field.name]}</span>}
+                      {instExplanations[field.name] && (
+                        <span style={explanationTextStyle}>
+                          {field.name === 'regrasResposta'
+                            ? instExplanationsTexts.regrasResposta
+                            : field.name === 'linkCalendly'
+                            ? instExplanationsTexts.linkCalendly
+                            : field.name === 'linkSite'
+                            ? instExplanationsTexts.linkSite
+                            : instExplanationsTexts.exemplosAtendimento}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <button
+                type="submit"
+                style={{
+                  backgroundColor: '#5de5d9',
+                  border: 'none',
+                  padding: '1rem',
+                  borderRadius: '4px',
+                  color: 'white',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.3s',
+                }}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#4cc9c0')}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#5de5d9')}
+              >
+                {t.salvar}
+              </button>
+            </form>
+          )}
+          {submitError && (
+            <div
+              style={{
+                backgroundColor: '#f8d7da',
+                color: '#842029',
+                padding: '1rem',
+                borderRadius: '4px',
+                marginBottom: '1rem',
+              }}
             >
-              {t.salvar}
-            </button>
-          </form>
+              {submitError}
+            </div>
+          )}
         </div>
       </main>
 
-      <footer style={{ backgroundColor: '#4cc9c0', color: 'white', textAlign: 'center', padding: '1rem' }}>
+      {/* Footer */}
+      <footer
+        style={{
+          backgroundColor: '#4cc9c0',
+          color: 'white',
+          textAlign: 'center',
+          padding: '1rem',
+        }}
+      >
         &copy; 2025 BiVisualizer. Todos os direitos reservados.
       </footer>
     </div>
