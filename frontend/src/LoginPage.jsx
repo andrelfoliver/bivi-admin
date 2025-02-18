@@ -19,7 +19,8 @@ function LoginPage() {
         body: JSON.stringify({ email: username, password }),
       });
       if (response.ok) {
-        // Força o recarregamento da página para atualizar a sessão
+        // Força um reload para garantir que a sessão seja atualizada e
+        // exibir corretamente o usuário logado.
         window.location.href = '/';
       } else {
         const data = await response.json();
@@ -34,7 +35,7 @@ function LoginPage() {
     <>
       <style>
         {`
-          /* Wrapper que centraliza tudo vertical/horizontal */
+          /* Área que centraliza tudo vertical/horizontal */
           .login-wrapper {
             min-height: 100vh;
             display: flex;
@@ -43,7 +44,7 @@ function LoginPage() {
             background-color: #f0f2f5; /* cor de fundo suave */
           }
 
-          /* Container principal com 2 painéis (esquerda 40%, direita 60%) */
+          /* Container principal (box-shadow e bordas arredondadas) */
           .login-container {
             width: 900px; /* ajuste conforme desejar */
             height: 500px; /* ajuste conforme desejar */
@@ -57,7 +58,7 @@ function LoginPage() {
           /* Painel esquerdo (40%) */
           .left-panel {
             flex: 0 0 40%;
-            background-color: #009688; /* cor de fundo do painel esquerdo */
+            background-color: #009688; /* cor do painel esquerdo */
             color: #fff;
             display: flex;
             flex-direction: column;
@@ -80,21 +81,25 @@ function LoginPage() {
             line-height: 1.5;
           }
 
-          /* Painel direito (60%) */
+          /* Painel direito (60%) - agora sem card interno */
           .right-panel {
             flex: 0 0 60%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             padding: 2rem;
+            background-color: #fff; /* fundo branco */
           }
-          .right-panel .card {
+
+          /* Título e formulário no painel direito */
+          .right-panel h2 {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #666;
+          }
+          .form-container {
             max-width: 350px;
             margin: 0 auto;
-            border: none;
-          }
-          .right-panel .card-body {
-            padding: 0;
           }
 
           /* Botão Entrar */
@@ -141,8 +146,6 @@ function LoginPage() {
         `}
       </style>
 
-      {/* Não temos mais a barra preta no topo, removemos o header. */}
-      
       {/* Área principal de login */}
       <div className="login-wrapper">
         <div className="login-container">
@@ -155,61 +158,57 @@ function LoginPage() {
 
           {/* Painel direito (60%) */}
           <div className="right-panel">
-            <div className="card shadow">
-              <div className="card-body">
-                <p className="text-center text-muted mb-4">Faça login para continuar</p>
-                <form onSubmit={handleSubmit}>
-                  <div className="mb-3">
-                    <label htmlFor="username" className="form-label">
-                      Usuário (E-mail)
-                    </label>
-                    <input
-                      type="text"
-                      id="username"
-                      name="username"
-                      className="form-control"
-                      placeholder="Digite seu usuário"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="password" className="form-label">
-                      Senha
-                    </label>
-                    <input
-                      type="password"
-                      id="password"
-                      name="password"
-                      className="form-control"
-                      placeholder="Digite sua senha"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <button type="submit" className="btn-entrar">
-                    Entrar
-                  </button>
-                  {errorMsg && (
-                    <p className="text-danger text-center mt-3">{errorMsg}</p>
-                  )}
-                </form>
-                <div className="mt-3 text-center">
-                  <p className="small text-muted">
-                    Ainda não tem uma conta?{' '}
-                    <a href="/register" className="text-primary">
-                      Cadastre-se
-                    </a>
-                  </p>
+            <h2>Faça login para continuar</h2>
+            <div className="form-container">
+              <form onSubmit={handleSubmit}>
+                <div className="mb-3">
+                  <label htmlFor="username" className="form-label">
+                    Usuário (E-mail)
+                  </label>
+                  <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    className="form-control"
+                    placeholder="Digite seu usuário"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                  />
                 </div>
-                <hr />
-                <div className="text-center">
-                  <a href="/auth/google" className="btn btn-outline-danger w-100 btn-google">
-                    <i className="bi bi-google me-2"></i> Entrar com Google
+                <div className="mb-3">
+                  <label htmlFor="password" className="form-label">
+                    Senha
+                  </label>
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    className="form-control"
+                    placeholder="Digite sua senha"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <button type="submit" className="btn-entrar">Entrar</button>
+                {errorMsg && (
+                  <p className="text-danger text-center mt-3">{errorMsg}</p>
+                )}
+              </form>
+              <div className="mt-3 text-center">
+                <p className="small text-muted">
+                  Ainda não tem uma conta?{' '}
+                  <a href="/register" className="text-primary">
+                    Cadastre-se
                   </a>
-                </div>
+                </p>
+              </div>
+              <hr />
+              <div className="text-center">
+                <a href="/auth/google" className="btn btn-outline-danger w-100 btn-google">
+                  <i className="bi bi-google me-2"></i> Entrar com Google
+                </a>
               </div>
             </div>
           </div>

@@ -74,16 +74,30 @@ Error generating stack: `+t.message+`
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */var bd;function s0(){if(bd)return Du;bd=1;var r=Symbol.for("react.transitional.element"),d=Symbol.for("react.fragment");function v(f,g,E){var R=null;if(E!==void 0&&(R=""+E),g.key!==void 0&&(R=""+g.key),"key"in g){E={};for(var N in g)N!=="key"&&(E[N]=g[N])}else E=g;return g=E.ref,{$$typeof:r,type:f,key:R,ref:g!==void 0?g:null,props:E}}return Du.Fragment=d,Du.jsx=v,Du.jsxs=v,Du}var Sd;function o0(){return Sd||(Sd=1,df.exports=s0()),df.exports}var bf=o0();const O=bf.jsx,J=bf.jsxs,Yd=bf.Fragment;function d0(){const[r,d]=B.useState(""),[v,f]=B.useState(""),[g,E]=B.useState("");return pf(),J(Yd,{children:[O("style",{children:`
-          /* Estilos para o layout two-panels */
-          .login-container {
+          /* Área que centraliza tudo vertical/horizontal */
+          .login-wrapper {
             min-height: 100vh;
             display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f2f5; /* cor de fundo suave */
           }
 
-          /* Painel esquerdo (bem-vindo) */
-          .welcome-panel {
-            flex: 1;
-            background-color: #009688; /* Ajuste a cor de fundo como desejar */
+          /* Container principal (box-shadow e bordas arredondadas) */
+          .login-container {
+            width: 900px; /* ajuste conforme desejar */
+            height: 500px; /* ajuste conforme desejar */
+            display: flex;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fff; /* cor de fundo do container */
+          }
+
+          /* Painel esquerdo (40%) */
+          .left-panel {
+            flex: 0 0 40%;
+            background-color: #009688; /* cor do painel esquerdo */
             color: #fff;
             display: flex;
             flex-direction: column;
@@ -91,30 +105,39 @@ Error generating stack: `+t.message+`
             justify-content: center;
             padding: 2rem;
           }
-          .welcome-panel h2 {
-            font-size: 2rem;
+          .left-panel img {
+            height: 60px;
             margin-bottom: 1rem;
           }
-          .welcome-panel p {
+          .left-panel h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+          }
+          .left-panel p {
             font-size: 1rem;
-            max-width: 300px;
+            max-width: 250px;
             text-align: center;
             line-height: 1.5;
           }
 
-          /* Painel direito (formulário) */
-          .form-panel {
-            flex: 1;
-            background-color: #f8f9fa; /* Cor neutra do Bootstrap */
+          /* Painel direito (60%) - agora sem card interno */
+          .right-panel {
+            flex: 0 0 60%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             padding: 2rem;
+            background-color: #fff; /* fundo branco */
           }
 
-          /* Ajustes do card */
-          .card {
-            max-width: 400px;
+          /* Título e formulário no painel direito */
+          .right-panel h2 {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #666;
+          }
+          .form-container {
+            max-width: 350px;
             margin: 0 auto;
           }
 
@@ -132,34 +155,34 @@ Error generating stack: `+t.message+`
           .btn-entrar:hover {
             background-color: #4cc9c0;
           }
+
+          /* Botão Google */
           .btn-google {
             margin-top: 1rem;
           }
 
-          /* Rodapé com cor personalizada */
+          /* Rodapé customizado */
           .custom-footer {
             background-color: #4cc9c0;
-            color: white;
+            color: #fff;
             text-align: center;
             padding: 1rem;
           }
 
+          /* Responsivo */
           @media (max-width: 768px) {
             .login-container {
+              width: 95%;
+              height: auto;
               flex-direction: column;
             }
-            .welcome-panel, .form-panel {
+            .left-panel, .right-panel {
               flex: unset;
               width: 100%;
-            }
-            .welcome-panel {
-              order: 2;
-            }
-            .form-panel {
-              order: 1;
+              height: auto;
             }
           }
-        `}),O("header",{className:"bg-dark text-white py-3",children:O("div",{className:"container d-flex align-items-center justify-content-between",children:J("div",{className:"d-flex align-items-center",children:[O("img",{src:"logo.png",alt:"BiVisualizer Logo",style:{height:"60px"}}),O("h1",{className:"ms-3 h4 mb-0",children:"BiVisualizer"})]})})}),J("div",{className:"login-container",children:[J("div",{className:"welcome-panel",children:[O("h2",{children:"Bem-vindo de volta!"}),O("p",{children:"Para se manter conectado, faça login com suas informações pessoais"})]}),O("div",{className:"form-panel",children:O("div",{className:"card shadow",children:J("div",{className:"card-body",children:[O("p",{className:"text-center text-muted mb-4",children:"Faça login para continuar"}),J("form",{onSubmit:async N=>{N.preventDefault(),E("");try{const T=await fetch("/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({email:r,password:v})});if(T.ok)window.location.href="/";else{const p=await T.json();E(p.error||"Usuário ou senha inválidos!")}}catch{E("Erro de conexão. Tente novamente.")}},children:[J("div",{className:"mb-3",children:[O("label",{htmlFor:"username",className:"form-label",children:"Usuário (E-mail)"}),O("input",{type:"text",id:"username",name:"username",className:"form-control",placeholder:"Digite seu usuário",value:r,onChange:N=>d(N.target.value),required:!0})]}),J("div",{className:"mb-3",children:[O("label",{htmlFor:"password",className:"form-label",children:"Senha"}),O("input",{type:"password",id:"password",name:"password",className:"form-control",placeholder:"Digite sua senha",value:v,onChange:N=>f(N.target.value),required:!0})]}),O("button",{type:"submit",className:"btn-entrar",children:"Entrar"}),g&&O("p",{className:"text-danger text-center mt-3",children:g})]}),O("div",{className:"mt-3 text-center",children:J("p",{className:"small text-muted",children:["Ainda não tem uma conta?"," ",O("a",{href:"/register",className:"text-primary",children:"Cadastre-se"})]})}),O("hr",{}),O("div",{className:"text-center",children:J("a",{href:"/auth/google",className:"btn btn-outline-danger w-100 btn-google",children:[O("i",{className:"bi bi-google me-2"})," Entrar com Google"]})})]})})})]}),O("footer",{className:"custom-footer",children:"© 2025 BiVisualizer. Todos os direitos reservados."})]})}const h0={pt:{pageTitle:"Configuração da Empresa",dadosBasicos:"Dados Básicos",nomeEmpresa:"Nome da Empresa",nomePlaceholder:"Digite o nome da empresa",apiKey:"API Key OpenAI",apiPlaceholder:"Digite a API Key",apiKeyError:"API Key inválida. Deve começar com 'sk-' e ter no mínimo 50 caracteres.",telefone:"Telefone",telefonePlaceholder:"Digite o telefone",email:"E‑mail para Contato",emailPlaceholder:"Digite o e‑mail",saudacao:"Saudação",saudacaoPlaceholder:"Mensagem de saudação",identidadeVisual:"Identidade Visual",logotipo:"Logotipo",logoDropZone:"Arraste e solte o logo aqui ou clique para selecionar (somente PNG ou JPEG).",corPrimaria:"Cor Primária",corSecundaria:"Cor Secundária",corFundo:"Cor de Fundo",configuracaoAtendimento:"Configuração do Atendimento",saudacaoInicial:"Saudação Inicial",saudacaoInicialPlaceholder:"Ex.: Olá, seja bem-vindo à [nome da empresa]!",respostaPadrao:"Resposta Padrão",respostaPadraoPlaceholder:"Ex.: Oferecemos soluções inovadoras em análise de dados.",solicitacaoEmail:"Mensagem para Solicitar E‑mail",solicitacaoEmailPlaceholder:"Ex.: Antes de nos despedirmos, posso enviar mais detalhes por e‑mail. Qual é o seu e‑mail?",mensagemEncerramento:"Mensagem de Encerramento",mensagemEncerramentoPlaceholder:"Ex.: Obrigado pelo contato! Estamos à disposição.",listaProdutos:"Lista de Produtos/Serviços",listaProdutosPlaceholder:`Ex.: - Dashboards Interativos
+        `}),O("div",{className:"login-wrapper",children:J("div",{className:"login-container",children:[J("div",{className:"left-panel",children:[O("img",{src:"logo.png",alt:"BiVisualizer Logo"}),O("h2",{children:"Bem-vindo de volta!"}),O("p",{children:"Para se manter conectado, faça login com suas informações pessoais."})]}),J("div",{className:"right-panel",children:[O("h2",{children:"Faça login para continuar"}),J("div",{className:"form-container",children:[J("form",{onSubmit:async N=>{N.preventDefault(),E("");try{const T=await fetch("/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({email:r,password:v})});if(T.ok)window.location.href="/";else{const p=await T.json();E(p.error||"Usuário ou senha inválidos!")}}catch{E("Erro de conexão. Tente novamente.")}},children:[J("div",{className:"mb-3",children:[O("label",{htmlFor:"username",className:"form-label",children:"Usuário (E-mail)"}),O("input",{type:"text",id:"username",name:"username",className:"form-control",placeholder:"Digite seu usuário",value:r,onChange:N=>d(N.target.value),required:!0})]}),J("div",{className:"mb-3",children:[O("label",{htmlFor:"password",className:"form-label",children:"Senha"}),O("input",{type:"password",id:"password",name:"password",className:"form-control",placeholder:"Digite sua senha",value:v,onChange:N=>f(N.target.value),required:!0})]}),O("button",{type:"submit",className:"btn-entrar",children:"Entrar"}),g&&O("p",{className:"text-danger text-center mt-3",children:g})]}),O("div",{className:"mt-3 text-center",children:J("p",{className:"small text-muted",children:["Ainda não tem uma conta?"," ",O("a",{href:"/register",className:"text-primary",children:"Cadastre-se"})]})}),O("hr",{}),O("div",{className:"text-center",children:J("a",{href:"/auth/google",className:"btn btn-outline-danger w-100 btn-google",children:[O("i",{className:"bi bi-google me-2"})," Entrar com Google"]})})]})]})]})}),O("footer",{className:"custom-footer",children:"© 2025 BiVisualizer. Todos os direitos reservados."})]})}const h0={pt:{pageTitle:"Configuração da Empresa",dadosBasicos:"Dados Básicos",nomeEmpresa:"Nome da Empresa",nomePlaceholder:"Digite o nome da empresa",apiKey:"API Key OpenAI",apiPlaceholder:"Digite a API Key",apiKeyError:"API Key inválida. Deve começar com 'sk-' e ter no mínimo 50 caracteres.",telefone:"Telefone",telefonePlaceholder:"Digite o telefone",email:"E‑mail para Contato",emailPlaceholder:"Digite o e‑mail",saudacao:"Saudação",saudacaoPlaceholder:"Mensagem de saudação",identidadeVisual:"Identidade Visual",logotipo:"Logotipo",logoDropZone:"Arraste e solte o logo aqui ou clique para selecionar (somente PNG ou JPEG).",corPrimaria:"Cor Primária",corSecundaria:"Cor Secundária",corFundo:"Cor de Fundo",configuracaoAtendimento:"Configuração do Atendimento",saudacaoInicial:"Saudação Inicial",saudacaoInicialPlaceholder:"Ex.: Olá, seja bem-vindo à [nome da empresa]!",respostaPadrao:"Resposta Padrão",respostaPadraoPlaceholder:"Ex.: Oferecemos soluções inovadoras em análise de dados.",solicitacaoEmail:"Mensagem para Solicitar E‑mail",solicitacaoEmailPlaceholder:"Ex.: Antes de nos despedirmos, posso enviar mais detalhes por e‑mail. Qual é o seu e‑mail?",mensagemEncerramento:"Mensagem de Encerramento",mensagemEncerramentoPlaceholder:"Ex.: Obrigado pelo contato! Estamos à disposição.",listaProdutos:"Lista de Produtos/Serviços",listaProdutosPlaceholder:`Ex.: - Dashboards Interativos
 - Atendimento Virtual com IA
 - Soluções Integradas`,salvar:"Salvar Configuração",logout:"Sair",languageLabel:"Idioma",successMessage:"Configuração salva com sucesso!",logoFormatError:"Apenas arquivos PNG ou JPEG são aceitos.",envSectionTitle:"Configuração do Arquivo .env",instrucoesPersonalizadas:"Instruções Personalizadas",regrasResposta:"Regras de Resposta",regrasRespostaPlaceholder:"Digite as regras de resposta para a assistente virtual",linkCalendly:"Link de Calendly",linkCalendlyPlaceholder:"Cole o link do Calendly aqui",linkSite:"Link do Site",linkSitePlaceholder:"Cole o link do site aqui",exemplosAtendimento:"Exemplos de Perguntas e Respostas",exemplosAtendimentoPlaceholder:"Digite exemplos de perguntas e respostas para o atendimento"},en:{pageTitle:"Company Setup",dadosBasicos:"Basic Information",nomeEmpresa:"Company Name",nomePlaceholder:"Enter the company name",apiKey:"OpenAI API Key",apiPlaceholder:"Enter the API Key",apiKeyError:"Invalid API Key. It must start with 'sk-' and be at least 50 characters long.",telefone:"Phone",telefonePlaceholder:"Enter phone number",email:"Contact Email",emailPlaceholder:"Enter the email",saudacao:"Greeting",saudacaoPlaceholder:"Greeting message",identidadeVisual:"Visual Identity",logotipo:"Logo",logoDropZone:"Drag and drop the logo here or click to select (only PNG or JPEG files are accepted).",corPrimaria:"Primary Color",corSecundaria:"Secondary Color",corFundo:"Background Color",configuracaoAtendimento:"Service Setup",saudacaoInicial:"Initial Greeting",saudacaoInicialPlaceholder:"E.g., Hello, welcome to [company name]!",respostaPadrao:"Default Response",respostaPadraoPlaceholder:"E.g., We offer innovative data analysis solutions.",solicitacaoEmail:"Email Request Message",solicitacaoEmailPlaceholder:"E.g., Before we say goodbye, may I send more details by email? What is your email?",mensagemEncerramento:"Closing Message",mensagemEncerramentoPlaceholder:"E.g., Thank you for contacting us! We're here to help.",listaProdutos:"Products/Services List",listaProdutosPlaceholder:`E.g., - Interactive Dashboards
 - Virtual Assistance with AI
