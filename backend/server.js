@@ -126,11 +126,17 @@ app.post('/api/auth/login', async (req, res, next) => {
   try {
     const user = await User.findOne({ email, provider: 'local' });
     if (!user) return res.status(401).send({ error: "Credenciais inválidas." });
+    
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).send({ error: "Credenciais inválidas." });
-    req.login(user, (err) => {
+    
+    // Limpa qualquer sessão anterior antes de realizar o login
+    req.logout(function(err) {
       if (err) return next(err);
-      res.send({ message: "Login efetuado com sucesso!", user });
+      req.login(user, (err) => {
+        if (err) return next(err);
+        res.send({ message: "Login efetuado com sucesso!", user });
+      });
     });
   } catch (err) {
     res.status(500).send({ error: err.message });
