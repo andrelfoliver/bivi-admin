@@ -81,9 +81,16 @@ passport.use(
     }
   )
 );
-// Endpoint para login com Google
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+// Inicia o fluxo de login com Google, forçando escolha de conta e consentimento
+app.get(
+  '/auth/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    prompt: 'select_account consent'
+  })
+);
 
+// Callback após autenticação
 app.get(
   '/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
@@ -92,6 +99,7 @@ app.get(
     res.redirect('/');
   }
 );
+
 
 // Endpoint para registro manual de usuário
 app.post('/api/auth/register', async (req, res) => {
