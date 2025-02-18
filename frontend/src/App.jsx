@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom';
 import LoginPage from './LoginPage';
 import ConfigEmpresa from './ConfigEmpresa';
+import RegisterPage from './RegisterPage';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -31,18 +32,19 @@ function App() {
         setLoading(false);
       }
     }
-    // Execute apenas uma vez no mount
+    // Executa a verificação somente uma vez no mount
     checkUser();
-  }, []); 
+  }, []);
 
   if (loading) {
-    return <div>Carregando...</div>;
+    return <div>Loading...</div>;
   }
 
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route 
           path="/" 
           element={user ? <ConfigEmpresa user={user} /> : <Navigate to="/login" replace />} 

@@ -72,12 +72,14 @@ passport.use(
       const existingUser = await User.findOne({ googleId: profile.id, provider: 'google' });
       if (existingUser) return done(null, existingUser);
       // Cria um novo usuário Google se não existir
-      const newUser = new User({
+      const newUser = await new User({
         googleId: profile.id,
         email: profile.emails[0].value,
         name: profile.displayName,
-        provider: 'google',
-      });
+        picture: profile.photos[0].value, // Adicionado para armazenar a foto
+        provider: 'google'
+      }).save();
+      
       const savedUser = await newUser.save();
       done(null, savedUser);
     }
