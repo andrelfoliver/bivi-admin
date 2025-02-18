@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true },
     password: { type: String }, // Apenas para usuários manuais
     name: { type: String },
+    picture: { type: String }, // Campo adicionado para armazenar a URL do avatar
     provider: { 
       type: String, 
       required: true, 

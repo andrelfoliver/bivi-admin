@@ -61,31 +61,26 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "https://app.bivisualizer.com/auth/google/callback",
+      callbackURL: "https://app.bivisualizer.com/auth/google/callback"
     },
     async (accessToken, refreshToken, profile, done) => {
-      // Verifica se o e‑mail é do Gmail
       if (!profile.emails[0].value.endsWith('@gmail.com')) {
         return done(null, false, { message: 'Apenas contas Gmail são permitidas.' });
       }
-      // Procura se o usuário já existe (Google)
-      const existingUser = await User.findOne({ googleId: profile.id, provider: 'google' });
+      const existingUser = await User.findOne({ googleId: profile.id });
       if (existingUser) return done(null, existingUser);
-      // Cria um novo usuário Google se não existir
+      // Cria um novo usuário incluindo a foto do perfil
       const newUser = await new User({
         googleId: profile.id,
         email: profile.emails[0].value,
         name: profile.displayName,
-        picture: profile.photos[0].value, // Adicionado para armazenar a foto
+        picture: profile.photos && profile.photos[0] ? profile.photos[0].value : null,
         provider: 'google'
       }).save();
-      
-      const savedUser = await newUser.save();
-      done(null, savedUser);
+      done(null, newUser);
     }
   )
 );
-
 // Endpoint para login com Google
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
