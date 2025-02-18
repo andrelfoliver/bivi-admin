@@ -3,17 +3,14 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
-  useLocation
+  Navigate
 } from 'react-router-dom';
 import LoginPage from './LoginPage';
 import ConfigEmpresa from './ConfigEmpresa';
-import RegisterPage from './RegisterPage';
 
-function AppContent() {
+function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const location = useLocation();
 
   useEffect(() => {
     async function checkUser() {
@@ -34,27 +31,23 @@ function AppContent() {
         setLoading(false);
       }
     }
+    // Execute apenas uma vez no mount
     checkUser();
-  }, [location]);
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-  return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route
-        path="/"
-        element={user ? <ConfigEmpresa user={user} /> : <Navigate to="/login" replace />}
-      />
-    </Routes>
-  );
-}
+  }, []); 
 
-function App() {
+  if (loading) {
+    return <div>Carregando...</div>;
+  }
+
   return (
     <Router>
-      <AppContent />
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route 
+          path="/" 
+          element={user ? <ConfigEmpresa user={user} /> : <Navigate to="/login" replace />} 
+        />
+      </Routes>
     </Router>
   );
 }
