@@ -1,10 +1,18 @@
 import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 function LoginPage() {
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Implemente a lógica de autenticação aqui, se necessário.
+    // Por exemplo, você pode redirecionar para a página principal após a autenticação:
+    // navigate('/');
+  };
+
   return (
     <>
-      {/* Podemos inserir um bloco de estilo aqui mesmo no JSX, 
-          ou então colocar em um arquivo CSS separado */}
       <style>
         {`
           .btn-entrar {
@@ -17,7 +25,6 @@ function LoginPage() {
             border-radius: 6px;
             transition: background-color 0.3s;
           }
-
           .btn-entrar:hover {
             background-color: #4cc9c0;
           }
@@ -40,14 +47,10 @@ function LoginPage() {
           <div className="container" style={{ maxWidth: '400px' }}>
             <div className="card shadow">
               <div className="card-body">
-                <p className="text-center text-muted mb-4">
-                  Faça login para continuar
-                </p>
-                <form id="loginForm">
+                <p className="text-center text-muted mb-4">Faça login para continuar</p>
+                <form id="loginForm" onSubmit={handleSubmit}>
                   <div className="mb-3">
-                    <label htmlFor="username" className="form-label">
-                      Usuário
-                    </label>
+                    <label htmlFor="username" className="form-label">Usuário</label>
                     <input
                       type="text"
                       id="username"
@@ -58,9 +61,7 @@ function LoginPage() {
                     />
                   </div>
                   <div className="mb-3">
-                    <label htmlFor="password" className="form-label">
-                      Senha
-                    </label>
+                    <label htmlFor="password" className="form-label">Senha</label>
                     <input
                       type="password"
                       id="password"
@@ -70,29 +71,21 @@ function LoginPage() {
                       required
                     />
                   </div>
-                  {/* Aplique a classe btn-entrar aqui */}
-                  <button type="submit" className="btn-entrar">
-                    Entrar
-                  </button>
-                  <p
-                    id="errorMessage"
-                    className="text-danger text-center mt-3 d-none"
-                  >
+                  <button type="submit" className="btn-entrar">Entrar</button>
+                  <p id="errorMessage" className="text-danger text-center mt-3 d-none">
                     Usuário ou senha inválidos!
                   </p>
                 </form>
                 <div className="mt-3 text-center">
                   <p className="small text-muted">
-                    Ainda não tem uma conta?{" "}
-                    <a href="RegisterPage.jsx" className="text-primary">
+                    Ainda não tem uma conta?{' '}
+                    <Link to="/register" className="text-primary">
                       Cadastre-se
-                    </a>
+                    </Link>
                   </p>
                 </div>
                 <hr />
                 <div className="text-center">
-                  {/* Exemplo de botão para Google OAuth, 
-                      caso você queira manter a opção */}
                   <a href="/auth/google" className="btn btn-outline-danger w-100">
                     <i className="bi bi-google me-2"></i> Entrar com Google
                   </a>
@@ -103,10 +96,7 @@ function LoginPage() {
         </main>
 
         {/* Rodapé */}
-        <footer
-          className="text-white text-center py-3"
-          style={{ backgroundColor: "#4cc9c0" }}
-        >
+        <footer className="text-white text-center py-3" style={{ backgroundColor: "#4cc9c0" }}>
           &copy; 2025 BiVisualizer. Todos os direitos reservados.
         </footer>
       </div>
