@@ -63,7 +63,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "https://bivi-empresas-28885d192e15.herokuapp.com/auth/google/callback"
+      callbackURL: "https://app.bivisualizer.com/auth/google/callback"
     },
     async (accessToken, refreshToken, profile, done) => {
       // Extraia a URL da foto
