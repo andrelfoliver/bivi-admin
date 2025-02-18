@@ -2,13 +2,19 @@ import React, { useState, useRef } from 'react';
 
 // Função para calcular a distância de Levenshtein entre duas strings
 function levenshteinDistance(a, b) {
-  const dp = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(null));
+  const dp = Array(a.length + 1)
+    .fill(null)
+    .map(() => Array(b.length + 1).fill(null));
   for (let i = 0; i <= a.length; i++) dp[i][0] = i;
   for (let j = 0; j <= b.length; j++) dp[0][j] = j;
   for (let i = 1; i <= a.length; i++) {
     for (let j = 1; j <= b.length; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost
+      );
     }
   }
   return dp[a.length][b.length];
@@ -16,7 +22,13 @@ function levenshteinDistance(a, b) {
 
 // Sugere um domínio próximo se a distância for pequena
 function getClosestDomain(typedDomain) {
-  const popularDomains = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "icloud.com"];
+  const popularDomains = [
+    "gmail.com",
+    "yahoo.com",
+    "outlook.com",
+    "hotmail.com",
+    "icloud.com",
+  ];
   let closest = null;
   let minDistance = Infinity;
   popularDomains.forEach((domain) => {
@@ -37,7 +49,8 @@ const translations = {
     nomePlaceholder: "Digite o nome da empresa",
     apiKey: "API Key OpenAI",
     apiPlaceholder: "Digite a API Key",
-    apiKeyError: "API Key inválida. Deve começar com 'sk-' e ter no mínimo 50 caracteres.",
+    apiKeyError:
+      "API Key inválida. Deve começar com 'sk-' e ter no mínimo 50 caracteres.",
     telefone: "Telefone",
     telefonePlaceholder: "Digite o telefone",
     email: "E‑mail para Contato",
@@ -46,21 +59,27 @@ const translations = {
     saudacaoPlaceholder: "Mensagem de saudação",
     identidadeVisual: "Identidade Visual",
     logotipo: "Logotipo",
-    logoDropZone: "Arraste e solte o logo aqui ou clique para selecionar (somente PNG ou JPEG).",
+    logoDropZone:
+      "Arraste e solte o logo aqui ou clique para selecionar (somente PNG ou JPEG).",
     corPrimaria: "Cor Primária",
     corSecundaria: "Cor Secundária",
     corFundo: "Cor de Fundo",
     configuracaoAtendimento: "Configuração do Atendimento",
     saudacaoInicial: "Saudação Inicial",
-    saudacaoInicialPlaceholder: "Ex.: Olá, seja bem-vindo à [nome da empresa]!",
+    saudacaoInicialPlaceholder:
+      "Ex.: Olá, seja bem-vindo à [nome da empresa]!",
     respostaPadrao: "Resposta Padrão",
-    respostaPadraoPlaceholder: "Ex.: Oferecemos soluções inovadoras em análise de dados.",
+    respostaPadraoPlaceholder:
+      "Ex.: Oferecemos soluções inovadoras em análise de dados.",
     solicitacaoEmail: "Mensagem para Solicitar E‑mail",
-    solicitacaoEmailPlaceholder: "Ex.: Antes de nos despedirmos, posso enviar mais detalhes por e‑mail. Qual é o seu e‑mail?",
+    solicitacaoEmailPlaceholder:
+      "Ex.: Antes de nos despedirmos, posso enviar mais detalhes por e‑mail. Qual é o seu e‑mail?",
     mensagemEncerramento: "Mensagem de Encerramento",
-    mensagemEncerramentoPlaceholder: "Ex.: Obrigado pelo contato! Estamos à disposição.",
+    mensagemEncerramentoPlaceholder:
+      "Ex.: Obrigado pelo contato! Estamos à disposição.",
     listaProdutos: "Lista de Produtos/Serviços",
-    listaProdutosPlaceholder: "Ex.: - Dashboards Interativos\n- Atendimento Virtual com IA\n- Soluções Integradas",
+    listaProdutosPlaceholder:
+      "Ex.: - Dashboards Interativos\n- Atendimento Virtual com IA\n- Soluções Integradas",
     salvar: "Salvar Configuração",
     logout: "Sair",
     languageLabel: "Idioma",
@@ -69,16 +88,71 @@ const translations = {
     envSectionTitle: "Configuração do Arquivo .env",
     instrucoesPersonalizadas: "Instruções Personalizadas",
     regrasResposta: "Regras de Resposta",
-    regrasRespostaPlaceholder: "Digite as regras de resposta para a assistente virtual",
+    regrasRespostaPlaceholder:
+      "Digite as regras de resposta para a assistente virtual",
     linkCalendly: "Link de Calendly",
     linkCalendlyPlaceholder: "Cole o link do Calendly aqui",
     linkSite: "Link do Site",
     linkSitePlaceholder: "Cole o link do site aqui",
     exemplosAtendimento: "Exemplos de Perguntas e Respostas",
-    exemplosAtendimentoPlaceholder: "Digite exemplos de perguntas e respostas para o atendimento",
+    exemplosAtendimentoPlaceholder:
+      "Digite exemplos de perguntas e respostas para o atendimento",
   },
   en: {
-    // Traduções em inglês (adicione conforme necessário)
+    pageTitle: "Company Setup",
+    dadosBasicos: "Basic Information",
+    nomeEmpresa: "Company Name",
+    nomePlaceholder: "Enter the company name",
+    apiKey: "OpenAI API Key",
+    apiPlaceholder: "Enter the API Key",
+    apiKeyError:
+      "Invalid API Key. It must start with 'sk-' and be at least 50 characters long.",
+    telefone: "Phone",
+    telefonePlaceholder: "Enter phone number",
+    email: "Contact Email",
+    emailPlaceholder: "Enter the email",
+    saudacao: "Greeting",
+    saudacaoPlaceholder: "Greeting message",
+    identidadeVisual: "Visual Identity",
+    logotipo: "Logo",
+    logoDropZone:
+      "Drag and drop the logo here or click to select (only PNG or JPEG files are accepted).",
+    corPrimaria: "Primary Color",
+    corSecundaria: "Secondary Color",
+    corFundo: "Background Color",
+    configuracaoAtendimento: "Service Setup",
+    saudacaoInicial: "Initial Greeting",
+    saudacaoInicialPlaceholder:
+      "E.g., Hello, welcome to [company name]!",
+    respostaPadrao: "Default Response",
+    respostaPadraoPlaceholder:
+      "E.g., We offer innovative data analysis solutions.",
+    solicitacaoEmail: "Email Request Message",
+    solicitacaoEmailPlaceholder:
+      "E.g., Before we say goodbye, may I send more details by email? What is your email?",
+    mensagemEncerramento: "Closing Message",
+    mensagemEncerramentoPlaceholder:
+      "E.g., Thank you for contacting us! We're here to help.",
+    listaProdutos: "Products/Services List",
+    listaProdutosPlaceholder:
+      "E.g., - Interactive Dashboards\n- Virtual Assistance with AI\n- Integrated Solutions",
+    salvar: "Save Configuration",
+    logout: "Logout",
+    languageLabel: "Language",
+    successMessage: "Configuration saved successfully!",
+    logoFormatError: "Only PNG or JPEG files are accepted.",
+    envSectionTitle: "Environment Variables Configuration",
+    instrucoesPersonalizadas: "Personalized Instructions",
+    regrasResposta: "Response Rules",
+    regrasRespostaPlaceholder:
+      "Enter the response rules for the virtual assistant",
+    linkCalendly: "Calendly Link",
+    linkCalendlyPlaceholder: "Paste your Calendly link here",
+    linkSite: "Website Link",
+    linkSitePlaceholder: "Paste your website link here",
+    exemplosAtendimento: "Q&A Examples",
+    exemplosAtendimentoPlaceholder:
+      "Enter examples of questions and answers for service",
   },
 };
 
@@ -175,21 +249,21 @@ function ConfigEmpresa({ user }) {
   });
 
   const envExplanationsTexts = {
-    verifyToken: "Token utilizado para verificar a autenticidade das requisições, garantindo a segurança da integração.",
-    whatsappApiToken: "Token da API do WhatsApp, necessário para autenticar as requisições à API do WhatsApp Business.",
-    openaiApiKey: "Chave de API da OpenAI que permite acessar os serviços de inteligência artificial.",
-    mongoUri: "URI de conexão do banco de dados MongoDB, utilizada para conectar a aplicação ao banco de dados.",
-    phoneNumberId: "Identificador do número de telefone configurado para o WhatsApp Business.",
-    emailUser: "Endereço de e‑mail usado para envio de notificações automáticas.",
-    emailPass: "Senha associada ao e‑mail definido em EMAIL_USER, para autenticação no serviço de e‑mail.",
-    emailGestor: "E‑mail do gestor da aplicação, que receberá notificações e relatórios.",
+    verifyToken: "Token used to verify the authenticity of requests, ensuring integration security.",
+    whatsappApiToken: "WhatsApp API token, needed to authenticate requests to the WhatsApp Business API.",
+    openaiApiKey: "OpenAI API key to access artificial intelligence services.",
+    mongoUri: "MongoDB connection URI used to connect the application to the database.",
+    phoneNumberId: "Identifier for the WhatsApp Business phone number.",
+    emailUser: "Email address used to send automated notifications.",
+    emailPass: "Password associated with EMAIL_USER for email authentication.",
+    emailGestor: "Email of the application manager who will receive notifications and reports.",
   };
 
   const instExplanationsTexts = {
-    regrasResposta: "Defina as diretrizes de como a assistente deve responder, incluindo regras de finalização e comportamento assertivo.",
-    linkCalendly: "URL utilizada para agendamentos e reuniões quando o cliente solicitar valores ou atendimento humano.",
-    linkSite: "URL do site da empresa, utilizada para direcionar clientes a depoimentos ou trabalhos anteriores.",
-    exemplosAtendimento: "Forneça exemplos de perguntas e respostas comuns, para personalizar o atendimento e agilizar o fluxo de conversação.",
+    regrasResposta: "Define the rules for how the assistant should respond, including closing rules and assertive behavior.",
+    linkCalendly: "URL for scheduling meetings when the customer requests pricing or human assistance.",
+    linkSite: "Company website URL used to direct customers to testimonials or previous work.",
+    exemplosAtendimento: "Provide common Q&A examples to personalize service and streamline communication.",
   };
 
   // Funções para alternar os tooltips
@@ -323,6 +397,7 @@ function ConfigEmpresa({ user }) {
         if (!value.trim())
           error = language === 'pt' ? 'Lista de Produtos/Serviços é obrigatória.' : 'Products/Services List is required.';
         break;
+      // Validação dos campos do .env
       case 'verifyToken':
       case 'whatsappApiToken':
       case 'openaiApiKey':
@@ -334,6 +409,7 @@ function ConfigEmpresa({ user }) {
         if (!value.trim())
           error = language === 'pt' ? `${name.toUpperCase()} é obrigatório.` : `${name.toUpperCase()} is required.`;
         break;
+      // Validação dos novos campos de Instruções Personalizadas
       case 'regrasResposta':
         if (!value.trim())
           error = language === 'pt' ? 'Regras de Resposta são obrigatórias.' : 'Response rules are required.';
@@ -496,7 +572,7 @@ function ConfigEmpresa({ user }) {
                 color: '#5de5d9',
               }}
             >
-              Configuração salva com sucesso!
+              {t.successMessage}
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -507,7 +583,9 @@ function ConfigEmpresa({ user }) {
                 </h3>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
                   <div style={{ flex: '1 1 300px' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#272631' }}>{t.nomeEmpresa}</label>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#272631' }}>
+                      {t.nomeEmpresa}
+                    </label>
                     <input
                       type="text"
                       name="nome"
@@ -764,7 +842,9 @@ function ConfigEmpresa({ user }) {
                       />
                       {errors[field.name] && <span style={errorStyle}>{errors[field.name]}</span>}
                       {envExplanations[field.name] && (
-                        <span style={explanationTextStyle}>{envExplanationsTexts[field.name]}</span>
+                        <span style={explanationTextStyle}>
+                          {envExplanationsTexts[field.name]}
+                        </span>
                       )}
                     </div>
                   ))}
