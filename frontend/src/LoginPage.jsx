@@ -84,7 +84,7 @@ function LoginPage() {
                 <div className="mt-3 text-center">
                   <p className="small text-muted">
                     Ainda não tem uma conta?{" "}
-                    <a href="register.html" className="text-primary">
+                    <a href="RegisterPage.jsx" className="text-primary">
                       Cadastre-se
                     </a>
                   </p>
