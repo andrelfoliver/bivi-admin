@@ -7,6 +7,7 @@ function LoginPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
 
+  // Lógica de submit do login manual
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -33,16 +34,30 @@ function LoginPage() {
     <>
       <style>
         {`
-          /* Estilos para o layout two-panels */
-          .login-container {
+          /* Wrapper que centraliza tudo vertical/horizontal */
+          .login-wrapper {
             min-height: 100vh;
             display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f2f5; /* cor de fundo suave */
           }
 
-          /* Painel esquerdo (bem-vindo) */
-          .welcome-panel {
-            flex: 1;
-            background-color: #76c6a7; /* Ajuste a cor de fundo como desejar */
+          /* Container principal com 2 painéis (esquerda 40%, direita 60%) */
+          .login-container {
+            width: 900px; /* ajuste conforme desejar */
+            height: 500px; /* ajuste conforme desejar */
+            display: flex;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fff; /* cor de fundo do container */
+          }
+
+          /* Painel esquerdo (40%) */
+          .left-panel {
+            flex: 0 0 40%;
+            background-color: #009688; /* cor de fundo do painel esquerdo */
             color: #fff;
             display: flex;
             flex-direction: column;
@@ -50,31 +65,36 @@ function LoginPage() {
             justify-content: center;
             padding: 2rem;
           }
-          .welcome-panel h2 {
-            font-size: 2rem;
+          .left-panel img {
+            height: 60px;
             margin-bottom: 1rem;
           }
-          .welcome-panel p {
+          .left-panel h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+          }
+          .left-panel p {
             font-size: 1rem;
-            max-width: 300px;
+            max-width: 250px;
             text-align: center;
             line-height: 1.5;
           }
 
-          /* Painel direito (formulário) */
-          .form-panel {
-            flex: 1;
-            background-color: #f8f9fa; /* Cor neutra do Bootstrap */
+          /* Painel direito (60%) */
+          .right-panel {
+            flex: 0 0 60%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             padding: 2rem;
           }
-
-          /* Ajustes do card */
-          .card {
-            max-width: 400px;
+          .right-panel .card {
+            max-width: 350px;
             margin: 0 auto;
+            border: none;
+          }
+          .right-panel .card-body {
+            padding: 0;
           }
 
           /* Botão Entrar */
@@ -91,119 +111,112 @@ function LoginPage() {
           .btn-entrar:hover {
             background-color: #4cc9c0;
           }
+
+          /* Botão Google */
           .btn-google {
             margin-top: 1rem;
           }
 
-          /* Rodapé com cor personalizada */
+          /* Rodapé customizado */
           .custom-footer {
             background-color: #4cc9c0;
-            color: white;
+            color: #fff;
             text-align: center;
             padding: 1rem;
           }
 
+          /* Responsivo */
           @media (max-width: 768px) {
             .login-container {
+              width: 95%;
+              height: auto;
               flex-direction: column;
             }
-            .welcome-panel, .form-panel {
+            .left-panel, .right-panel {
               flex: unset;
               width: 100%;
-            }
-            .welcome-panel {
-              order: 2;
-            }
-            .form-panel {
-              order: 1;
+              height: auto;
             }
           }
         `}
       </style>
 
-      {/* Cabeçalho */}
-      <header className="bg-dark text-white py-3">
-        <div className="container d-flex align-items-center justify-content-between">
-          <div className="d-flex align-items-center">
-            <img src="logo.png" alt="BiVisualizer Logo" style={{ height: '60px' }} />
-            <h1 className="ms-3 h4 mb-0">BiVisualizer</h1>
+      {/* Não temos mais a barra preta no topo, removemos o header. */}
+      
+      {/* Área principal de login */}
+      <div className="login-wrapper">
+        <div className="login-container">
+          {/* Painel esquerdo (40%) */}
+          <div className="left-panel">
+            <img src="logo.png" alt="BiVisualizer Logo" />
+            <h2>Bem-vindo de volta!</h2>
+            <p>Para se manter conectado, faça login com suas informações pessoais.</p>
           </div>
-        </div>
-      </header>
 
-      {/* Conteúdo Principal em dois painéis */}
-      <div className="login-container">
-        {/* Painel esquerdo */}
-        <div className="welcome-panel">
-          <h2>Bem-vindo de volta!</h2>
-          <p>Para se manter conectado, faça login com suas informações pessoais</p>
-        </div>
-
-        {/* Painel direito - Formulário */}
-        <div className="form-panel">
-          <div className="card shadow">
-            <div className="card-body">
-              <p className="text-center text-muted mb-4">
-                Faça login para continuar
-              </p>
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label htmlFor="username" className="form-label">
-                    Usuário (E-mail)
-                  </label>
-                  <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    className="form-control"
-                    placeholder="Digite seu usuário"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                  />
+          {/* Painel direito (60%) */}
+          <div className="right-panel">
+            <div className="card shadow">
+              <div className="card-body">
+                <p className="text-center text-muted mb-4">Faça login para continuar</p>
+                <form onSubmit={handleSubmit}>
+                  <div className="mb-3">
+                    <label htmlFor="username" className="form-label">
+                      Usuário (E-mail)
+                    </label>
+                    <input
+                      type="text"
+                      id="username"
+                      name="username"
+                      className="form-control"
+                      placeholder="Digite seu usuário"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="password" className="form-label">
+                      Senha
+                    </label>
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      className="form-control"
+                      placeholder="Digite sua senha"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <button type="submit" className="btn-entrar">
+                    Entrar
+                  </button>
+                  {errorMsg && (
+                    <p className="text-danger text-center mt-3">{errorMsg}</p>
+                  )}
+                </form>
+                <div className="mt-3 text-center">
+                  <p className="small text-muted">
+                    Ainda não tem uma conta?{' '}
+                    <a href="/register" className="text-primary">
+                      Cadastre-se
+                    </a>
+                  </p>
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="password" className="form-label">
-                    Senha
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    className="form-control"
-                    placeholder="Digite sua senha"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <button type="submit" className="btn-entrar">
-                  Entrar
-                </button>
-                {errorMsg && (
-                  <p className="text-danger text-center mt-3">{errorMsg}</p>
-                )}
-              </form>
-              <div className="mt-3 text-center">
-                <p className="small text-muted">
-                  Ainda não tem uma conta?{' '}
-                  <a href="/register" className="text-primary">
-                    Cadastre-se
+                <hr />
+                <div className="text-center">
+                  <a href="/auth/google" className="btn btn-outline-danger w-100 btn-google">
+                    <i className="bi bi-google me-2"></i> Entrar com Google
                   </a>
-                </p>
-              </div>
-              <hr />
-              <div className="text-center">
-                <a href="/auth/google" className="btn btn-outline-danger w-100 btn-google">
-                  <i className="bi bi-google me-2"></i> Entrar com Google
-                </a>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Rodapé */}
+      {/* Rodapé personalizado */}
       <footer className="custom-footer">
         &copy; 2025 BiVisualizer. Todos os direitos reservados.
       </footer>
