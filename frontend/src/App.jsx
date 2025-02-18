@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom';
 import LoginPage from './LoginPage';
 import ConfigEmpresa from './ConfigEmpresa';
+import RegisterPage from './RegisterPage';
 
 function AppContent() {
   const [user, setUser] = useState(null);
@@ -36,13 +37,10 @@ function AppContent() {
     checkUser();
   }, [location]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route
         path="/"
         element={user ? <ConfigEmpresa user={user} /> : <Navigate to="/login" replace />}
