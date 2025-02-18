@@ -1,20 +1,39 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function LoginPage() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aqui você implementa sua lógica de autenticação, e após o sucesso, redireciona:
-    // navigate('/');
+    setErrorMsg('');
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        // Usamos "email" no corpo para conciliar com o campo usado no backend
+        body: JSON.stringify({ email: username, password }),
+      });
+      if (response.ok) {
+        // Se o login manual for bem-sucedido, redireciona para a página principal (ConfigEmpresa)
+        navigate('/');
+      } else {
+        const data = await response.json();
+        setErrorMsg(data.error || 'Usuário ou senha inválidos!');
+      }
+    } catch (error) {
+      setErrorMsg('Erro de conexão. Tente novamente.');
+    }
   };
 
   return (
     <>
       <style>
         {`
-          /* Estilo do botão "Entrar" */
           .btn-entrar {
             background-color: #5de5d9;
             color: #fff;
@@ -30,7 +49,6 @@ function LoginPage() {
           }
         `}
       </style>
-
       <div className="d-flex flex-column min-vh-100">
         {/* Cabeçalho */}
         <header className="bg-dark text-white py-3">
@@ -48,7 +66,7 @@ function LoginPage() {
             <div className="card shadow">
               <div className="card-body">
                 <p className="text-center text-muted mb-4">Faça login para continuar</p>
-                <form id="loginForm" onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit}>
                   <div className="mb-3">
                     <label htmlFor="username" className="form-label">Usuário</label>
                     <input
@@ -57,6 +75,8 @@ function LoginPage() {
                       name="username"
                       className="form-control"
                       placeholder="Digite seu usuário"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       required
                     />
                   </div>
@@ -68,18 +88,20 @@ function LoginPage() {
                       name="password"
                       className="form-control"
                       placeholder="Digite sua senha"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       required
                     />
                   </div>
                   <button type="submit" className="btn-entrar">Entrar</button>
-                  <p id="errorMessage" className="text-danger text-center mt-3 d-none">
-                    Usuário ou senha inválidos!
-                  </p>
+                  {errorMsg && (
+                    <p className="text-danger text-center mt-3">{errorMsg}</p>
+                  )}
                 </form>
                 <div className="mt-3 text-center">
                   <p className="small text-muted">
                     Ainda não tem uma conta?{' '}
-                    <Link to="/register" className="text-primary">Cadastre-se</Link>
+                    <a href="/register" className="text-primary">Cadastre-se</a>
                   </p>
                 </div>
                 <hr />
@@ -94,7 +116,7 @@ function LoginPage() {
         </main>
 
         {/* Rodapé */}
-        <footer className="text-white text-center py-3" style={{ backgroundColor: "#4cc9c0" }}>
+        <footer className="bg-primary text-white text-center py-3">
           &copy; 2025 BiVisualizer. Todos os direitos reservados.
         </footer>
       </div>
