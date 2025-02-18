@@ -302,21 +302,28 @@ function ConfigEmpresa({ user }) {
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value, type, files } = e.target;
+  const handleChange = async (e) => {
+    const { name, type, files } = e.target;
     if (type === 'file') {
       const file = files[0];
       if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
-        setEmpresa({ ...empresa, [name]: file });
-        setErrors((prev) => ({ ...prev, logo: '' }));
+        // Ler o arquivo como base64
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          // reader.result será algo como 'data:image/png;base64,iVBORw0K...'
+          setEmpresa(prev => ({ ...prev, [name]: reader.result }));
+        };
+        reader.readAsDataURL(file);
       } else {
-        setErrors((prev) => ({ ...prev, logo: t.logoFormatError }));
-        setEmpresa({ ...empresa, [name]: null });
+        setErrors(prev => ({ ...prev, logo: t.logoFormatError }));
+        setEmpresa(prev => ({ ...prev, [name]: '' }));
       }
     } else {
-      setEmpresa({ ...empresa, [name]: value });
+      // Para outros tipos (text, color etc.)
+      setEmpresa(prev => ({ ...prev, [name]: e.target.value }));
     }
   };
+  
 
   const handleDrop = (e) => {
     e.preventDefault();
