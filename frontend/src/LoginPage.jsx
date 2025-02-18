@@ -15,7 +15,7 @@ function LoginPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        // Usamos "email" no corpo para conciliar com o campo usado no backend
+        // Ussamos "email" no corpo para conciliar com o campo usado no backend
         body: JSON.stringify({ email: username, password }),
       });
       if (response.ok) {
