@@ -185,36 +185,38 @@ function ConfigEmpresa({ user }) {
     border: 'none',
     cursor: 'pointer'
   };
-
+// 1) Definir o objeto inicial do estado (inicialState) para facilitar o reset
+const initialState = {
+  nome: "",
+  apiKey: "",
+  telefone: "",
+  email: "",
+  saudacao: "",
+  logo: null, // se você estiver usando base64, lembre de salvar como ""
+  primaryColor: "#5de5d9",
+  secondaryColor: "#272631",
+  backgroundColor: "#f5fafd",
+  saudacaoInicial: "",
+  respostaPadrao: "",
+  solicitacaoEmail: "",
+  mensagemEncerramento: "",
+  listaProdutos: "",
+  verifyToken: "",
+  whatsappApiToken: "",
+  openaiApiKey: "",
+  mongoUri: "",
+  phoneNumberId: "",
+  emailUser: "",
+  emailPass: "",
+  emailGestor: "",
+  regrasResposta: "",
+  linkCalendly: "",
+  linkSite: "",
+  exemplosAtendimento: "",
+};
   // Estado para armazenar as configurações da empresa
-  const [empresa, setEmpresa] = useState({
-    nome: '',
-    apiKey: '',
-    telefone: '',
-    email: '',
-    saudacao: '',
-    logo: null,
-    primaryColor: '#5de5d9',
-    secondaryColor: '#272631',
-    backgroundColor: '#f5fafd',
-    saudacaoInicial: '',
-    respostaPadrao: '',
-    solicitacaoEmail: '',
-    mensagemEncerramento: '',
-    listaProdutos: '',
-    verifyToken: '',
-    whatsappApiToken: '',
-    openaiApiKey: '',
-    mongoUri: '',
-    phoneNumberId: '',
-    emailUser: '',
-    emailPass: '',
-    emailGestor: '',
-    regrasResposta: '',
-    linkCalendly: '',
-    linkSite: '',
-    exemplosAtendimento: '',
-  });
+  const [empresa, setEmpresa] = useState(initialState);
+    
 
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
@@ -278,27 +280,37 @@ function ConfigEmpresa({ user }) {
     e.preventDefault();
     console.log("handleSubmit acionado");
     console.log("Dados da empresa a serem enviados:", empresa);
-
+  
     try {
-      const response = await fetch('/register-company', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/register-company", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(empresa),
       });
       console.log("Status da resposta:", response.status);
       const data = await response.json();
       console.log("Resposta do servidor:", data);
-
+  
       if (!response.ok) {
         setSubmitError(data.error || "Erro ao salvar configuração.");
+        setSuccess(false);
       } else {
+        // 3a) Exibe a mensagem de sucesso
         setSuccess(true);
         setSubmitError(null);
-        setTimeout(() => setSuccess(false), 3000);
+  
+        // 3b) Limpa o estado (formulário), voltando para o initialState
+        setEmpresa(initialState);
+  
+        // 3c) Se quiser fechar a mensagem após alguns segundos
+        setTimeout(() => {
+          setSuccess(false);
+        }, 3000);
       }
     } catch (error) {
       console.error("Erro ao enviar dados:", error);
       setSubmitError("Erro ao enviar dados: " + error.message);
+      setSuccess(false);
     }
   };
 
