@@ -6,8 +6,7 @@ function LoginPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Implemente a lógica de autenticação aqui, se necessário.
-    // Por exemplo, você pode redirecionar para a página principal após a autenticação:
+    // Aqui você implementa sua lógica de autenticação, e após o sucesso, redireciona:
     // navigate('/');
   };
 
@@ -15,6 +14,7 @@ function LoginPage() {
     <>
       <style>
         {`
+          /* Estilo do botão "Entrar" */
           .btn-entrar {
             background-color: #5de5d9;
             color: #fff;
@@ -79,9 +79,7 @@ function LoginPage() {
                 <div className="mt-3 text-center">
                   <p className="small text-muted">
                     Ainda não tem uma conta?{' '}
-                    <Link to="/register" className="text-primary">
-                      Cadastre-se
-                    </Link>
+                    <Link to="/register" className="text-primary">Cadastre-se</Link>
                   </p>
                 </div>
                 <hr />
