@@ -58,7 +58,7 @@ function LoginPage() {
           /* Painel esquerdo (40%) */
           .left-panel {
             flex: 0 0 40%;
-            background-color: #009688; /* cor do painel esquerdo */
+            background-color: #000000; /* cor do painel esquerdo */
             color: #fff;
             display: flex;
             flex-direction: column;
@@ -163,7 +163,7 @@ function LoginPage() {
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
                   <label htmlFor="username" className="form-label">
-                    Usuário (E-mail)
+                    Usuário
                   </label>
                   <input
                     type="text"
