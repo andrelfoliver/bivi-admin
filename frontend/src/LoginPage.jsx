@@ -14,13 +14,12 @@ function LoginPage() {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        // Ussamos "email" no corpo para conciliar com o campo usado no backend
+        credentials: 'include', // importante para enviar/receber cookies
         body: JSON.stringify({ email: username, password }),
       });
       if (response.ok) {
-        // Se o login manual for bem-sucedido, redireciona para a página principal (ConfigEmpresa)
-        navigate('/');
+        // Força o recarregamento da página para atualizar a sessão e obter os dados corretos do usuário
+        window.location.href = '/';
       } else {
         const data = await response.json();
         setErrorMsg(data.error || 'Usuário ou senha inválidos!');
@@ -29,6 +28,7 @@ function LoginPage() {
       setErrorMsg('Erro de conexão. Tente novamente.');
     }
   };
+ 
 
   return (
     <>
