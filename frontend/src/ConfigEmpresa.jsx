@@ -2,9 +2,7 @@ import React, { useState, useRef } from 'react';
 
 // Função para calcular a distância de Levenshtein entre duas strings
 function levenshteinDistance(a, b) {
-  const dp = Array(a.length + 1)
-    .fill(null)
-    .map(() => Array(b.length + 1).fill(null));
+  const dp = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(null));
   for (let i = 0; i <= a.length; i++) dp[i][0] = i;
   for (let j = 0; j <= b.length; j++) dp[0][j] = j;
   for (let i = 1; i <= a.length; i++) {
@@ -22,13 +20,7 @@ function levenshteinDistance(a, b) {
 
 // Sugere um domínio próximo se a distância for pequena
 function getClosestDomain(typedDomain) {
-  const popularDomains = [
-    "gmail.com",
-    "yahoo.com",
-    "outlook.com",
-    "hotmail.com",
-    "icloud.com",
-  ];
+  const popularDomains = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "icloud.com"];
   let closest = null;
   let minDistance = Infinity;
   popularDomains.forEach((domain) => {
@@ -72,8 +64,7 @@ const translations = {
     mensagemEncerramento: "Mensagem de Encerramento",
     mensagemEncerramentoPlaceholder: "Ex.: Obrigado pelo contato! Estamos à disposição.",
     listaProdutos: "Lista de Produtos/Serviços",
-    listaProdutosPlaceholder:
-      "Ex.: - Dashboards Interativos\n- Atendimento Virtual com IA\n- Soluções Integradas",
+    listaProdutosPlaceholder: "Ex.: - Dashboards Interativos\n- Atendimento Virtual com IA\n- Soluções Integradas",
     salvar: "Salvar Configuração",
     logout: "Sair",
     languageLabel: "Idioma",
@@ -120,8 +111,7 @@ const translations = {
     mensagemEncerramento: "Closing Message",
     mensagemEncerramentoPlaceholder: "E.g.: Thank you for contacting us! We're here to help.",
     listaProdutos: "Products/Services List",
-    listaProdutosPlaceholder:
-      "E.g.: - Interactive Dashboards\n- Virtual Assistance with AI\n- Integrated Solutions",
+    listaProdutosPlaceholder: "E.g.: - Interactive Dashboards\n- Virtual Assistance with AI\n- Integrated Solutions",
     salvar: "Save Configuration",
     logout: "Logout",
     languageLabel: "Language",
@@ -140,22 +130,20 @@ const translations = {
   },
 };
 
-function ConfigEmpresa() {
+function ConfigEmpresa({ user }) {
   console.log("ConfigEmpresa renderizado!");
   const [language, setLanguage] = useState('pt');
   const t = translations[language];
 
-  // Estilos
+  // Estilos para inputs, labels, etc.
   const inputStyle = {
     width: '100%',
     padding: '0.75rem',
     border: '1px solid #ccc',
     borderRadius: '4px',
   };
-
   const labelStyle = { display: 'block', marginBottom: '0.5rem', color: '#272631' };
   const errorStyle = { color: 'red', fontSize: '0.875rem', marginTop: '0.25rem' };
-
   const dropZoneStyle = {
     border: '2px dashed #ccc',
     borderRadius: '4px',
@@ -164,14 +152,12 @@ function ConfigEmpresa() {
     cursor: 'pointer',
     position: 'relative',
   };
-
   const explanationIconStyle = {
     marginLeft: '8px',
     color: '#007bff',
     cursor: 'pointer',
     fontWeight: 'bold',
   };
-
   const explanationTextStyle = {
     display: 'block',
     fontSize: '0.8rem',
@@ -182,7 +168,25 @@ function ConfigEmpresa() {
     borderRadius: '4px',
   };
 
-  // Estado para as configurações da empresa
+  // Estilo do botão "Salvar Configuração" com hover
+  const [isButtonHovered, setIsButtonHovered] = useState(false);
+  const btnStyle = {
+    display: 'block',
+    width: '100%',
+    textAlign: 'center',
+    padding: '1rem',
+    margin: '0.5rem 0',
+    borderRadius: '6px',
+    fontWeight: 'bold',
+    textDecoration: 'none',
+    transition: 'background-color 0.3s',
+    backgroundColor: isButtonHovered ? '#4cc9c0' : '#5de5d9',
+    color: 'white',
+    border: 'none',
+    cursor: 'pointer'
+  };
+
+  // Estado para armazenar as configurações da empresa
   const [empresa, setEmpresa] = useState({
     nome: '',
     apiKey: '',
@@ -228,7 +232,6 @@ function ConfigEmpresa() {
     emailPass: false,
     emailGestor: false,
   });
-
   const [instExplanations, setInstExplanations] = useState({
     regrasResposta: false,
     linkCalendly: false,
@@ -237,33 +240,21 @@ function ConfigEmpresa() {
   });
 
   const envExplanationsTexts = {
-    verifyToken:
-      "Token utilizado para verificar a autenticidade das requisições, garantindo a segurança da integração.",
-    whatsappApiToken:
-      "Token da API do WhatsApp, necessário para autenticar as requisições à API do WhatsApp Business.",
-    openaiApiKey:
-      "Chave de API da OpenAI que permite acessar os serviços de inteligência artificial.",
-    mongoUri:
-      "URI de conexão do banco de dados MongoDB, utilizada para conectar a aplicação ao banco de dados.",
-    phoneNumberId:
-      "Identificador do número de telefone configurado para o WhatsApp Business.",
-    emailUser:
-      "Endereço de e‑mail usado para envio de notificações automáticas.",
-    emailPass:
-      "Senha associada ao e‑mail definido em EMAIL_USER, para autenticação no serviço de e‑mail.",
-    emailGestor:
-      "E‑mail do gestor da aplicação, que receberá notificações e relatórios.",
+    verifyToken: "Token utilizado para verificar a autenticidade das requisições, garantindo a segurança da integração.",
+    whatsappApiToken: "Token da API do WhatsApp, necessário para autenticar as requisições à API do WhatsApp Business.",
+    openaiApiKey: "Chave de API da OpenAI que permite acessar os serviços de inteligência artificial.",
+    mongoUri: "URI de conexão do banco de dados MongoDB, utilizada para conectar a aplicação ao banco de dados.",
+    phoneNumberId: "Identificador do número de telefone configurado para o WhatsApp Business.",
+    emailUser: "Endereço de e‑mail usado para envio de notificações automáticas.",
+    emailPass: "Senha associada ao e‑mail definido em EMAIL_USER, para autenticação no serviço de e‑mail.",
+    emailGestor: "E‑mail do gestor da aplicação, que receberá notificações e relatórios.",
   };
 
   const instExplanationsTexts = {
-    regrasResposta:
-      "Defina as diretrizes de como a assistente deve responder, incluindo regras de finalização e comportamento assertivo.",
-    linkCalendly:
-      "URL utilizada para agendamentos e reuniões quando o cliente solicitar valores ou atendimento humano.",
-    linkSite:
-      "URL do site da empresa, utilizada para direcionar clientes a depoimentos ou trabalhos anteriores.",
-    exemplosAtendimento:
-      "Forneça exemplos de perguntas e respostas comuns, para personalizar o atendimento e agilizar o fluxo de conversação.",
+    regrasResposta: "Defina as diretrizes de como a assistente deve responder, incluindo regras de finalização e comportamento assertivo.",
+    linkCalendly: "URL utilizada para agendamentos e reuniões quando o cliente solicitar valores ou atendimento humano.",
+    linkSite: "URL do site da empresa, utilizada para direcionar clientes a depoimentos ou trabalhos anteriores.",
+    exemplosAtendimento: "Forneça exemplos de perguntas e respostas comuns, para personalizar o atendimento e agilizar o fluxo de conversação.",
   };
 
   const toggleEnvExplanation = (field) => {
@@ -297,7 +288,7 @@ function ConfigEmpresa() {
       console.log("Status da resposta:", response.status);
       const data = await response.json();
       console.log("Resposta do servidor:", data);
-      
+
       if (!response.ok) {
         setSubmitError(data.error || "Erro ao salvar configuração.");
       } else {
@@ -531,51 +522,27 @@ function ConfigEmpresa() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       {/* Header */}
-      <header
-        style={{
-          backgroundColor: '#272631',
-          color: 'white',
-          padding: '1rem 2rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
+      <header style={{ backgroundColor: '#272631', color: 'white', padding: '1rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <img src="logo.png" alt="BiVisualizer Logo" style={{ height: '60px' }} />
-          <h1 style={{ marginLeft: '1rem', fontSize: '1.5rem', fontWeight: 'bold' }}>
-            BiVisualizer
-          </h1>
+          <h1 style={{ marginLeft: '1rem', fontSize: '1.5rem', fontWeight: 'bold' }}>BiVisualizer</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
+          {/** Exibe informações do usuário se disponíveis */}
+          {user && (
+            <div style={{ display: 'flex', alignItems: 'center', marginRight: '1rem' }}>
+              {user.picture && (
+                <img src={user.picture} alt={user.name} style={{ height: '40px', width: '40px', borderRadius: '50%', marginRight: '8px' }} />
+              )}
+              <span>{user.name}</span>
+            </div>
+          )}
           <label style={{ marginRight: '0.5rem' }}>{t.languageLabel}:</label>
-          <select
-            style={{
-              padding: '0.5rem',
-              borderRadius: '4px',
-              border: '1px solid #ccc',
-              backgroundColor: '#fff',
-              color: '#333',
-              marginRight: '0.5rem',
-            }}
-            value={language}
-            onChange={handleLanguageChange}
-          >
+          <select style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', backgroundColor: '#fff', color: '#333', marginRight: '0.5rem' }} value={language} onChange={handleLanguageChange}>
             <option value="pt">Português</option>
             <option value="en">English</option>
           </select>
-          <button
-            style={{
-              backgroundColor: '#e3342f',
-              border: 'none',
-              padding: '0.5rem 1rem',
-              borderRadius: '4px',
-              color: 'white',
-              cursor: 'pointer',
-              marginLeft: '1rem',
-            }}
-            onClick={handleLogout}
-          >
+          <button style={{ backgroundColor: '#e3342f', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', color: 'white', cursor: 'pointer', marginLeft: '1rem' }} onClick={handleLogout}>
             {t.logout}
           </button>
         </div>
@@ -583,51 +550,17 @@ function ConfigEmpresa() {
 
       {/* Conteúdo Principal */}
       <main style={{ flexGrow: 1, backgroundColor: '#f5fafd', padding: '2rem' }}>
-        <div
-          style={{
-            maxWidth: '800px',
-            margin: '0 auto',
-            backgroundColor: '#ffffff',
-            padding: '2rem',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          }}
-        >
-          <h2
-            style={{
-              fontSize: '2.5rem',
-              fontWeight: 'bold',
-              marginBottom: '1rem',
-              textAlign: 'center',
-              color: '#272631',
-            }}
-          >
+        <div style={{ maxWidth: '800px', margin: '0 auto', backgroundColor: '#ffffff', padding: '2rem', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}>
+          <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1rem', textAlign: 'center', color: '#272631' }}>
             {t.pageTitle}
           </h2>
           {success && (
-            <div
-              style={{
-                backgroundColor: '#5de5d9',
-                color: 'white',
-                textAlign: 'center',
-                padding: '1rem',
-                borderRadius: '6px',
-                marginBottom: '1rem',
-              }}
-            >
+            <div style={{ backgroundColor: '#5de5d9', color: 'white', textAlign: 'center', padding: '1rem', borderRadius: '6px', marginBottom: '1rem' }}>
               {t.successMessage}
             </div>
           )}
           {submitError && (
-            <div
-              style={{
-                backgroundColor: '#f8d7da',
-                color: '#842029',
-                padding: '1rem',
-                borderRadius: '4px',
-                marginBottom: '1rem',
-              }}
-            >
+            <div style={{ backgroundColor: '#f8d7da', color: '#842029', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
               {submitError}
             </div>
           )}
@@ -639,9 +572,7 @@ function ConfigEmpresa() {
               </h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
                 <div style={{ flex: '1 1 300px' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', color: '#272631' }}>
-                    {t.nomeEmpresa}
-                  </label>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', color: '#272631' }}>{t.nomeEmpresa}</label>
                   <input
                     type="text"
                     name="nome"
@@ -721,53 +652,23 @@ function ConfigEmpresa() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
                 <div style={{ flex: '1 1 100%' }}>
                   <label style={labelStyle}>{t.logotipo}</label>
-                  <div
-                    style={dropZoneStyle}
-                    onDrop={handleDrop}
-                    onDragOver={handleDragOver}
-                    onClick={() => logoInputRef.current && logoInputRef.current.click()}
-                  >
+                  <div style={dropZoneStyle} onDrop={handleDrop} onDragOver={handleDragOver} onClick={() => logoInputRef.current && logoInputRef.current.click()}>
                     <p>{t.logoDropZone}</p>
-                    <input
-                      type="file"
-                      name="logo"
-                      accept="image/png, image/jpeg"
-                      onChange={handleChange}
-                      ref={logoInputRef}
-                      style={{ display: 'none' }}
-                    />
+                    <input type="file" name="logo" accept="image/png, image/jpeg" onChange={handleChange} ref={logoInputRef} style={{ display: 'none' }} />
                   </div>
                   {errors.logo && <span style={errorStyle}>{errors.logo}</span>}
                 </div>
                 <div style={{ flex: '1 1 300px' }}>
                   <label style={labelStyle}>{t.corPrimaria}</label>
-                  <input
-                    type="color"
-                    name="primaryColor"
-                    value={empresa.primaryColor}
-                    onChange={handleChange}
-                    style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }}
-                  />
+                  <input type="color" name="primaryColor" value={empresa.primaryColor} onChange={handleChange} style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }} />
                 </div>
                 <div style={{ flex: '1 1 300px' }}>
                   <label style={labelStyle}>{t.corSecundaria}</label>
-                  <input
-                    type="color"
-                    name="secondaryColor"
-                    value={empresa.secondaryColor}
-                    onChange={handleChange}
-                    style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }}
-                  />
+                  <input type="color" name="secondaryColor" value={empresa.secondaryColor} onChange={handleChange} style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }} />
                 </div>
                 <div style={{ flex: '1 1 300px' }}>
                   <label style={labelStyle}>{t.corFundo}</label>
-                  <input
-                    type="color"
-                    name="backgroundColor"
-                    value={empresa.backgroundColor}
-                    onChange={handleChange}
-                    style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }}
-                  />
+                  <input type="color" name="backgroundColor" value={empresa.backgroundColor} onChange={handleChange} style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }} />
                 </div>
               </div>
             </section>
@@ -780,69 +681,26 @@ function ConfigEmpresa() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
                 <div style={{ flex: '1 1 100%' }}>
                   <label style={labelStyle}>{t.saudacaoInicial}</label>
-                  <textarea
-                    name="saudacaoInicial"
-                    rows="2"
-                    placeholder={t.saudacaoInicialPlaceholder}
-                    value={empresa.saudacaoInicial}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    style={inputStyle}
-                    required
-                  ></textarea>
+                  <textarea name="saudacaoInicial" rows="2" placeholder={t.saudacaoInicialPlaceholder} value={empresa.saudacaoInicial} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required></textarea>
                   {errors.saudacaoInicial && <span style={errorStyle}>{errors.saudacaoInicial}</span>}
                 </div>
                 <div style={{ flex: '1 1 100%' }}>
                   <label style={labelStyle}>{t.respostaPadrao}</label>
-                  <textarea
-                    name="respostaPadrao"
-                    rows="2"
-                    placeholder={t.respostaPadraoPlaceholder}
-                    value={empresa.respostaPadrao}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    style={inputStyle}
-                    required
-                  ></textarea>
+                  <textarea name="respostaPadrao" rows="2" placeholder={t.respostaPadraoPlaceholder} value={empresa.respostaPadrao} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required></textarea>
                   {errors.respostaPadrao && <span style={errorStyle}>{errors.respostaPadrao}</span>}
                 </div>
                 <div style={{ flex: '1 1 100%' }}>
                   <label style={labelStyle}>{t.solicitacaoEmail}</label>
-                  <textarea
-                    name="solicitacaoEmail"
-                    rows="2"
-                    placeholder={t.solicitacaoEmailPlaceholder}
-                    value={empresa.solicitacaoEmail}
-                    onChange={handleChange}
-                    style={inputStyle}
-                  ></textarea>
+                  <textarea name="solicitacaoEmail" rows="2" placeholder={t.solicitacaoEmailPlaceholder} value={empresa.solicitacaoEmail} onChange={handleChange} style={inputStyle}></textarea>
                 </div>
                 <div style={{ flex: '1 1 100%' }}>
                   <label style={labelStyle}>{t.mensagemEncerramento}</label>
-                  <textarea
-                    name="mensagemEncerramento"
-                    rows="2"
-                    placeholder={t.mensagemEncerramentoPlaceholder}
-                    value={empresa.mensagemEncerramento}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    style={inputStyle}
-                    required
-                  ></textarea>
+                  <textarea name="mensagemEncerramento" rows="2" placeholder={t.mensagemEncerramentoPlaceholder} value={empresa.mensagemEncerramento} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required></textarea>
                   {errors.mensagemEncerramento && <span style={errorStyle}>{errors.mensagemEncerramento}</span>}
                 </div>
                 <div style={{ flex: '1 1 100%' }}>
                   <label style={labelStyle}>{t.listaProdutos}</label>
-                  <textarea
-                    name="listaProdutos"
-                    rows="3"
-                    placeholder={t.listaProdutosPlaceholder}
-                    value={empresa.listaProdutos}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    style={{ ...inputStyle, whiteSpace: 'pre-wrap' }}
-                    required
-                  ></textarea>
+                  <textarea name="listaProdutos" rows="3" placeholder={t.listaProdutosPlaceholder} value={empresa.listaProdutos} onChange={handleChange} onBlur={handleBlur} style={{ ...inputStyle, whiteSpace: 'pre-wrap' }} required></textarea>
                   {errors.listaProdutos && <span style={errorStyle}>{errors.listaProdutos}</span>}
                 </div>
               </div>
@@ -867,10 +725,7 @@ function ConfigEmpresa() {
                   <div key={field.name} style={{ flex: '1 1 100%' }}>
                     <label style={labelStyle}>
                       {field.label}
-                      <span
-                        style={explanationIconStyle}
-                        onClick={() => toggleEnvExplanation(field.name)}
-                      >
+                      <span style={explanationIconStyle} onClick={() => toggleEnvExplanation(field.name)}>
                         ?
                       </span>
                     </label>
@@ -902,34 +757,15 @@ function ConfigEmpresa() {
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {[
-                  {
-                    label: t.regrasResposta,
-                    name: 'regrasResposta',
-                    placeholder: t.regrasRespostaPlaceholder,
-                  },
-                  {
-                    label: t.linkCalendly,
-                    name: 'linkCalendly',
-                    placeholder: t.linkCalendlyPlaceholder,
-                  },
-                  {
-                    label: t.linkSite,
-                    name: 'linkSite',
-                    placeholder: t.linkSitePlaceholder,
-                  },
-                  {
-                    label: t.exemplosAtendimento,
-                    name: 'exemplosAtendimento',
-                    placeholder: t.exemplosAtendimentoPlaceholder,
-                  },
+                  { label: t.regrasResposta, name: 'regrasResposta', placeholder: t.regrasRespostaPlaceholder },
+                  { label: t.linkCalendly, name: 'linkCalendly', placeholder: t.linkCalendlyPlaceholder },
+                  { label: t.linkSite, name: 'linkSite', placeholder: t.linkSitePlaceholder },
+                  { label: t.exemplosAtendimento, name: 'exemplosAtendimento', placeholder: t.exemplosAtendimentoPlaceholder },
                 ].map((field) => (
                   <div key={field.name} style={{ flex: '1 1 100%' }}>
                     <label style={labelStyle}>
                       {field.label}
-                      <span
-                        style={explanationIconStyle}
-                        onClick={() => toggleInstExplanation(field.name)}
-                      >
+                      <span style={explanationIconStyle} onClick={() => toggleInstExplanation(field.name)}>
                         ?
                       </span>
                     </label>
@@ -973,12 +809,18 @@ function ConfigEmpresa() {
               </div>
             </section>
 
-            <button type="submit">Salvar Configuração</button>
+            <button
+              type="submit"
+              style={btnStyle}
+              onMouseEnter={() => setIsButtonHovered(true)}
+              onMouseLeave={() => setIsButtonHovered(false)}
+            >
+              {t.salvar}
+            </button>
           </form>
         </div>
       </main>
 
-      {/* Footer */}
       <footer style={{ backgroundColor: '#4cc9c0', color: 'white', textAlign: 'center', padding: '1rem' }}>
         &copy; 2025 BiVisualizer. Todos os direitos reservados.
       </footer>
