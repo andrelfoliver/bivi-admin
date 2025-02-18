@@ -502,6 +502,7 @@ function ConfigEmpresa({ user }) {
           <h1 style={{ marginLeft: '1rem', fontSize: '1.5rem', fontWeight: 'bold' }}>BiVisualizer</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
+          {/*
           <select
             style={{
               padding: '0.5rem',
@@ -517,6 +518,7 @@ function ConfigEmpresa({ user }) {
             <option value="pt">Português</option>
             <option value="en">English</option>
           </select>
+          */}
           {user && (
             <div style={{ display: 'flex', alignItems: 'center', marginRight: '1rem' }}>
               <img

@@ -19,7 +19,6 @@ const companySchema = new mongoose.Schema({
   // Variáveis do .env
   verifyToken: { type: String },
   whatsappApiToken: { type: String },
-  openaiApiKey: { type: String },
   mongoUri: { type: String },
   phoneNumberId: { type: String },
   emailUser: { type: String },
