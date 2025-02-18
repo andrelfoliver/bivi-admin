@@ -520,31 +520,37 @@ function ConfigEmpresa({ user }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {/* Header */}
-      <header style={{ backgroundColor: '#272631', color: 'white', padding: '1rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div>
+      <header
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          backgroundColor: '#272631',
+          padding: '1rem 2rem',
+          color: 'white',
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <img src="logo.png" alt="BiVisualizer Logo" style={{ height: '60px' }} />
           <h1 style={{ marginLeft: '1rem', fontSize: '1.5rem', fontWeight: 'bold' }}>BiVisualizer</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          {/** Exibe informações do usuário se disponíveis */}
           {user && (
             <div style={{ display: 'flex', alignItems: 'center', marginRight: '1rem' }}>
-              {user.picture && (
-                <img src={user.picture} alt={user.name} style={{ height: '40px', width: '40px', borderRadius: '50%', marginRight: '8px' }} />
-              )}
+              <img
+                src={user.picture ? user.picture : '/default-avatar.png'}
+                alt={user.name}
+                style={{
+                  height: '40px',
+                  width: '40px',
+                  borderRadius: '50%',
+                  marginRight: '8px',
+                }}
+              />
               <span>{user.name}</span>
             </div>
           )}
-          <label style={{ marginRight: '0.5rem' }}>{t.languageLabel}:</label>
-          <select style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', backgroundColor: '#fff', color: '#333', marginRight: '0.5rem' }} value={language} onChange={handleLanguageChange}>
-            <option value="pt">Português</option>
-            <option value="en">English</option>
-          </select>
-          <button style={{ backgroundColor: '#e3342f', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', color: 'white', cursor: 'pointer', marginLeft: '1rem' }} onClick={handleLogout}>
-            {t.logout}
-          </button>
         </div>
       </header>
 

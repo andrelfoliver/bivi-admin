@@ -45,7 +45,7 @@ function AppContent() {
       <Route path="/login" element={<LoginPage />} />
       <Route
         path="/"
-        element={user ? <ConfigEmpresa /> : <Navigate to="/login" replace />}
+        element={user ? <ConfigEmpresa user={user} /> : <Navigate to="/login" replace />}
       />
     </Routes>
   );
