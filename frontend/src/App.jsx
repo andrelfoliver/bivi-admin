@@ -36,7 +36,9 @@ function AppContent() {
     }
     checkUser();
   }, [location]);
-
+  if (loading) {
+    return <div>Loading...</div>;
+  }
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
