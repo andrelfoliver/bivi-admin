@@ -158,7 +158,7 @@ function LoginPage() {
 
           {/* Painel direito (60%) */}
           <div className="right-panel">
-            <h2>Faça login para continuar</h2>
+            {/*<h2>Faça login para continuar</h2> */}
             <div className="form-container">
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
