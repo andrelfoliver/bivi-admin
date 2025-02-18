@@ -57,31 +57,47 @@ passport.deserializeUser((id, done) => {
 });
 
 // Configura a estratégia do Google OAuth (permitindo apenas contas Gmail)
+// No seu server.js (ou arquivo onde a GoogleStrategy está configurada)
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "https://app.bivisualizer.com/auth/google/callback"
+      callbackURL: "https://bivi-empresas-28885d192e15.herokuapp.com/auth/google/callback"
     },
     async (accessToken, refreshToken, profile, done) => {
+      // Extraia a URL da foto
+      const picture = profile.photos && profile.photos[0] ? profile.photos[0].value : null;
+
       // Verifica se o e‑mail é do Gmail
       if (!profile.emails[0].value.endsWith('@gmail.com')) {
         return done(null, false, { message: 'Apenas contas Gmail são permitidas.' });
       }
+
       // Procura se o usuário já existe
-      const existingUser = await User.findOne({ googleId: profile.id });
-      if (existingUser) return done(null, existingUser);
+      let existingUser = await User.findOne({ googleId: profile.id });
+      if (existingUser) {
+        // Atualiza o campo 'picture' se necessário
+        if (picture && existingUser.picture !== picture) {
+          existingUser.picture = picture;
+          await existingUser.save();
+        }
+        return done(null, existingUser);
+      }
+
       // Cria um novo usuário se não existir
       const newUser = await new User({
         googleId: profile.id,
         email: profile.emails[0].value,
         name: profile.displayName,
+        picture, // salva a URL da foto
       }).save();
+
       done(null, newUser);
     }
   )
 );
+
 
 // Rota para iniciar a autenticação com o Google
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
