@@ -102,7 +102,6 @@ app.post('/api/auth/register', async (req, res) => {
   if (!username || !email || !password) {
     return res.status(400).send({ error: "Campos obrigatórios não preenchidos." });
   }
-  // Verifica se o usuário já existe para o provider local
   const existingUser = await User.findOne({ email, provider: 'local' });
   if (existingUser) {
     return res.status(400).send({ error: "Usuário já existe." });
@@ -123,6 +122,7 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
+
 // Endpoint para login manual de usuário
 app.post('/api/auth/login', async (req, res, next) => {
   const { email, password } = req.body;
@@ -139,6 +139,7 @@ app.post('/api/auth/login', async (req, res, next) => {
     res.status(500).send({ error: err.message });
   }
 });
+
 
 // Endpoint para verificar se o usuário está autenticado
 app.get('/api/current-user', (req, res) => {
