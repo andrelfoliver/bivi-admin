@@ -83,7 +83,7 @@ Error generating stack: `+t.message+`
           /* Painel esquerdo (bem-vindo) */
           .welcome-panel {
             flex: 1;
-            background-color: #009688; /* Ajuste a cor de fundo como desejar */
+            background-color: #5de5d9; /* Ajuste a cor de fundo como desejar */
             color: #fff;
             display: flex;
             flex-direction: column;
