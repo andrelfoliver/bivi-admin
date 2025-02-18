@@ -116,7 +116,10 @@ function LoginPage() {
         </main>
 
         {/* Rodapé */}
-        <footer className="bg-primary text-white text-center py-3">
+        <footer
+          style={{ backgroundColor: '#4cc9c0' }}
+          className="text-white text-center py-3"
+        >
           &copy; 2025 BiVisualizer. Todos os direitos reservados.
         </footer>
       </div>
