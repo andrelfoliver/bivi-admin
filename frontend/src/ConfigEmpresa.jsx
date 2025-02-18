@@ -408,7 +408,6 @@ function ConfigEmpresa({ user }) {
         if (!value.trim())
           error = language === 'pt' ? 'Lista de Produtos/Serviços é obrigatória.' : 'Products/Services List is required.';
         break;
-      // Validação dos campos do .env
       case 'verifyToken':
       case 'whatsappApiToken':
       case 'openaiApiKey':
@@ -420,7 +419,6 @@ function ConfigEmpresa({ user }) {
         if (!value.trim())
           error = language === 'pt' ? `${name.toUpperCase()} é obrigatório.` : `${name.toUpperCase()} is required.`;
         break;
-      // Validação dos novos campos de Instruções Personalizadas
       case 'regrasResposta':
         if (!value.trim())
           error = language === 'pt' ? 'Regras de Resposta são obrigatórias.' : 'Response rules are required.';
@@ -573,7 +571,7 @@ function ConfigEmpresa({ user }) {
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
-                <Tab eventKey="dadosBasicos" title="Dados Básicos">
+                <Tab eventKey="dadosBasicos" title={t.dadosBasicos}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
                     <div style={{ flex: '1 1 300px' }}>
                       <label style={{ display: 'block', marginBottom: '0.5rem', color: '#272631' }}>
@@ -649,7 +647,7 @@ function ConfigEmpresa({ user }) {
                     </div>
                   </div>
                 </Tab>
-                <Tab eventKey="identidadeVisual" title="Identidade Visual">
+                <Tab eventKey="identidadeVisual" title={t.identidadeVisual}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
                     <div style={{ flex: '1 1 100%' }}>
                       <label style={labelStyle}>{t.logotipo}</label>
@@ -718,7 +716,7 @@ function ConfigEmpresa({ user }) {
                     </div>
                   </div>
                 </Tab>
-                <Tab eventKey="fluxoAtendimento" title="Fluxo de Atendimento">
+                <Tab eventKey="fluxoAtendimento" title={t.configuracaoAtendimento}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
                     <div style={{ flex: '1 1 100%' }}>
                       <label style={labelStyle}>{t.saudacaoInicial}</label>
@@ -789,7 +787,7 @@ function ConfigEmpresa({ user }) {
                     </div>
                   </div>
                 </Tab>
-                <Tab eventKey="envVars" title="Variáveis do Ambiente">
+                <Tab eventKey="envVars" title={t.envSectionTitle}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {[
                       { label: 'VERIFY_TOKEN', name: 'verifyToken' },
@@ -827,7 +825,7 @@ function ConfigEmpresa({ user }) {
                     ))}
                   </div>
                 </Tab>
-                <Tab eventKey="instrucao" title="Instruções Personalizadas">
+                <Tab eventKey="instrucao" title={t.instrucoesPersonalizadas}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {[
                       { label: t.regrasResposta, name: 'regrasResposta', placeholder: t.regrasRespostaPlaceholder },
@@ -880,24 +878,26 @@ function ConfigEmpresa({ user }) {
                       </div>
                     ))}
                   </div>
+                  {/* Botão Salvar Configuração só aparece na última aba */}
+                  <button
+                    type="submit"
+                    style={{
+                      backgroundColor: '#5de5d9',
+                      border: 'none',
+                      padding: '1rem',
+                      borderRadius: '4px',
+                      color: 'white',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.3s',
+                      marginTop: '1rem'
+                    }}
+                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#4cc9c0')}
+                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#5de5d9')}
+                  >
+                    {t.salvar}
+                  </button>
                 </Tab>
               </Tabs>
-              <button
-                type="submit"
-                style={{
-                  backgroundColor: '#5de5d9',
-                  border: 'none',
-                  padding: '1rem',
-                  borderRadius: '4px',
-                  color: 'white',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.3s',
-                }}
-                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#4cc9c0')}
-                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#5de5d9')}
-              >
-                {t.salvar}
-              </button>
             </form>
           )}
           {submitError && (
