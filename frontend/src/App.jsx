@@ -32,9 +32,19 @@ function App() {
         setLoading(false);
       }
     }
-    // Executa a verificação somente uma vez no mount
     checkUser();
   }, []);
+
+  // Função de logout que atualiza o estado e limpa a sessão
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+    } catch (error) {
+      console.error("Erro durante o logout:", error);
+    } finally {
+      setUser(null);
+    }
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -43,24 +53,16 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Se o usuário já estiver autenticado, não mostra a tela de login */}
-        <Route 
-          path="/login" 
-          element={user ? <Navigate to="/config" replace /> : <LoginPage />} 
-        />
+        {/* Se o usuário já estiver autenticado, não exibe a tela de login */}
+        <Route path="/login" element={user ? <Navigate to="/config" replace /> : <LoginPage setUser={setUser} />} />
         <Route path="/register" element={<RegisterPage />} />
-        {/* Acesso à configuração somente se o usuário estiver autenticado */}
+        {/* Rota para a configuração da empresa (apenas se autenticado) */}
         <Route 
           path="/config" 
-          element={user ? <ConfigEmpresa user={user} /> : <Navigate to="/login" replace />} 
+          element={user ? <ConfigEmpresa user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />} 
         />
-        {/* Se o usuário acessar a raiz:
-              - se autenticado, vai para /config;
-              - se não, vai para /login */}
-        <Route 
-          path="/" 
-          element={user ? <Navigate to="/config" replace /> : <Navigate to="/login" replace />} 
-        />
+        {/* Rota raiz redireciona de acordo com a autenticação */}
+        <Route path="/" element={user ? <Navigate to="/config" replace /> : <Navigate to="/login" replace />} />
       </Routes>
     </Router>
   );

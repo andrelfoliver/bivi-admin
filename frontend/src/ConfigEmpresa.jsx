@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Tabs, Tab } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 function levenshteinDistance(a, b) {
   const dp = Array(a.length + 1)
@@ -155,8 +156,9 @@ const translations = {
   },
 };
 
-function ConfigEmpresa({ user }) {
+function ConfigEmpresa({ user, onLogout }) {
   console.log("ConfigEmpresa renderizado!");
+  const navigate = useNavigate();
   const [language, setLanguage] = useState('pt');
   const t = translations[language];
 
@@ -288,7 +290,8 @@ function ConfigEmpresa({ user }) {
       console.error('Erro ao encerrar a sessão:', error);
     } finally {
       localStorage.removeItem('authToken');
-      window.location.href = '/login';
+      onLogout(); // Atualiza o estado global (setUser(null))
+      navigate('/login', { replace: true });
     }
   };
 
