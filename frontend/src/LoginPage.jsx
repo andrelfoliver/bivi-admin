@@ -141,7 +141,7 @@ function LoginPage({ setUser }) {
         <div className="login-container">
           <div className="left-panel">
             <img src="logo.png" alt="BiVisualizer Logo" />
-            <h2>Bem-vindo de volta!</h2>
+            <h2>BiVisualizer</h2>
             <p>Para se manter conectado, faça login com suas informações pessoais.</p>
           </div>
           <div className="right-panel">
