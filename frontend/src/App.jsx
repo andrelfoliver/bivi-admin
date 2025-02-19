@@ -32,10 +32,11 @@ function App() {
         setLoading(false);
       }
     }
+    // Sempre checa o usuário, mas não redireciona automaticamente para a área protegida
     checkUser();
   }, []);
 
-  // Função de logout que atualiza o estado e limpa a sessão
+  // Função de logout que atualiza o estado do usuário
   const handleLogout = async () => {
     try {
       await fetch('/api/logout', { method: 'POST', credentials: 'include' });
@@ -53,16 +54,16 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Se o usuário já estiver autenticado, não exibe a tela de login */}
-        <Route path="/login" element={user ? <Navigate to="/config" replace /> : <LoginPage setUser={setUser} />} />
+        {/* Rota de login SEM redirecionamento automático mesmo se houver sessão ativa */}
+        <Route path="/login" element={<LoginPage setUser={setUser} />} />
         <Route path="/register" element={<RegisterPage />} />
-        {/* Rota para a configuração da empresa (apenas se autenticado) */}
+        {/* Área protegida: só acessível se o usuário estiver autenticado */}
         <Route 
           path="/config" 
           element={user ? <ConfigEmpresa user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />} 
         />
-        {/* Rota raiz redireciona de acordo com a autenticação */}
-        <Route path="/" element={user ? <Navigate to="/config" replace /> : <Navigate to="/login" replace />} />
+        {/* Qualquer acesso à raiz redireciona para /login */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
   );
