@@ -193,6 +193,7 @@ function ConfigEmpresa({ user }) {
     borderRadius: '4px',
   };
 
+  // Estado inicial do formulário
   const initialState = {
     nome: '',
     apiKey: '',
@@ -248,33 +249,21 @@ function ConfigEmpresa({ user }) {
   });
 
   const envExplanationsTexts = {
-    verifyToken:
-      "Token used to verify the authenticity of requests, ensuring integration security.",
-    whatsappApiToken:
-      "WhatsApp API token, needed to authenticate requests to the WhatsApp Business API.",
-    openaiApiKey:
-      "OpenAI API key to access artificial intelligence services.",
-    mongoUri:
-      "MongoDB connection URI used to connect the application to the database.",
-    phoneNumberId:
-      "Identifier for the WhatsApp Business phone number.",
-    emailUser:
-      "Email address used to send automated notifications.",
-    emailPass:
-      "Password associated with EMAIL_USER for email authentication.",
-    emailGestor:
-      "Email of the application manager who will receive notifications and reports.",
+    verifyToken: "Token used to verify the authenticity of requests, ensuring integration security.",
+    whatsappApiToken: "WhatsApp API token, needed to authenticate requests to the WhatsApp Business API.",
+    openaiApiKey: "OpenAI API key to access artificial intelligence services.",
+    mongoUri: "MongoDB connection URI used to connect the application to the database.",
+    phoneNumberId: "Identifier for the WhatsApp Business phone number.",
+    emailUser: "Email address used to send automated notifications.",
+    emailPass: "Password associated with EMAIL_USER for email authentication.",
+    emailGestor: "Email of the application manager who will receive notifications and reports.",
   };
 
   const instExplanationsTexts = {
-    regrasResposta:
-      "Enter the response rules for the virtual assistant.",
-    linkCalendly:
-      "Paste your Calendly link here.",
-    linkSite:
-      "Paste your website link here.",
-    exemplosAtendimento:
-      "Enter examples of questions and answers for service.",
+    regrasResposta: "Enter the response rules for the virtual assistant.",
+    linkCalendly: "Paste your Calendly link here.",
+    linkSite: "Paste your website link here.",
+    exemplosAtendimento: "Enter examples of questions and answers for service.",
   };
 
   const toggleEnvExplanation = (field) => {
@@ -508,7 +497,9 @@ function ConfigEmpresa({ user }) {
       >
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <img src="logo.png" alt="BiVisualizer Logo" style={{ height: '60px' }} />
-          <h1 style={{ marginLeft: '1rem', fontSize: '1.5rem', fontWeight: 'bold' }}>BiVisualizer</h1>
+          <h1 style={{ marginLeft: '1rem', fontSize: '1.5rem', fontWeight: 'bold' }}>
+            BiVisualizer
+          </h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {user && (
@@ -558,18 +549,21 @@ function ConfigEmpresa({ user }) {
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
           }}
         >
-          {/* Título da página */}
-          <h2 style={{ textAlign: 'center', color: '#272631', marginBottom: '1rem' }}>
+          {/* Título da Página */}
+          <h2
+            style={{
+              textAlign: 'center',
+              color: '#272631',
+              marginBottom: '2rem',
+              fontSize: '2rem',
+              fontWeight: 'bold',
+            }}
+          >
             Configuração da Assistente Virtual
           </h2>
+
           {success ? (
-            <div
-              style={{
-                textAlign: 'center',
-                fontSize: '1.5rem',
-                color: '#5de5d9',
-              }}
-            >
+            <div style={{ textAlign: 'center', fontSize: '1.5rem', color: '#5de5d9' }}>
               {t.successMessage}
             </div>
           ) : (
@@ -882,7 +876,7 @@ function ConfigEmpresa({ user }) {
                       </div>
                     ))}
                   </div>
-                  {/* Botão Salvar Configuração só aparece na última aba */}
+                  {/* Botão Salvar Configuração aparece somente na última aba */}
                   <button
                     type="submit"
                     style={{
