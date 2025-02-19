@@ -114,6 +114,24 @@ function LoginPage({ setUser }) {
           .btn-google {
             margin-top: 1rem;
           }
+          /* Divisor estilizado (linha contínua) */
+          .divider {
+            display: flex;
+            align-items: center;
+            margin: 1rem 0;
+          }
+          .divider::before,
+          .divider::after {
+            content: "";
+            flex: 1;
+            border-top: 1px solid #ccc;
+          }
+          .divider:not(:empty)::before {
+            margin-right: 0.5em;
+          }
+          .divider:not(:empty)::after {
+            margin-left: 0.5em;
+          }
           /* Rodapé customizado */
           .custom-footer {
             background-color: #4cc9c0;
@@ -139,11 +157,13 @@ function LoginPage({ setUser }) {
 
       <div className="login-wrapper">
         <div className="login-container">
+          {/* Painel esquerdo */}
           <div className="left-panel">
             <img src="logo.png" alt="BiVisualizer Logo" />
             <h2>BiVisualizer</h2>
             <p>Para se manter conectado, faça login com suas informações pessoais.</p>
           </div>
+          {/* Painel direito */}
           <div className="right-panel">
             <div className="form-container">
               <form onSubmit={handleSubmit}>
@@ -184,10 +204,16 @@ function LoginPage({ setUser }) {
                   <a href="/register" className="text-primary">Cadastre-se</a>
                 </p>
               </div>
-              <hr />
+              {/* Divisor estilizado */}
+              <div className="divider small text-muted">ou</div>
               <div className="text-center">
                 <a href="/auth/google" className="btn btn-outline-danger w-100 btn-google">
-                  <i className="bi bi-google me-2"></i> Entrar com Google
+                  <img
+                    alt="Ícone do Google"
+                    src="https://d2f1ec00givic0.cloudfront.net/fcf2ab3961c65027bd585cc9805340a0103d4e63/assets/google-icon-951d035651ba3683f7b257339c3a48e019476204d863024213245269137e47e4.svg"
+                    style={{ height: '20px', marginRight: '8px', verticalAlign: 'middle' }}
+                  />
+                  Entrar com Google
                 </a>
               </div>
             </div>
