@@ -558,6 +558,10 @@ function ConfigEmpresa({ user }) {
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
           }}
         >
+          {/* Título da página */}
+          <h2 style={{ textAlign: 'center', color: '#272631', marginBottom: '1rem' }}>
+            Configuração da Assistente Virtual
+          </h2>
           {success ? (
             <div
               style={{
