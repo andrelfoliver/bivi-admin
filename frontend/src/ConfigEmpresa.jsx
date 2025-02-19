@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Tabs, Tab } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
+// Função para calcular a distância de Levenshtein entre duas strings
 function levenshteinDistance(a, b) {
   const dp = Array(a.length + 1)
     .fill(null)
@@ -21,6 +22,7 @@ function levenshteinDistance(a, b) {
   return dp[a.length][b.length];
 }
 
+// Sugere um domínio próximo se a distância for pequena
 function getClosestDomain(typedDomain) {
   const popularDomains = [
     "gmail.com",
@@ -252,14 +254,22 @@ function ConfigEmpresa({ user, onLogout }) {
   });
 
   const envExplanationsTexts = {
-    verifyToken: "Token utilizado para verificar a autenticidade das requisições, garantindo a segurança da integração.",
-    whatsappApiToken: "Token da API do WhatsApp, necessário para autenticar as requisições à API do WhatsApp Business.",
-    openaiApiKey: "Chave de API da OpenAI para acessar serviços de inteligência artificial.",
-    mongoUri: "URI de conexão do MongoDB utilizada para conectar a aplicação ao banco de dados.",
-    phoneNumberId: "Identificador do número de telefone do WhatsApp Business.",
-    emailUser: "Endereço de e‑mail utilizado para enviar notificações automáticas.",
-    emailPass: "Senha associada ao EMAIL_USER para autenticação de e‑mail.",
-    emailGestor: "E‑mail do gestor da aplicação que receberá notificações e relatórios.",
+    verifyToken:
+      "Token utilizado para verificar a autenticidade das requisições, garantindo a segurança da integração.",
+    whatsappApiToken:
+      "Token da API do WhatsApp, necessário para autenticar as requisições à API do WhatsApp Business.",
+    openaiApiKey:
+      "Chave de API da OpenAI para acessar serviços de inteligência artificial.",
+    mongoUri:
+      "URI de conexão do MongoDB utilizada para conectar a aplicação ao banco de dados.",
+    phoneNumberId:
+      "Identificador do número de telefone do WhatsApp Business.",
+    emailUser:
+      "Endereço de e‑mail utilizado para enviar notificações automáticas.",
+    emailPass:
+      "Senha associada ao EMAIL_USER para autenticação de e‑mail.",
+    emailGestor:
+      "E‑mail do gestor da aplicação que receberá notificações e relatórios.",
   };
 
   const instExplanationsTexts = {
@@ -270,27 +280,26 @@ function ConfigEmpresa({ user, onLogout }) {
   };
 
   const toggleEnvExplanation = (field) => {
-    setEnvExplanations(prev => ({ ...prev, [field]: !prev[field] }));
+    setEnvExplanations((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
   const toggleInstExplanation = (field) => {
-    setInstExplanations(prev => ({ ...prev, [field]: !prev[field] }));
+    setInstExplanations((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
   const handleLanguageChange = (e) => {
     setLanguage(e.target.value);
   };
 
-  // Função de logout atualizada
+  // Função de logout
   const handleLogout = async () => {
     try {
-      // Chama o endpoint de logout no servidor para encerrar a sessão
       await fetch('/api/logout', { method: 'POST', credentials: 'include' });
     } catch (error) {
       console.error('Erro ao encerrar a sessão:', error);
     } finally {
       localStorage.removeItem('authToken');
-      onLogout(); // Atualiza o estado global (setUser(null))
+      onLogout();
       navigate('/login', { replace: true });
     }
   };
@@ -330,19 +339,19 @@ function ConfigEmpresa({ user, onLogout }) {
       if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
         const reader = new FileReader();
         reader.onloadend = () => {
-          setEmpresa(prev => ({
+          setEmpresa((prev) => ({
             ...prev,
             logo: reader.result,
-            logoFileName: file.name
+            logoFileName: file.name,
           }));
         };
         reader.readAsDataURL(file);
       } else {
-        setErrors(prev => ({ ...prev, logo: t.logoFormatError }));
-        setEmpresa(prev => ({ ...prev, [name]: '' }));
+        setErrors((prev) => ({ ...prev, logo: t.logoFormatError }));
+        setEmpresa((prev) => ({ ...prev, logo: '', logoFileName: null }));
       }
     } else {
-      setEmpresa(prev => ({ ...prev, [name]: value }));
+      setEmpresa((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -353,11 +362,15 @@ function ConfigEmpresa({ user, onLogout }) {
       if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
         const reader = new FileReader();
         reader.onloadend = () => {
-          setEmpresa(prev => ({ ...prev, logo: reader.result, logoFileName: file.name }));
+          setEmpresa((prev) => ({
+            ...prev,
+            logo: reader.result,
+            logoFileName: file.name,
+          }));
         };
         reader.readAsDataURL(file);
       } else {
-        setErrors(prev => ({ ...prev, logo: t.logoFormatError }));
+        setErrors((prev) => ({ ...prev, logo: t.logoFormatError }));
       }
       e.dataTransfer.clearData();
     }
@@ -422,7 +435,9 @@ function ConfigEmpresa({ user, onLogout }) {
       case 'emailPass':
       case 'emailGestor':
         if (!value.trim())
-          error = language === 'pt' ? `${name.toUpperCase()} é obrigatório.` : `${name.toUpperCase()} is required.`;
+          error = language === 'pt'
+            ? `${name.toUpperCase()} é obrigatório.`
+            : `${name.toUpperCase()} is required.`;
         break;
       case 'regrasResposta':
         if (!value.trim())
@@ -443,7 +458,7 @@ function ConfigEmpresa({ user, onLogout }) {
       default:
         break;
     }
-    setErrors(prev => ({ ...prev, [name]: error }));
+    setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
   const validateForm = () => {
@@ -454,7 +469,9 @@ function ConfigEmpresa({ user, onLogout }) {
       newErrors.apiKey = t.apiKeyError;
     const phoneDigits = empresa.telefone.replace(/\D/g, '');
     if (!empresa.telefone.trim() || phoneDigits.length < 10 || phoneDigits.length > 15)
-      newErrors.telefone = language === 'pt' ? 'Telefone inválido. Insira entre 10 e 15 dígitos.' : 'Invalid phone. Enter between 10 and 15 digits.';
+      newErrors.telefone = language === 'pt'
+        ? 'Telefone inválido. Insira entre 10 e 15 dígitos.'
+        : 'Invalid phone. Enter between 10 and 15 digits.';
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!empresa.email.trim() || !emailRegex.test(empresa.email))
       newErrors.email = language === 'pt' ? 'E‑mail inválido.' : 'Invalid e‑mail.';
@@ -479,28 +496,38 @@ function ConfigEmpresa({ user, onLogout }) {
       'emailGestor',
     ].forEach((field) => {
       if (!empresa[field].trim()) {
-        newErrors[field] = language === 'pt' ? `${field.toUpperCase()} é obrigatório.` : `${field.toUpperCase()} is required.`;
+        newErrors[field] = language === 'pt'
+          ? `${field.toUpperCase()} é obrigatório.`
+          : `${field.toUpperCase()} is required.`;
       }
     });
     if (!empresa.regrasResposta.trim()) {
-      newErrors.regrasResposta = language === 'pt' ? 'Regras de Resposta são obrigatórias.' : 'Response rules are required.';
+      newErrors.regrasResposta = language === 'pt'
+        ? 'Regras de Resposta são obrigatórias.'
+        : 'Response rules are required.';
     }
     if (!empresa.linkCalendly.trim()) {
-      newErrors.linkCalendly = language === 'pt' ? 'Link de Calendly é obrigatório.' : 'Calendly link is required.';
+      newErrors.linkCalendly = language === 'pt'
+        ? 'Link de Calendly é obrigatório.'
+        : 'Calendly link is required.';
     }
     if (!empresa.linkSite.trim()) {
-      newErrors.linkSite = language === 'pt' ? 'Link do Site é obrigatório.' : 'Site link is required.';
+      newErrors.linkSite = language === 'pt'
+        ? 'Link do Site é obrigatório.'
+        : 'Site link is required.';
     }
     if (!empresa.exemplosAtendimento.trim()) {
-      newErrors.exemplosAtendimento = language === 'pt' ? 'Exemplos de Perguntas e Respostas são obrigatórios.' : 'Examples of Q&A are required.';
+      newErrors.exemplosAtendimento = language === 'pt'
+        ? 'Exemplos de Perguntas e Respostas são obrigatórios.'
+        : 'Examples of Q&A are required.';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Função para remover o logo selecionado e resetar o input
+  // Função para remover o logo selecionado
   const handleRemoveLogo = () => {
-    setEmpresa(prev => ({ ...prev, logo: null, logoFileName: null }));
+    setEmpresa((prev) => ({ ...prev, logo: null, logoFileName: null }));
     if (logoInputRef.current) {
       logoInputRef.current.value = "";
     }
@@ -508,6 +535,7 @@ function ConfigEmpresa({ user, onLogout }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      {/* Bloco de estilo para destacar aba ativa */}
       <style>
         {`
           .nav-tabs .nav-link.active {
@@ -518,6 +546,7 @@ function ConfigEmpresa({ user, onLogout }) {
           }
         `}
       </style>
+
       {/* Header */}
       <header
         style={{
@@ -531,9 +560,7 @@ function ConfigEmpresa({ user, onLogout }) {
       >
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <img src="logo.png" alt="BiVisualizer Logo" style={{ height: '60px' }} />
-          <h1 style={{ marginLeft: '1rem', fontSize: '1.5rem', fontWeight: 'bold' }}>
-            BiVisualizer
-          </h1>
+          <h1 style={{ marginLeft: '1rem', fontSize: '1.5rem', fontWeight: 'bold' }}>BiVisualizer</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {user && (
@@ -588,7 +615,7 @@ function ConfigEmpresa({ user, onLogout }) {
             style={{
               textAlign: 'center',
               color: '#272631',
-              marginBottom: '6rem',
+              marginBottom: '3rem',
               fontSize: '2rem',
               fontWeight: 'bold',
             }}
@@ -702,7 +729,16 @@ function ConfigEmpresa({ user, onLogout }) {
                       {empresa.logoFileName && (
                         <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           <p style={{ fontStyle: 'italic' }}>Arquivo selecionado: {empresa.logoFileName}</p>
-                          <button type="button" onClick={handleRemoveLogo} style={{ background: 'none', border: 'none', color: '#e3342f', cursor: 'pointer' }}>
+                          <button
+                            type="button"
+                            onClick={handleRemoveLogo}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#e3342f',
+                              cursor: 'pointer',
+                            }}
+                          >
                             Remover
                           </button>
                         </div>
@@ -918,6 +954,7 @@ function ConfigEmpresa({ user, onLogout }) {
                       </div>
                     ))}
                   </div>
+                  {/* Botão Salvar Configuração aparece somente na última aba */}
                   <button
                     type="submit"
                     style={{
