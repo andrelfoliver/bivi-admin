@@ -14,26 +14,12 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function checkUser() {
-      try {
-        console.log("Fetching /api/current-user...");
-        const response = await fetch('/api/current-user', { credentials: 'include' });
-        const data = await response.json();
-        console.log("Response from /api/current-user:", data);
-        // Mesmo que o servidor informe que há uma sessão ativa,
-        // forçamos o estado do usuário para null para não carregar a última sessão.
-        setUser(null);
-      } catch (error) {
-        console.error("Error fetching /api/current-user:", error);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    }
-    checkUser();
+    // Força sempre iniciar com user nulo (ignora qualquer sessão anterior)
+    setUser(null);
+    setLoading(false);
   }, []);
 
-  // Função de logout: chama o endpoint, limpa o estado e permite o redirecionamento para /login
+  // Função de logout que chama o endpoint, limpa o estado e não persiste a sessão
   const handleLogout = async () => {
     try {
       await fetch('/api/logout', { method: 'POST', credentials: 'include' });
@@ -51,13 +37,22 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Rota de login: se já houver um usuário (após login bem-sucedido), redireciona para /config */}
-        <Route path="/login" element={user ? <Navigate to="/config" replace /> : <LoginPage setUser={setUser} />} />
+        {/* Rota de login: sempre exibe o LoginPage, mesmo que haja um token armazenado */}
+        <Route 
+          path="/login" 
+          element={<LoginPage setUser={setUser} />} 
+        />
         <Route path="/register" element={<RegisterPage />} />
-        {/* Rota protegida: somente acessível se o usuário estiver autenticado */}
-        <Route path="/config" element={user ? <ConfigEmpresa user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />} />
+        {/* Rota protegida: só exibe o ConfigEmpresa se houver um usuário (definido após o login) */}
+        <Route 
+          path="/config" 
+          element={user ? <ConfigEmpresa user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />} 
+        />
         {/* Qualquer acesso à raiz redireciona para /login */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route 
+          path="/" 
+          element={<Navigate to="/login" replace />} 
+        />
       </Routes>
     </Router>
   );
