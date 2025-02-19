@@ -3,7 +3,7 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate
+  Navigate,
 } from 'react-router-dom';
 import LoginPage from './LoginPage';
 import ConfigEmpresa from './ConfigEmpresa';
@@ -13,13 +13,12 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Não faz verificação automática de sessão ao montar o App.
   useEffect(() => {
-    // Força sempre iniciar com user nulo (ignora qualquer sessão anterior)
-    setUser(null);
     setLoading(false);
   }, []);
 
-  // Função de logout que chama o endpoint, limpa o estado e não persiste a sessão
+  // Função de logout: chama o endpoint, limpa o estado e força o redirecionamento para /login.
   const handleLogout = async () => {
     try {
       await fetch('/api/logout', { method: 'POST', credentials: 'include' });
@@ -30,29 +29,24 @@ function App() {
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <div>Loading...</div>;
 
   return (
     <Router>
       <Routes>
-        {/* Rota de login: sempre exibe o LoginPage, mesmo que haja um token armazenado */}
+        {/* Se o usuário estiver logado, redireciona para /config; caso contrário, mostra LoginPage */}
         <Route 
-          path="/login" 
-          element={<LoginPage setUser={setUser} />} 
+          path="/login"
+          element={user ? <Navigate to="/config" replace /> : <LoginPage setUser={setUser} />}
         />
         <Route path="/register" element={<RegisterPage />} />
-        {/* Rota protegida: só exibe o ConfigEmpresa se houver um usuário (definido após o login) */}
+        {/* Área protegida: só acessível se o usuário estiver logado */}
         <Route 
-          path="/config" 
-          element={user ? <ConfigEmpresa user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />} 
+          path="/config"
+          element={user ? <ConfigEmpresa user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />}
         />
         {/* Qualquer acesso à raiz redireciona para /login */}
-        <Route 
-          path="/" 
-          element={<Navigate to="/login" replace />} 
-        />
+        <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
   );
