@@ -13,25 +13,28 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Ao montar o App, tenta recuperar a sessão do usuário
+  // Verifica a sessão (pode ser adaptado conforme sua API real)
   useEffect(() => {
-    async function fetchUser() {
+    async function checkUser() {
       try {
         const response = await fetch('/api/current-user', { credentials: 'include' });
         const data = await response.json();
         if (data.loggedIn) {
           setUser(data.user);
+        } else {
+          setUser(null);
         }
       } catch (error) {
-        console.error("Erro ao buscar usuário atual:", error);
+        console.error("Erro ao verificar usuário:", error);
+        setUser(null);
       } finally {
         setLoading(false);
       }
     }
-    fetchUser();
+    checkUser();
   }, []);
 
-  // Função de logout: chama o endpoint e limpa o estado do usuário
+  // Função de logout que chama o endpoint e atualiza o estado
   const handleLogout = async () => {
     try {
       await fetch('/api/logout', { method: 'POST', credentials: 'include' });
@@ -39,6 +42,8 @@ function App() {
       console.error("Erro durante o logout:", error);
     } finally {
       setUser(null);
+      // Força redirecionamento para a tela de login
+      window.location.href = '/login';
     }
   };
 
@@ -56,6 +61,7 @@ function App() {
           path="/config"
           element={user ? <ConfigEmpresa user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />}
         />
+        {/* Sempre redireciona a raiz para /login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>

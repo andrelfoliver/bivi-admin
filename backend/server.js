@@ -184,6 +184,18 @@ app.post('/register-company', async (req, res) => {
     res.status(500).send({ error: "Erro ao cadastrar empresa: " + err.message });
   }
 });
+// Endpoint para logout – destrói a sessão e limpa o cookie
+app.post('/api/logout', (req, res, next) => {
+  req.logout(err => {
+    if (err) return next(err);
+    req.session.destroy(err => {
+      if (err) return next(err);
+      // Limpa o cookie da sessão (nome padrão é "connect.sid")
+      res.clearCookie('connect.sid', { path: '/' });
+      return res.send({ message: "Logout successful" });
+    });
+  });
+});
 
 // Rota protegida para servir o frontend (página de configuração da empresa)
 app.get('/company-registration', (req, res) => {
