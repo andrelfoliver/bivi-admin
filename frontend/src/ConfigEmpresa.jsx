@@ -487,9 +487,12 @@ function ConfigEmpresa({ user }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Função para remover o logo selecionado
+  // Função para remover o logo selecionado e resetar o input
   const handleRemoveLogo = () => {
     setEmpresa(prev => ({ ...prev, logo: null, logoFileName: null }));
+    if (logoInputRef.current) {
+      logoInputRef.current.value = "";
+    }
   };
 
   return (
