@@ -279,9 +279,17 @@ function ConfigEmpresa({ user }) {
     setLanguage(e.target.value);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    window.location.href = '/login';
+  // Função de logout atualizada
+  const handleLogout = async () => {
+    try {
+      // Chama o endpoint de logout no servidor para encerrar a sessão
+      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+    } catch (error) {
+      console.error('Erro ao encerrar a sessão:', error);
+    } finally {
+      localStorage.removeItem('authToken');
+      window.location.href = '/login';
+    }
   };
 
   const handleSubmit = async (e) => {
