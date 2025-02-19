@@ -45,10 +45,13 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        {/* Rota para a configuração da empresa, acessível somente se o usuário estiver autenticado */}
         <Route 
-          path="/" 
+          path="/config" 
           element={user ? <ConfigEmpresa user={user} /> : <Navigate to="/login" replace />} 
         />
+        {/* Redireciona a raiz para a tela de login, forçando o usuário a logar */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
   );
