@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function LoginPage({ setUser }) {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState(''); // Alterado de username para email
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
@@ -16,10 +16,10 @@ function LoginPage({ setUser }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email: username, password }),
+        body: JSON.stringify({ email, password }), // Envia email e senha
       });
       if (response.ok) {
-        // Após login, busca os dados do usuário e atualiza o estado global
+        // Após login manual, recarrega a sessão para obter os dados atualizados do usuário
         const res = await fetch('/api/current-user', { credentials: 'include' });
         const data = await res.json();
         if (data.loggedIn) {
@@ -30,7 +30,7 @@ function LoginPage({ setUser }) {
         }
       } else {
         const data = await response.json();
-        setErrorMsg(data.error || 'Usuário ou senha inválidos!');
+        setErrorMsg(data.error || 'E-mail ou senha inválidos!');
       }
     } catch (error) {
       setErrorMsg('Erro de conexão. Tente novamente.');
@@ -145,15 +145,15 @@ function LoginPage({ setUser }) {
             <div className="form-container">
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label htmlFor="username" className="form-label">Usuário</label>
+                  <label htmlFor="email" className="form-label">E-mail</label>
                   <input
-                    type="text"
-                    id="username"
-                    name="username"
+                    type="email"
+                    id="email"
+                    name="email"
                     className="form-control"
-                    placeholder="Digite seu usuário"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Digite seu e-mail"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>

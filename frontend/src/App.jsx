@@ -13,12 +13,25 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Não faz verificação automática de sessão ao montar o App.
+  // Ao montar o App, tenta recuperar a sessão do usuário
   useEffect(() => {
-    setLoading(false);
+    async function fetchUser() {
+      try {
+        const response = await fetch('/api/current-user', { credentials: 'include' });
+        const data = await response.json();
+        if (data.loggedIn) {
+          setUser(data.user);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar usuário atual:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUser();
   }, []);
 
-  // Função de logout: chama o endpoint, limpa o estado e força o redirecionamento para /login.
+  // Função de logout: chama o endpoint e limpa o estado do usuário
   const handleLogout = async () => {
     try {
       await fetch('/api/logout', { method: 'POST', credentials: 'include' });
@@ -34,18 +47,15 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Se o usuário estiver logado, redireciona para /config; caso contrário, mostra LoginPage */}
         <Route 
           path="/login"
           element={user ? <Navigate to="/config" replace /> : <LoginPage setUser={setUser} />}
         />
         <Route path="/register" element={<RegisterPage />} />
-        {/* Área protegida: só acessível se o usuário estiver logado */}
         <Route 
           path="/config"
           element={user ? <ConfigEmpresa user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />}
         />
-        {/* Qualquer acesso à raiz redireciona para /login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
