@@ -80,9 +80,9 @@ Error generating stack: `+l.message+`
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #f0f2f5;
+            background-color: #f0f2f5; /* cor de fundo suave */
           }
-          /* Container principal */
+          /* Container principal (box-shadow e bordas arredondadas) */
           .login-container {
             width: 900px;
             height: 500px;
@@ -92,7 +92,7 @@ Error generating stack: `+l.message+`
             overflow: hidden;
             background-color: #fff;
           }
-          /* Painel esquerdo */
+          /* Painel esquerdo (40%) */
           .left-panel {
             flex: 0 0 40%;
             background-color: #000;
@@ -117,7 +117,7 @@ Error generating stack: `+l.message+`
             text-align: center;
             line-height: 1.5;
           }
-          /* Painel direito */
+          /* Painel direito (60%) */
           .right-panel {
             flex: 0 0 60%;
             display: flex;
@@ -126,10 +126,16 @@ Error generating stack: `+l.message+`
             padding: 2rem;
             background-color: #fff;
           }
+          .right-panel h2 {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #666;
+          }
           .form-container {
             max-width: 350px;
             margin: 0 auto;
           }
+          /* Botão Entrar */
           .btn-entrar {
             background-color: #5de5d9;
             color: #fff;
@@ -143,15 +149,18 @@ Error generating stack: `+l.message+`
           .btn-entrar:hover {
             background-color: #4cc9c0;
           }
+          /* Botão Google */
           .btn-google {
             margin-top: 1rem;
           }
+          /* Rodapé customizado */
           .custom-footer {
             background-color: #4cc9c0;
             color: #fff;
             text-align: center;
             padding: 1rem;
           }
+          /* Responsivo */
           @media (max-width: 768px) {
             .login-container {
               width: 95%;
@@ -164,7 +173,7 @@ Error generating stack: `+l.message+`
               height: auto;
             }
           }
-        `}),O("div",{className:"login-wrapper",children:k("div",{className:"login-container",children:[k("div",{className:"left-panel",children:[O("img",{src:"logo.png",alt:"BiVisualizer Logo"}),O("h2",{children:"Bem-vindo de volta!"}),O("p",{children:"Para se manter conectado, faça login com suas informações pessoais."})]}),O("div",{className:"right-panel",children:k("div",{className:"form-container",children:[k("form",{onSubmit:async g=>{g.preventDefault(),v("");try{const y=await fetch("/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({username:f,password:c})});if(y.ok)window.location.href="/";else{const C=await y.json();v(C.error||"Usuário ou senha inválidos!")}}catch{v("Erro de conexão. Tente novamente.")}},children:[k("div",{className:"mb-3",children:[O("label",{htmlFor:"username",className:"form-label",children:"Usuário"}),O("input",{type:"text",id:"username",name:"username",className:"form-control",placeholder:"Digite seu nome de usuário",value:f,onChange:g=>o(g.target.value),required:!0})]}),k("div",{className:"mb-3",children:[O("label",{htmlFor:"password",className:"form-label",children:"Senha"}),O("input",{type:"password",id:"password",name:"password",className:"form-control",placeholder:"Digite sua senha",value:c,onChange:g=>h(g.target.value),required:!0})]}),O("button",{type:"submit",className:"btn-entrar",children:"Entrar"}),d&&O("p",{className:"text-danger text-center mt-3",children:d})]}),O("div",{className:"mt-3 text-center",children:k("p",{className:"small text-muted",children:["Ainda não tem uma conta?"," ",O("a",{href:"/register",className:"text-primary",children:"Cadastre-se"})]})}),O("hr",{}),O("div",{className:"text-center",children:k("a",{href:"/auth/google",className:"btn btn-outline-danger w-100 btn-google",children:[O("i",{className:"bi bi-google me-2"})," Entrar com Google"]})})]})})]})}),O("footer",{className:"custom-footer",children:"© 2025 BiVisualizer. Todos os direitos reservados."})]})}var Nr={exports:{}};/*!
+        `}),O("div",{className:"login-wrapper",children:k("div",{className:"login-container",children:[k("div",{className:"left-panel",children:[O("img",{src:"logo.png",alt:"BiVisualizer Logo"}),O("h2",{children:"Bem-vindo de volta!"}),O("p",{children:"Para se manter conectado, faça login com suas informações pessoais."})]}),O("div",{className:"right-panel",children:k("div",{className:"form-container",children:[k("form",{onSubmit:async g=>{g.preventDefault(),v("");try{const y=await fetch("/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({username:f,password:c})});if(y.ok)window.location.href="/";else{const C=await y.json();v(C.error||"Usuário ou senha inválidos!")}}catch{v("Erro de conexão. Tente novamente.")}},children:[k("div",{className:"mb-3",children:[O("label",{htmlFor:"username",className:"form-label",children:"Usuário"}),O("input",{type:"text",id:"username",name:"username",className:"form-control",placeholder:"Digite seu usuário",value:f,onChange:g=>o(g.target.value),required:!0})]}),k("div",{className:"mb-3",children:[O("label",{htmlFor:"password",className:"form-label",children:"Senha"}),O("input",{type:"password",id:"password",name:"password",className:"form-control",placeholder:"Digite sua senha",value:c,onChange:g=>h(g.target.value),required:!0})]}),O("button",{type:"submit",className:"btn-entrar",children:"Entrar"}),d&&O("p",{className:"text-danger text-center mt-3",children:d})]}),O("div",{className:"mt-3 text-center",children:k("p",{className:"small text-muted",children:["Ainda não tem uma conta?"," ",O("a",{href:"/register",className:"text-primary",children:"Cadastre-se"})]})}),O("hr",{}),O("div",{className:"text-center",children:k("a",{href:"/auth/google",className:"btn btn-outline-danger w-100 btn-google",children:[O("i",{className:"bi bi-google me-2"})," Entrar com Google"]})})]})})]})}),O("footer",{className:"custom-footer",children:"© 2025 BiVisualizer. Todos os direitos reservados."})]})}var Nr={exports:{}};/*!
 	Copyright (c) 2018 Jed Watson.
 	Licensed under the MIT License (MIT), see
 	http://jedwatson.github.io/classnames

@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function LoginPage({ setUser }) {
-  const [username, setUsername] = useState(''); // Agora este campo é o username
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
 
-  // Lógica de submit do login manual utilizando "username"
+  // Lógica de submit do login manual
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -16,11 +16,11 @@ function LoginPage({ setUser }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        // Envia username e senha
+        // Envia "username" e "password" no corpo da requisição
         body: JSON.stringify({ username, password }),
       });
       if (response.ok) {
-        // Após login, recarrega a sessão para atualizar os dados do usuário
+        // Força um reload para atualizar a sessão
         window.location.href = '/';
       } else {
         const data = await response.json();
@@ -41,9 +41,9 @@ function LoginPage({ setUser }) {
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #f0f2f5;
+            background-color: #f0f2f5; /* cor de fundo suave */
           }
-          /* Container principal */
+          /* Container principal (box-shadow e bordas arredondadas) */
           .login-container {
             width: 900px;
             height: 500px;
@@ -53,7 +53,7 @@ function LoginPage({ setUser }) {
             overflow: hidden;
             background-color: #fff;
           }
-          /* Painel esquerdo */
+          /* Painel esquerdo (40%) */
           .left-panel {
             flex: 0 0 40%;
             background-color: #000;
@@ -78,7 +78,7 @@ function LoginPage({ setUser }) {
             text-align: center;
             line-height: 1.5;
           }
-          /* Painel direito */
+          /* Painel direito (60%) */
           .right-panel {
             flex: 0 0 60%;
             display: flex;
@@ -87,10 +87,16 @@ function LoginPage({ setUser }) {
             padding: 2rem;
             background-color: #fff;
           }
+          .right-panel h2 {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #666;
+          }
           .form-container {
             max-width: 350px;
             margin: 0 auto;
           }
+          /* Botão Entrar */
           .btn-entrar {
             background-color: #5de5d9;
             color: #fff;
@@ -104,15 +110,18 @@ function LoginPage({ setUser }) {
           .btn-entrar:hover {
             background-color: #4cc9c0;
           }
+          /* Botão Google */
           .btn-google {
             margin-top: 1rem;
           }
+          /* Rodapé customizado */
           .custom-footer {
             background-color: #4cc9c0;
             color: #fff;
             text-align: center;
             padding: 1rem;
           }
+          /* Responsivo */
           @media (max-width: 768px) {
             .login-container {
               width: 95%;
@@ -130,13 +139,11 @@ function LoginPage({ setUser }) {
 
       <div className="login-wrapper">
         <div className="login-container">
-          {/* Painel esquerdo */}
           <div className="left-panel">
             <img src="logo.png" alt="BiVisualizer Logo" />
             <h2>Bem-vindo de volta!</h2>
             <p>Para se manter conectado, faça login com suas informações pessoais.</p>
           </div>
-          {/* Painel direito */}
           <div className="right-panel">
             <div className="form-container">
               <form onSubmit={handleSubmit}>
@@ -147,7 +154,7 @@ function LoginPage({ setUser }) {
                     id="username"
                     name="username"
                     className="form-control"
-                    placeholder="Digite seu nome de usuário"
+                    placeholder="Digite seu usuário"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required

@@ -130,7 +130,7 @@ app.post('/api/auth/register', async (req, res) => {
 
 // Endpoint para login manual de usuário
 app.post('/api/auth/login', async (req, res, next) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
   try {
     // Se já houver um usuário autenticado, faça logout para limpar a sessão anterior
     if (req.isAuthenticated()) {
