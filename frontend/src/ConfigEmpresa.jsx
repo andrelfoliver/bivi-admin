@@ -484,7 +484,16 @@ function ConfigEmpresa({ user }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      
+          <style>
+        {`
+          .nav-tabs .nav-link.active {
+            background-color: #5de5d9 !important;
+            color: white !important;
+            border-color: #4cc9c0 !important;
+            font-weight: bold;
+          }
+        `}
+      </style>
       {/* Header */}
       <header
         style={{
