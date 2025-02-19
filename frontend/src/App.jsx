@@ -43,15 +43,24 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
+        {/* Se o usuário já estiver autenticado, não mostra a tela de login */}
+        <Route 
+          path="/login" 
+          element={user ? <Navigate to="/config" replace /> : <LoginPage />} 
+        />
         <Route path="/register" element={<RegisterPage />} />
-        {/* Rota para a configuração da empresa, acessível somente se o usuário estiver autenticado */}
+        {/* Acesso à configuração somente se o usuário estiver autenticado */}
         <Route 
           path="/config" 
           element={user ? <ConfigEmpresa user={user} /> : <Navigate to="/login" replace />} 
         />
-        {/* Redireciona a raiz para a tela de login, forçando o usuário a logar */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* Se o usuário acessar a raiz:
+              - se autenticado, vai para /config;
+              - se não, vai para /login */}
+        <Route 
+          path="/" 
+          element={user ? <Navigate to="/config" replace /> : <Navigate to="/login" replace />} 
+        />
       </Routes>
     </Router>
   );
