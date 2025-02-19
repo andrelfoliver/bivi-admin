@@ -107,7 +107,7 @@ app.post('/api/auth/register', async (req, res) => {
   if (!username || !email || !password) {
     return res.status(400).send({ error: "Campos obrigatórios não preenchidos." });
   }
-  const existingUser = await User.findOne({ email, provider: 'local' });
+  const existingUser = await User.findOne({ username, provider: 'local' });
   if (existingUser) {
     return res.status(400).send({ error: "Usuário já existe." });
   }
@@ -142,7 +142,7 @@ app.post('/api/auth/login', async (req, res, next) => {
       });
     }
 
-    const user = await User.findOne({ email, provider: 'local' });
+    const user = await User.findOne({ username, provider: 'local' });
     if (!user) return res.status(401).send({ error: "Credenciais inválidas." });
     
     const isMatch = await bcrypt.compare(password, user.password);
