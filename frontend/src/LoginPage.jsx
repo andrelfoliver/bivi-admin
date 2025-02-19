@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function LoginPage() {
+function LoginPage({ setUser }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
@@ -19,9 +19,15 @@ function LoginPage() {
         body: JSON.stringify({ email: username, password }),
       });
       if (response.ok) {
-        // Força um reload para garantir que a sessão seja atualizada e
-        // exibir corretamente o usuário logado.
-        window.location.href = '/';
+        // Após login, busca os dados do usuário e atualiza o estado global
+        const res = await fetch('/api/current-user', { credentials: 'include' });
+        const data = await res.json();
+        if (data.loggedIn) {
+          setUser(data.user);
+          navigate('/config');
+        } else {
+          setErrorMsg("Falha ao recuperar dados do usuário.");
+        }
       } else {
         const data = await response.json();
         setErrorMsg(data.error || 'Usuário ou senha inválidos!');
@@ -41,24 +47,22 @@ function LoginPage() {
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #f0f2f5; /* cor de fundo suave */
+            background-color: #f0f2f5;
           }
-
-          /* Container principal (box-shadow e bordas arredondadas) */
+          /* Container principal */
           .login-container {
-            width: 900px; /* ajuste conforme desejar */
-            height: 500px; /* ajuste conforme desejar */
+            width: 900px;
+            height: 500px;
             display: flex;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             overflow: hidden;
-            background-color: #fff; /* cor de fundo do container */
+            background-color: #fff;
           }
-
-          /* Painel esquerdo (40%) */
+          /* Painel esquerdo */
           .left-panel {
             flex: 0 0 40%;
-            background-color: #000000; /* cor do painel esquerdo */
+            background-color: #000;
             color: #fff;
             display: flex;
             flex-direction: column;
@@ -80,29 +84,19 @@ function LoginPage() {
             text-align: center;
             line-height: 1.5;
           }
-
-          /* Painel direito (60%) - agora sem card interno */
+          /* Painel direito */
           .right-panel {
             flex: 0 0 60%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             padding: 2rem;
-            background-color: #fff; /* fundo branco */
-          }
-
-          /* Título e formulário no painel direito */
-          .right-panel h2 {
-            text-align: center;
-            margin-bottom: 1rem;
-            color: #666;
+            background-color: #fff;
           }
           .form-container {
             max-width: 350px;
             margin: 0 auto;
           }
-
-          /* Botão Entrar */
           .btn-entrar {
             background-color: #5de5d9;
             color: #fff;
@@ -116,21 +110,15 @@ function LoginPage() {
           .btn-entrar:hover {
             background-color: #4cc9c0;
           }
-
-          /* Botão Google */
           .btn-google {
             margin-top: 1rem;
           }
-
-          /* Rodapé customizado */
           .custom-footer {
             background-color: #4cc9c0;
             color: #fff;
             text-align: center;
             padding: 1rem;
           }
-
-          /* Responsivo */
           @media (max-width: 768px) {
             .login-container {
               width: 95%;
@@ -146,25 +134,18 @@ function LoginPage() {
         `}
       </style>
 
-      {/* Área principal de login */}
       <div className="login-wrapper">
         <div className="login-container">
-          {/* Painel esquerdo (40%) */}
           <div className="left-panel">
             <img src="logo.png" alt="BiVisualizer Logo" />
             <h2>Bem-vindo de volta!</h2>
             <p>Para se manter conectado, faça login com suas informações pessoais.</p>
           </div>
-
-          {/* Painel direito (60%) */}
           <div className="right-panel">
-            {/*<h2>Faça login para continuar</h2> */}
             <div className="form-container">
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label htmlFor="username" className="form-label">
-                    Usuário
-                  </label>
+                  <label htmlFor="username" className="form-label">Usuário</label>
                   <input
                     type="text"
                     id="username"
@@ -177,9 +158,7 @@ function LoginPage() {
                   />
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="password" className="form-label">
-                    Senha
-                  </label>
+                  <label htmlFor="password" className="form-label">Senha</label>
                   <input
                     type="password"
                     id="password"
@@ -199,9 +178,7 @@ function LoginPage() {
               <div className="mt-3 text-center">
                 <p className="small text-muted">
                   Ainda não tem uma conta?{' '}
-                  <a href="/register" className="text-primary">
-                    Cadastre-se
-                  </a>
+                  <a href="/register" className="text-primary">Cadastre-se</a>
                 </p>
               </div>
               <hr />
@@ -215,7 +192,6 @@ function LoginPage() {
         </div>
       </div>
 
-      {/* Rodapé personalizado */}
       <footer className="custom-footer">
         &copy; 2025 BiVisualizer. Todos os direitos reservados.
       </footer>

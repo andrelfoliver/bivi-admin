@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import { Tabs, Tab } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
-// Função para calcular a distância de Levenshtein entre duas strings
 function levenshteinDistance(a, b) {
   const dp = Array(a.length + 1)
     .fill(null)
@@ -22,7 +21,6 @@ function levenshteinDistance(a, b) {
   return dp[a.length][b.length];
 }
 
-// Sugere um domínio próximo se a distância for pequena
 function getClosestDomain(typedDomain) {
   const popularDomains = [
     "gmail.com",
@@ -159,7 +157,6 @@ const translations = {
 };
 
 function ConfigEmpresa({ user, onLogout }) {
-  console.log("ConfigEmpresa renderizado!");
   const navigate = useNavigate();
   const [language, setLanguage] = useState('pt');
   const t = translations[language];
@@ -299,6 +296,7 @@ function ConfigEmpresa({ user, onLogout }) {
       console.error('Erro ao encerrar a sessão:', error);
     } finally {
       localStorage.removeItem('authToken');
+      // Chama a função onLogout passada via props
       onLogout();
       navigate('/login', { replace: true });
     }
@@ -435,9 +433,7 @@ function ConfigEmpresa({ user, onLogout }) {
       case 'emailPass':
       case 'emailGestor':
         if (!value.trim())
-          error = language === 'pt'
-            ? `${name.toUpperCase()} é obrigatório.`
-            : `${name.toUpperCase()} is required.`;
+          error = language === 'pt' ? `${name.toUpperCase()} é obrigatório.` : `${name.toUpperCase()} is required.`;
         break;
       case 'regrasResposta':
         if (!value.trim())
@@ -469,9 +465,7 @@ function ConfigEmpresa({ user, onLogout }) {
       newErrors.apiKey = t.apiKeyError;
     const phoneDigits = empresa.telefone.replace(/\D/g, '');
     if (!empresa.telefone.trim() || phoneDigits.length < 10 || phoneDigits.length > 15)
-      newErrors.telefone = language === 'pt'
-        ? 'Telefone inválido. Insira entre 10 e 15 dígitos.'
-        : 'Invalid phone. Enter between 10 and 15 digits.';
+      newErrors.telefone = language === 'pt' ? 'Telefone inválido. Insira entre 10 e 15 dígitos.' : 'Invalid phone. Enter between 10 and 15 digits.';
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!empresa.email.trim() || !emailRegex.test(empresa.email))
       newErrors.email = language === 'pt' ? 'E‑mail inválido.' : 'Invalid e‑mail.';
@@ -496,30 +490,20 @@ function ConfigEmpresa({ user, onLogout }) {
       'emailGestor',
     ].forEach((field) => {
       if (!empresa[field].trim()) {
-        newErrors[field] = language === 'pt'
-          ? `${field.toUpperCase()} é obrigatório.`
-          : `${field.toUpperCase()} is required.`;
+        newErrors[field] = language === 'pt' ? `${field.toUpperCase()} é obrigatório.` : `${field.toUpperCase()} is required.`;
       }
     });
     if (!empresa.regrasResposta.trim()) {
-      newErrors.regrasResposta = language === 'pt'
-        ? 'Regras de Resposta são obrigatórias.'
-        : 'Response rules are required.';
+      newErrors.regrasResposta = language === 'pt' ? 'Regras de Resposta são obrigatórias.' : 'Response rules are required.';
     }
     if (!empresa.linkCalendly.trim()) {
-      newErrors.linkCalendly = language === 'pt'
-        ? 'Link de Calendly é obrigatório.'
-        : 'Calendly link is required.';
+      newErrors.linkCalendly = language === 'pt' ? 'Link de Calendly é obrigatório.' : 'Calendly link is required.';
     }
     if (!empresa.linkSite.trim()) {
-      newErrors.linkSite = language === 'pt'
-        ? 'Link do Site é obrigatório.'
-        : 'Site link is required.';
+      newErrors.linkSite = language === 'pt' ? 'Link do Site é obrigatório.' : 'Site link is required.';
     }
     if (!empresa.exemplosAtendimento.trim()) {
-      newErrors.exemplosAtendimento = language === 'pt'
-        ? 'Exemplos de Perguntas e Respostas são obrigatórios.'
-        : 'Examples of Q&A are required.';
+      newErrors.exemplosAtendimento = language === 'pt' ? 'Exemplos de Perguntas e Respostas são obrigatórios.' : 'Examples of Q&A are required.';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -535,7 +519,6 @@ function ConfigEmpresa({ user, onLogout }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {/* Bloco de estilo para destacar aba ativa */}
       <style>
         {`
           .nav-tabs .nav-link.active {
@@ -954,7 +937,7 @@ function ConfigEmpresa({ user, onLogout }) {
                       </div>
                     ))}
                   </div>
-                  {/* Botão Salvar Configuração aparece somente na última aba */}
+                  {/* Botão Salvar aparece somente na última aba */}
                   <button
                     type="submit"
                     style={{
