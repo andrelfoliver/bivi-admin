@@ -84,7 +84,7 @@ const translations = {
     languageLabel: "Idioma",
     successMessage: "Configuração salva com sucesso!",
     logoFormatError: "Apenas arquivos PNG ou JPEG são aceitos.",
-    envSectionTitle: "Configuração do Arquivo .env",
+    envSectionTitle: "Variáveis de Ambiente",
     instrucoesPersonalizadas: "Instruções Personalizadas",
     regrasResposta: "Regras de Resposta",
     regrasRespostaPlaceholder:
@@ -201,6 +201,7 @@ function ConfigEmpresa({ user }) {
     email: '',
     saudacao: '',
     logo: null,
+    logoFileName: null,
     primaryColor: '#5de5d9',
     secondaryColor: '#272631',
     backgroundColor: '#f5fafd',
@@ -249,21 +250,21 @@ function ConfigEmpresa({ user }) {
   });
 
   const envExplanationsTexts = {
-    verifyToken: "Token used to verify the authenticity of requests, ensuring integration security.",
-    whatsappApiToken: "WhatsApp API token, needed to authenticate requests to the WhatsApp Business API.",
-    openaiApiKey: "OpenAI API key to access artificial intelligence services.",
-    mongoUri: "MongoDB connection URI used to connect the application to the database.",
-    phoneNumberId: "Identifier for the WhatsApp Business phone number.",
-    emailUser: "Email address used to send automated notifications.",
-    emailPass: "Password associated with EMAIL_USER for email authentication.",
-    emailGestor: "Email of the application manager who will receive notifications and reports.",
+    verifyToken: "Token utilizado para verificar a autenticidade das requisições, garantindo a segurança da integração.",
+    whatsappApiToken: "Token da API do WhatsApp, necessário para autenticar as requisições à API do WhatsApp Business.",
+    openaiApiKey: "Chave de API da OpenAI para acessar serviços de inteligência artificial.",
+    mongoUri: "URI de conexão do MongoDB utilizada para conectar a aplicação ao banco de dados.",
+    phoneNumberId: "Identificador do número de telefone do WhatsApp Business.",
+    emailUser: "Endereço de e‑mail utilizado para enviar notificações automáticas.",
+    emailPass: "Senha associada ao EMAIL_USER para autenticação de e‑mail.",
+    emailGestor: "E‑mail do gestor da aplicação que receberá notificações e relatórios.",
   };
 
   const instExplanationsTexts = {
-    regrasResposta: "Enter the response rules for the virtual assistant.",
-    linkCalendly: "Paste your Calendly link here.",
-    linkSite: "Paste your website link here.",
-    exemplosAtendimento: "Enter examples of questions and answers for service.",
+    regrasResposta: "Digite as regras de resposta para a assistente virtual.",
+    linkCalendly: "Cole o link do Calendly aqui.",
+    linkSite: "Cole o link do site aqui.",
+    exemplosAtendimento: "Digite exemplos de perguntas e respostas para o atendimento.",
   };
 
   const toggleEnvExplanation = (field) => {
@@ -321,7 +322,7 @@ function ConfigEmpresa({ user }) {
           setEmpresa(prev => ({
             ...prev,
             logo: reader.result,
-            logoFileName: file.name  // armazena o nome do arquivo
+            logoFileName: file.name
           }));
         };
         reader.readAsDataURL(file);
@@ -333,7 +334,6 @@ function ConfigEmpresa({ user }) {
       setEmpresa(prev => ({ ...prev, [name]: value }));
     }
   };
-  
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -342,7 +342,7 @@ function ConfigEmpresa({ user }) {
       if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
         const reader = new FileReader();
         reader.onloadend = () => {
-          setEmpresa(prev => ({ ...prev, logo: reader.result }));
+          setEmpresa(prev => ({ ...prev, logo: reader.result, logoFileName: file.name }));
         };
         reader.readAsDataURL(file);
       } else {
@@ -487,9 +487,14 @@ function ConfigEmpresa({ user }) {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Função para remover o logo selecionado
+  const handleRemoveLogo = () => {
+    setEmpresa(prev => ({ ...prev, logo: null, logoFileName: null }));
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          <style>
+      <style>
         {`
           .nav-tabs .nav-link.active {
             background-color: #5de5d9 !important;
@@ -681,7 +686,12 @@ function ConfigEmpresa({ user }) {
                         />
                       </div>
                       {empresa.logoFileName && (
-                        <p style={{ marginTop: '0.5rem', fontStyle: 'italic' }}>Arquivo selecionado: {empresa.logoFileName}</p>
+                        <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <p style={{ fontStyle: 'italic' }}>Arquivo selecionado: {empresa.logoFileName}</p>
+                          <button type="button" onClick={handleRemoveLogo} style={{ background: 'none', border: 'none', color: '#e3342f', cursor: 'pointer' }}>
+                            Remover
+                          </button>
+                        </div>
                       )}
                       {errors.logo && <span style={errorStyle}>{errors.logo}</span>}
                     </div>
@@ -811,7 +821,7 @@ function ConfigEmpresa({ user }) {
                       { label: 'MONGO_URI', name: 'mongoUri' },
                       { label: 'PHONE_NUMBER_ID', name: 'phoneNumberId' },
                       { label: 'EMAIL_USER', name: 'emailUser' },
-                      { label: 'EMAIL_PASS', name: 'emailPass', type: 'password' },
+                      { label: 'EMAIL_PASS', name: 'emailPass', type: 'text' },
                       { label: 'EMAIL_GESTOR', name: 'emailGestor' },
                     ].map((field) => (
                       <div key={field.name} style={{ flex: '1 1 100%' }}>
@@ -894,7 +904,6 @@ function ConfigEmpresa({ user }) {
                       </div>
                     ))}
                   </div>
-                  {/* Botão Salvar Configuração aparece somente na última aba */}
                   <button
                     type="submit"
                     style={{
