@@ -554,7 +554,7 @@ function ConfigEmpresa({ user }) {
             style={{
               textAlign: 'center',
               color: '#272631',
-              marginBottom: '2rem',
+              marginBottom: '8rem',
               fontSize: '2rem',
               fontWeight: 'bold',
             }}
