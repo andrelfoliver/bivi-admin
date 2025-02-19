@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function LoginPage({ setUser }) {
-  const [email, setEmail] = useState(''); // Alterado de username para email
+  const [username, setUsername] = useState(''); // Agora este campo é o username
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
 
-  // Lógica de submit do login manual
+  // Lógica de submit do login manual utilizando "username"
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -16,21 +16,15 @@ function LoginPage({ setUser }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email, password }), // Envia email e senha
+        // Envia username e senha
+        body: JSON.stringify({ username, password }),
       });
       if (response.ok) {
-        // Após login manual, recarrega a sessão para obter os dados atualizados do usuário
-        const res = await fetch('/api/current-user', { credentials: 'include' });
-        const data = await res.json();
-        if (data.loggedIn) {
-          setUser(data.user);
-          navigate('/config');
-        } else {
-          setErrorMsg("Falha ao recuperar dados do usuário.");
-        }
+        // Após login, recarrega a sessão para atualizar os dados do usuário
+        window.location.href = '/';
       } else {
         const data = await response.json();
-        setErrorMsg(data.error || 'E-mail ou senha inválidos!');
+        setErrorMsg(data.error || 'Usuário ou senha inválidos!');
       }
     } catch (error) {
       setErrorMsg('Erro de conexão. Tente novamente.');
@@ -136,24 +130,26 @@ function LoginPage({ setUser }) {
 
       <div className="login-wrapper">
         <div className="login-container">
+          {/* Painel esquerdo */}
           <div className="left-panel">
             <img src="logo.png" alt="BiVisualizer Logo" />
             <h2>Bem-vindo de volta!</h2>
             <p>Para se manter conectado, faça login com suas informações pessoais.</p>
           </div>
+          {/* Painel direito */}
           <div className="right-panel">
             <div className="form-container">
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label htmlFor="email" className="form-label">E-mail</label>
+                  <label htmlFor="username" className="form-label">Usuário</label>
                   <input
-                    type="email"
-                    id="email"
-                    name="email"
+                    type="text"
+                    id="username"
+                    name="username"
                     className="form-control"
-                    placeholder="Digite seu e-mail"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Digite seu nome de usuário"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     required
                   />
                 </div>
