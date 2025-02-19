@@ -318,7 +318,11 @@ function ConfigEmpresa({ user }) {
       if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
         const reader = new FileReader();
         reader.onloadend = () => {
-          setEmpresa(prev => ({ ...prev, [name]: reader.result }));
+          setEmpresa(prev => ({
+            ...prev,
+            logo: reader.result,
+            logoFileName: file.name  // armazena o nome do arquivo
+          }));
         };
         reader.readAsDataURL(file);
       } else {
@@ -329,6 +333,7 @@ function ConfigEmpresa({ user }) {
       setEmpresa(prev => ({ ...prev, [name]: value }));
     }
   };
+  
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -675,6 +680,9 @@ function ConfigEmpresa({ user }) {
                           style={{ display: 'none' }}
                         />
                       </div>
+                      {empresa.logoFileName && (
+                        <p style={{ marginTop: '0.5rem', fontStyle: 'italic' }}>Arquivo selecionado: {empresa.logoFileName}</p>
+                      )}
                       {errors.logo && <span style={errorStyle}>{errors.logo}</span>}
                     </div>
                     <div style={{ flex: '1 1 300px' }}>
