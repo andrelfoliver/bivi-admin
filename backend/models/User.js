@@ -3,14 +3,15 @@ import mongoose from 'mongoose';
 const userSchema = new mongoose.Schema(
   {
     googleId: { type: String },
-    username: { type: String }, // Para login manual
+    username: { type: String },
     email: { type: String, required: true },
-    password: { type: String }, // Apenas para usuários manuais
+    password: { type: String },
     name: { type: String },
-    picture: { type: String }, // Para usuários do Google
-    provider: { 
-      type: String, 
-      required: true, 
+    company: { type: String }, // novo campo
+    picture: { type: String },
+    provider: {
+      type: String,
+      required: true,
       enum: ['google', 'local']
     },
     role: {

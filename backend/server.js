@@ -144,10 +144,10 @@ app.post('/api/auth/login', async (req, res, next) => {
 
     const user = await User.findOne({ username, provider: 'local' });
     if (!user) return res.status(401).send({ error: "Credenciais inválidas." });
-    
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).send({ error: "Credenciais inválidas." });
-    
+
     // Regenera a sessão para garantir que nenhuma informação da sessão anterior seja mantida
     req.session.regenerate((err) => {
       if (err) return next(err);
@@ -297,6 +297,22 @@ app.delete('/api/companies/:id', isAdmin, async (req, res) => {
     res.json({ message: "Empresa excluída com sucesso!", company: deletedCompany });
   } catch (err) {
     res.status(500).json({ error: "Erro ao excluir empresa: " + err.message });
+  }
+});
+app.put('/api/user', async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: "Não autenticado." });
+  }
+  const { name, email, company } = req.body;
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { name, email, company },
+      { new: true }
+    ).select('-password');
+    res.json({ message: "Usuário atualizado com sucesso!", user: updatedUser });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao atualizar usuário: " + err.message });
   }
 });
 

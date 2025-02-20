@@ -9,7 +9,7 @@ function Dashboard({ user, onLogout }) {
     const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // Novo estado para edição de informações pessoais no módulo "Início"
+    // Estado para edição de informações pessoais no módulo "Início"
     const [userInfo, setUserInfo] = useState({
         fullName: user?.name || '',
         email: user?.email || '',
@@ -83,7 +83,6 @@ function Dashboard({ user, onLogout }) {
     // Função para salvar as alterações do módulo "Início"
     const handleSaveUserInfo = async (e) => {
         e.preventDefault();
-        // Exemplo: Envia a atualização via PUT para um endpoint de usuário
         try {
             const response = await fetch('/api/user', {
                 method: 'PUT',
@@ -131,7 +130,7 @@ function Dashboard({ user, onLogout }) {
                                 />
                             </div>
                             <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>E-mail:</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>E‑mail:</label>
                                 <input
                                     type="email"
                                     value={userInfo.email}
@@ -293,11 +292,11 @@ function Dashboard({ user, onLogout }) {
     };
 
     const moduleItemStyle = {
-        padding: '0.75rem 1rem', // aumento do padding horizontal e vertical
+        padding: '0.75rem 1.5rem',
         cursor: 'pointer',
         borderRadius: '4px',
         transition: 'background-color 0.3s',
-        marginBottom: '0.5rem', // espaço entre os botões
+        marginBottom: '0.5rem',
     };
 
     const moduleItemHoverStyle = {
@@ -308,7 +307,7 @@ function Dashboard({ user, onLogout }) {
     const mainContainerStyle = {
         flex: 1,
         padding: '1rem 2rem',
-        paddingBottom: '4rem', // espaço para o rodapé
+        paddingBottom: '4rem',
     };
 
     const footerStyle = {
