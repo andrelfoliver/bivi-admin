@@ -287,6 +287,18 @@ app.delete('/api/users/:id', isAdmin, async (req, res) => {
     res.status(500).json({ error: "Erro ao excluir usuário: " + err.message });
   }
 });
+// Endpoint para excluir uma empresa (apenas para admin)
+app.delete('/api/companies/:id', isAdmin, async (req, res) => {
+  try {
+    const deletedCompany = await Company.findByIdAndDelete(req.params.id);
+    if (!deletedCompany) {
+      return res.status(404).json({ error: "Empresa não encontrada." });
+    }
+    res.json({ message: "Empresa excluída com sucesso!", company: deletedCompany });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao excluir empresa: " + err.message });
+  }
+});
 
 // Serve arquivos estáticos da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));

@@ -7,6 +7,7 @@ function AdminDashboard({ user, onLogout }) {
   const [companies, setCompanies] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [actionLoading, setActionLoading] = useState({});
+  const [companyActionLoading, setCompanyActionLoading] = useState({});
 
   useEffect(() => {
     if (!user || user.role !== "admin") {
@@ -113,6 +114,30 @@ function AdminDashboard({ user, onLogout }) {
       alert("Erro ao excluir usuário: " + error.message);
     } finally {
       setActionLoading((prev) => ({ ...prev, [userId]: null }));
+    }
+  };
+
+  const handleDeleteCompany = async (companyId) => {
+    if (!window.confirm("Tem certeza que deseja excluir esta empresa?")) {
+      return;
+    }
+    try {
+      setCompanyActionLoading((prev) => ({ ...prev, [companyId]: "delete" }));
+      const response = await fetch(`/api/companies/${companyId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (response.ok) {
+        alert("Empresa excluída com sucesso!");
+        fetchCompanies();
+      } else {
+        const data = await response.json();
+        alert(data.error || "Erro ao excluir empresa.");
+      }
+    } catch (error) {
+      alert("Erro ao excluir empresa: " + error.message);
+    } finally {
+      setCompanyActionLoading((prev) => ({ ...prev, [companyId]: null }));
     }
   };
 
@@ -264,13 +289,30 @@ function AdminDashboard({ user, onLogout }) {
 
         <section style={sectionStyle}>
           <h2>Empresas</h2>
-          <ul style={listStyle}>
-            {companies.map((c) => (
-              <li key={c._id} style={listItemStyle}>
-                {c.nome}
-              </li>
-            ))}
-          </ul>
+          {companies.length === 0 ? (
+            <p>Nenhuma empresa cadastrada.</p>
+          ) : (
+            <ul style={listStyle}>
+              {companies.map((c) => (
+                <li key={c._id} style={listItemStyle}>
+                  <div>
+                    <strong>{c.nome}</strong>
+                  </div>
+                  <div style={buttonGroupStyle}>
+                    <button
+                      onClick={() => handleDeleteCompany(c._id)}
+                      style={deleteButtonStyle}
+                      disabled={companyActionLoading[c._id] === "delete"}
+                    >
+                      {companyActionLoading[c._id] === "delete"
+                        ? "Excluindo..."
+                        : "Excluir"}
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       </div>
     </div>
