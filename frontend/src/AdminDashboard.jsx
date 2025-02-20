@@ -1,6 +1,90 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+// Componente de modal para confirmação de ações
+function ConfirmationModal({ message, onConfirm, onCancel }) {
+  const modalOverlayStyle = {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  };
+
+  const modalStyle = {
+    backgroundColor: "#fff",
+    padding: "1.5rem",
+    borderRadius: "8px",
+    maxWidth: "400px",
+    width: "100%",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+  };
+
+  const buttonStyle = {
+    padding: "0.5rem 1rem",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+  };
+
+  const cancelButtonStyle = {
+    ...buttonStyle,
+    backgroundColor: "#ccc",
+    color: "#333",
+  };
+
+  const confirmButtonStyle = {
+    ...buttonStyle,
+    backgroundColor: "#5de5d9",
+    color: "#fff",
+  };
+
+  return (
+    <div style={modalOverlayStyle}>
+      <div style={modalStyle}>
+        <p>{message}</p>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "0.5rem",
+            marginTop: "1rem",
+          }}
+        >
+          <button onClick={onCancel} style={cancelButtonStyle}>
+            Cancelar
+          </button>
+          <button onClick={onConfirm} style={confirmButtonStyle}>
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Componente para exibir notificações na tela
+function Notification({ message, type }) {
+  const notificationStyle = {
+    position: "fixed",
+    top: "1rem",
+    right: "1rem",
+    backgroundColor: type === "success" ? "#5cb85c" : "#d9534f",
+    color: "#fff",
+    padding: "1rem 1.5rem",
+    borderRadius: "4px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+    zIndex: 1001,
+  };
+
+  return <div style={notificationStyle}>{message}</div>;
+}
+
 function AdminDashboard({ user, onLogout }) {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
@@ -8,6 +92,8 @@ function AdminDashboard({ user, onLogout }) {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [actionLoading, setActionLoading] = useState({});
   const [companyActionLoading, setCompanyActionLoading] = useState({});
+  const [confirmation, setConfirmation] = useState(null);
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     if (!user || user.role !== "admin") {
@@ -41,104 +127,119 @@ function AdminDashboard({ user, onLogout }) {
     }
   };
 
-  const handlePromoteUser = async (userId) => {
-    if (!window.confirm("Tem certeza que deseja tornar este usuário administrador?")) {
-      return;
-    }
-    try {
-      setActionLoading((prev) => ({ ...prev, [userId]: "promote" }));
-      const response = await fetch(`/api/users/${userId}/promote`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ role: "admin" }),
-      });
-      if (response.ok) {
-        alert("Usuário promovido a administrador com sucesso!");
-        fetchUsers();
-      } else {
-        const data = await response.json();
-        alert(data.error || "Erro ao promover usuário.");
-      }
-    } catch (error) {
-      alert("Erro ao promover usuário: " + error.message);
-    } finally {
-      setActionLoading((prev) => ({ ...prev, [userId]: null }));
-    }
+  const showNotification = (message, type = "success") => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
   };
 
-  const handleDemoteUser = async (userId) => {
-    if (!window.confirm("Tem certeza que deseja tornar este usuário cliente?")) {
-      return;
-    }
-    try {
-      setActionLoading((prev) => ({ ...prev, [userId]: "demote" }));
-      const response = await fetch(`/api/users/${userId}/demote`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ role: "client" }),
-      });
-      if (response.ok) {
-        alert("Usuário demovido para cliente com sucesso!");
-        fetchUsers();
-      } else {
-        const data = await response.json();
-        alert(data.error || "Erro ao demover usuário.");
-      }
-    } catch (error) {
-      alert("Erro ao demover usuário: " + error.message);
-    } finally {
-      setActionLoading((prev) => ({ ...prev, [userId]: null }));
-    }
+  const openConfirmationModal = (message, onConfirm) => {
+    setConfirmation({ message, onConfirm });
   };
 
-  const handleDeleteUser = async (userId) => {
-    if (!window.confirm("Tem certeza que deseja excluir este usuário?")) {
-      return;
-    }
-    try {
-      setActionLoading((prev) => ({ ...prev, [userId]: "delete" }));
-      const response = await fetch(`/api/users/${userId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (response.ok) {
-        alert("Usuário excluído com sucesso!");
-        fetchUsers();
-      } else {
-        const data = await response.json();
-        alert(data.error || "Erro ao excluir usuário.");
-      }
-    } catch (error) {
-      alert("Erro ao excluir usuário: " + error.message);
-    } finally {
-      setActionLoading((prev) => ({ ...prev, [userId]: null }));
-    }
+  const closeConfirmationModal = () => {
+    setConfirmation(null);
   };
 
-  const handleDeleteCompany = async (companyId) => {
-    if (!window.confirm("Tem certeza que deseja excluir esta empresa?")) {
-      return;
-    }
-    try {
-      setCompanyActionLoading((prev) => ({ ...prev, [companyId]: "delete" }));
-      const response = await fetch(`/api/companies/${companyId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (response.ok) {
-        alert("Empresa excluída com sucesso!");
-        fetchCompanies();
-      } else {
-        const data = await response.json();
-        alert(data.error || "Erro ao excluir empresa.");
+  // Funções de ações para usuários
+  const handlePromoteUser = (userId) => {
+    openConfirmationModal("Tem certeza que deseja tornar este usuário administrador?", async () => {
+      try {
+        setActionLoading((prev) => ({ ...prev, [userId]: "promote" }));
+        const response = await fetch(`/api/users/${userId}/promote`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ role: "admin" }),
+        });
+        if (response.ok) {
+          showNotification("Usuário promovido a administrador com sucesso!", "success");
+          fetchUsers();
+        } else {
+          const data = await response.json();
+          showNotification(data.error || "Erro ao promover usuário.", "error");
+        }
+      } catch (error) {
+        showNotification("Erro ao promover usuário: " + error.message, "error");
+      } finally {
+        setActionLoading((prev) => ({ ...prev, [userId]: null }));
       }
-    } catch (error) {
-      alert("Erro ao excluir empresa: " + error.message);
-    } finally {
-      setCompanyActionLoading((prev) => ({ ...prev, [companyId]: null }));
-    }
+      closeConfirmationModal();
+    });
+  };
+
+  const handleDemoteUser = (userId) => {
+    openConfirmationModal("Tem certeza que deseja tornar este usuário cliente?", async () => {
+      try {
+        setActionLoading((prev) => ({ ...prev, [userId]: "demote" }));
+        const response = await fetch(`/api/users/${userId}/demote`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ role: "client" }),
+        });
+        if (response.ok) {
+          showNotification("Usuário demovido para cliente com sucesso!", "success");
+          fetchUsers();
+        } else {
+          const data = await response.json();
+          showNotification(data.error || "Erro ao demover usuário.", "error");
+        }
+      } catch (error) {
+        showNotification("Erro ao demover usuário: " + error.message, "error");
+      } finally {
+        setActionLoading((prev) => ({ ...prev, [userId]: null }));
+      }
+      closeConfirmationModal();
+    });
+  };
+
+  const handleDeleteUser = (userId) => {
+    openConfirmationModal("Tem certeza que deseja excluir este usuário?", async () => {
+      try {
+        setActionLoading((prev) => ({ ...prev, [userId]: "delete" }));
+        const response = await fetch(`/api/users/${userId}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+        if (response.ok) {
+          showNotification("Usuário excluído com sucesso!", "success");
+          fetchUsers();
+        } else {
+          const data = await response.json();
+          showNotification(data.error || "Erro ao excluir usuário.", "error");
+        }
+      } catch (error) {
+        showNotification("Erro ao excluir usuário: " + error.message, "error");
+      } finally {
+        setActionLoading((prev) => ({ ...prev, [userId]: null }));
+      }
+      closeConfirmationModal();
+    });
+  };
+
+  // Função de ação para empresas
+  const handleDeleteCompany = (companyId) => {
+    openConfirmationModal("Tem certeza que deseja excluir esta empresa?", async () => {
+      try {
+        setCompanyActionLoading((prev) => ({ ...prev, [companyId]: "delete" }));
+        const response = await fetch(`/api/companies/${companyId}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+        if (response.ok) {
+          showNotification("Empresa excluída com sucesso!", "success");
+          fetchCompanies();
+        } else {
+          const data = await response.json();
+          showNotification(data.error || "Erro ao excluir empresa.", "error");
+        }
+      } catch (error) {
+        showNotification("Erro ao excluir empresa: " + error.message, "error");
+      } finally {
+        setCompanyActionLoading((prev) => ({ ...prev, [companyId]: null }));
+      }
+      closeConfirmationModal();
+    });
   };
 
   // Estilos para manter o padrão visual
@@ -315,6 +416,16 @@ function AdminDashboard({ user, onLogout }) {
           )}
         </section>
       </div>
+      {confirmation && (
+        <ConfirmationModal
+          message={confirmation.message}
+          onConfirm={confirmation.onConfirm}
+          onCancel={closeConfirmationModal}
+        />
+      )}
+      {notification && (
+        <Notification message={notification.message} type={notification.type} />
+      )}
     </div>
   );
 }
