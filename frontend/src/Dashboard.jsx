@@ -93,15 +93,15 @@ function Dashboard({ user, onLogout }) {
         }
     };
 
-    // Função que atualiza apenas o campo editado
+    // Atualiza apenas o campo editado; se for 'fullName', envia como 'name'
     const handleFieldSave = async (field) => {
+        const fieldToSend = field === 'fullName' ? 'name' : field;
         try {
             const response = await fetch('/api/user', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                // Envia somente o campo que foi alterado
-                body: JSON.stringify({ [field]: userInfo[field] }),
+                body: JSON.stringify({ [fieldToSend]: userInfo[field] }),
             });
             if (response.ok) {
                 setSaveMsg('Informações atualizadas com sucesso!');
