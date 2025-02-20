@@ -253,6 +253,10 @@ app.get('/company-registration', (req, res) => {
 // Endpoint para demover um usuário (tornar cliente)
 app.put('/api/users/:id/demote', isAdmin, async (req, res) => {
   try {
+    // Impede que o usuário logado se demova
+    if (req.user._id.toString() === req.params.id) {
+      return res.status(400).json({ error: "Você não pode se demover." });
+    }
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       { role: 'client' },
@@ -261,7 +265,7 @@ app.put('/api/users/:id/demote', isAdmin, async (req, res) => {
     if (!updatedUser) {
       return res.status(404).json({ error: "Usuário não encontrado." });
     }
-    res.json({ message: "Usuário demotivado com sucesso!", user: updatedUser });
+    res.json({ message: "Usuário demovido com sucesso!", user: updatedUser });
   } catch (err) {
     res.status(500).json({ error: "Erro ao demover usuário: " + err.message });
   }
@@ -270,6 +274,10 @@ app.put('/api/users/:id/demote', isAdmin, async (req, res) => {
 // Endpoint para excluir um usuário
 app.delete('/api/users/:id', isAdmin, async (req, res) => {
   try {
+    // Impede que o usuário logado se exclua
+    if (req.user._id.toString() === req.params.id) {
+      return res.status(400).json({ error: "Você não pode se excluir." });
+    }
     const deletedUser = await User.findByIdAndDelete(req.params.id);
     if (!deletedUser) {
       return res.status(404).json({ error: "Usuário não encontrado." });

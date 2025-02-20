@@ -79,7 +79,7 @@ function AdminDashboard({ user, onLogout }) {
         body: JSON.stringify({ role: "client" }),
       });
       if (response.ok) {
-        alert("Usuário demotivado para cliente com sucesso!");
+        alert("Usuário demovido para cliente com sucesso!");
         fetchUsers();
       } else {
         const data = await response.json();
@@ -217,30 +217,44 @@ function AdminDashboard({ user, onLogout }) {
                     <strong>{u.username || u.email}</strong> - {u.role}
                   </div>
                   <div style={buttonGroupStyle}>
-                    {u.role === "admin" ? (
-                      <button
-                        onClick={() => handleDemoteUser(u._id)}
-                        style={demoteButtonStyle}
-                        disabled={actionLoading[u._id] === "demote"}
-                      >
-                        {actionLoading[u._id] === "demote" ? "Processando..." : "Tornar Cliente"}
-                      </button>
+                    {u._id === user._id ? (
+                      <span style={{ fontStyle: "italic", color: "#888" }}>
+                        Seu usuário
+                      </span>
                     ) : (
-                      <button
-                        onClick={() => handlePromoteUser(u._id)}
-                        style={promoteButtonStyle}
-                        disabled={actionLoading[u._id] === "promote"}
-                      >
-                        {actionLoading[u._id] === "promote" ? "Processando..." : "Tornar Admin"}
-                      </button>
+                      <>
+                        {u.role === "admin" ? (
+                          <button
+                            onClick={() => handleDemoteUser(u._id)}
+                            style={demoteButtonStyle}
+                            disabled={actionLoading[u._id] === "demote"}
+                          >
+                            {actionLoading[u._id] === "demote"
+                              ? "Processando..."
+                              : "Tornar Cliente"}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handlePromoteUser(u._id)}
+                            style={promoteButtonStyle}
+                            disabled={actionLoading[u._id] === "promote"}
+                          >
+                            {actionLoading[u._id] === "promote"
+                              ? "Processando..."
+                              : "Tornar Admin"}
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteUser(u._id)}
+                          style={deleteButtonStyle}
+                          disabled={actionLoading[u._id] === "delete"}
+                        >
+                          {actionLoading[u._id] === "delete"
+                            ? "Excluindo..."
+                            : "Excluir"}
+                        </button>
+                      </>
                     )}
-                    <button
-                      onClick={() => handleDeleteUser(u._id)}
-                      style={deleteButtonStyle}
-                      disabled={actionLoading[u._id] === "delete"}
-                    >
-                      {actionLoading[u._id] === "delete" ? "Excluindo..." : "Excluir"}
-                    </button>
                   </div>
                 </li>
               ))}
