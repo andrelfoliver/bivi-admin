@@ -11,13 +11,14 @@ function Dashboard({ user, onLogout }) {
     const [loading, setLoading] = useState(false);
     const [saveMsg, setSaveMsg] = useState('');
 
-    // Estado para os dados pessoais (módulo "Início")
+    // Estado para os dados pessoais (inicializados com os valores do usuário)
     const [userInfo, setUserInfo] = useState({
         fullName: user?.name || '',
         email: user?.email || '',
         company: user?.company || '',
         telefone: user?.telefone || ''
     });
+
     // Estado para controlar quais campos estão em modo de edição
     const [editing, setEditing] = useState({
         fullName: false,
@@ -91,8 +92,7 @@ function Dashboard({ user, onLogout }) {
         }
     };
 
-    // Função para salvar o campo editado
-    // Se o campo for "fullName", envia como "name" para o backend
+    // Atualiza apenas o campo editado; para 'fullName', envia como 'name'
     const handleFieldSave = async (field) => {
         const fieldToSend = field === 'fullName' ? 'name' : field;
         try {
@@ -181,61 +181,7 @@ function Dashboard({ user, onLogout }) {
         );
     };
 
-    // Funções para promover, demover e excluir usuários
-    const handlePromoteUser = async (userId) => {
-        try {
-            const response = await fetch(`/api/users/${userId}/promote`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ role: 'admin' }),
-            });
-            if (response.ok) {
-                setSaveMsg('Usuário promovido com sucesso!');
-                fetchUsers();
-            } else {
-                setSaveMsg('Erro ao promover usuário.');
-            }
-        } catch (error) {
-            setSaveMsg('Erro ao promover usuário: ' + error.message);
-        }
-    };
-
-    const handleDemoteUser = async (userId) => {
-        try {
-            const response = await fetch(`/api/users/${userId}/demote`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include'
-            });
-            if (response.ok) {
-                setSaveMsg('Usuário demovido com sucesso!');
-                fetchUsers();
-            } else {
-                setSaveMsg('Erro ao demover usuário.');
-            }
-        } catch (error) {
-            setSaveMsg('Erro ao demover usuário: ' + error.message);
-        }
-    };
-
-    const handleDeleteUser = async (userId) => {
-        try {
-            const response = await fetch(`/api/users/${userId}`, {
-                method: 'DELETE',
-                credentials: 'include'
-            });
-            if (response.ok) {
-                setSaveMsg('Usuário excluído com sucesso!');
-                fetchUsers();
-            } else {
-                setSaveMsg('Erro ao excluir usuário.');
-            }
-        } catch (error) {
-            setSaveMsg('Erro ao excluir usuário: ' + error.message);
-        }
-    };
-
+    // Renderização dos módulos
     const renderModuleContent = () => {
         const cardStyle = {
             backgroundColor: '#fff',
@@ -264,88 +210,85 @@ function Dashboard({ user, onLogout }) {
                         {loading ? (
                             <p>Carregando usuários...</p>
                         ) : (
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    flexWrap: 'wrap',
-                                    gap: '1rem'
-                                }}
-                            >
-                                {users.map((u) => {
-                                    // Não exibe ações para o usuário logado
-                                    const isSelf = u._id.toString() === user._id.toString();
-                                    return (
-                                        <div
-                                            key={u._id}
-                                            style={{
-                                                flex: '1 1 300px',
-                                                backgroundColor: '#fff',
-                                                borderRadius: '8px',
-                                                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                                                padding: '1rem',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                justifyContent: 'space-between'
-                                            }}
-                                        >
-                                            <div>
-                                                <h4 style={{ margin: '0 0 0.5rem 0' }}>
-                                                    {u.username || u.email}
-                                                </h4>
-                                                <p style={{ margin: 0 }}>Role: <strong>{u.role}</strong></p>
-                                            </div>
-                                            {!isSelf && (
-                                                <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                                    {u.role === 'client' ? (
-                                                        <button
-                                                            onClick={() => handlePromoteUser(u._id)}
-                                                            style={{
-                                                                flex: '1 1 auto',
-                                                                padding: '0.5rem',
-                                                                backgroundColor: '#5de5d9',
-                                                                border: 'none',
-                                                                borderRadius: '4px',
-                                                                color: '#fff',
-                                                                cursor: 'pointer'
-                                                            }}
-                                                        >
-                                                            Promover
-                                                        </button>
-                                                    ) : (
-                                                        <button
-                                                            onClick={() => handleDemoteUser(u._id)}
-                                                            style={{
-                                                                flex: '1 1 auto',
-                                                                padding: '0.5rem',
-                                                                backgroundColor: '#f0ad4e',
-                                                                border: 'none',
-                                                                borderRadius: '4px',
-                                                                color: '#fff',
-                                                                cursor: 'pointer'
-                                                            }}
-                                                        >
-                                                            Demover
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        onClick={() => handleDeleteUser(u._id)}
-                                                        style={{
-                                                            flex: '1 1 auto',
-                                                            padding: '0.5rem',
-                                                            backgroundColor: '#d9534f',
-                                                            border: 'none',
-                                                            borderRadius: '4px',
-                                                            color: '#fff',
-                                                            cursor: 'pointer'
-                                                        }}
-                                                    >
-                                                        Excluir
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
+                            <div style={{ overflowX: 'auto' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                        <tr style={{ backgroundColor: '#5de5d9', color: '#000' }}>
+                                            <th style={{ padding: '0.75rem', textAlign: 'left' }}>Nome</th>
+                                            <th style={{ padding: '0.75rem', textAlign: 'left' }}>Permissão</th>
+                                            <th style={{ padding: '0.75rem', textAlign: 'left' }}>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {users
+                                            .sort((a, b) => {
+                                                const nameA = (a.name || a.email).toLowerCase();
+                                                const nameB = (b.name || b.email).toLowerCase();
+                                                if (nameA < nameB) return -1;
+                                                if (nameA > nameB) return 1;
+                                                return 0;
+                                            })
+                                            .map((u) => {
+                                                const isSelf = u._id.toString() === user._id.toString();
+                                                return (
+                                                    <tr key={u._id} style={{ borderBottom: '1px solid #ccc' }}>
+                                                        <td style={{ padding: '0.75rem' }}>{u.name || u.email}</td>
+                                                        <td style={{ padding: '0.75rem' }}>
+                                                            {u.role === 'admin' ? 'Admin' : 'Cliente'}
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem' }}>
+                                                            {!isSelf && (
+                                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                                    {u.role === 'client' ? (
+                                                                        <button
+                                                                            onClick={() => handlePromoteUser(u._id)}
+                                                                            style={{
+                                                                                padding: '0.5rem',
+                                                                                backgroundColor: '#5de5d9',
+                                                                                border: 'none',
+                                                                                borderRadius: '4px',
+                                                                                color: '#fff',
+                                                                                cursor: 'pointer'
+                                                                            }}
+                                                                        >
+                                                                            Promover
+                                                                        </button>
+                                                                    ) : (
+                                                                        <button
+                                                                            onClick={() => handleDemoteUser(u._id)}
+                                                                            style={{
+                                                                                padding: '0.5rem',
+                                                                                backgroundColor: '#f0ad4e',
+                                                                                border: 'none',
+                                                                                borderRadius: '4px',
+                                                                                color: '#fff',
+                                                                                cursor: 'pointer'
+                                                                            }}
+                                                                        >
+                                                                            Demover
+                                                                        </button>
+                                                                    )}
+                                                                    <button
+                                                                        onClick={() => handleDeleteUser(u._id)}
+                                                                        style={{
+                                                                            padding: '0.5rem',
+                                                                            backgroundColor: '#d9534f',
+                                                                            border: 'none',
+                                                                            borderRadius: '4px',
+                                                                            color: '#fff',
+                                                                            cursor: 'pointer'
+                                                                        }}
+                                                                    >
+                                                                        Excluir
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                    </tbody>
+                                </table>
                             </div>
                         )}
                     </div>
@@ -405,6 +348,61 @@ function Dashboard({ user, onLogout }) {
                         <h2>Módulo não encontrado</h2>
                     </div>
                 );
+        }
+    };
+
+    // Funções para promover, demover e excluir usuários
+    const handlePromoteUser = async (userId) => {
+        try {
+            const response = await fetch(`/api/users/${userId}/promote`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ role: 'admin' }),
+            });
+            if (response.ok) {
+                setSaveMsg('Usuário promovido com sucesso!');
+                fetchUsers();
+            } else {
+                setSaveMsg('Erro ao promover usuário.');
+            }
+        } catch (error) {
+            setSaveMsg('Erro ao promover usuário: ' + error.message);
+        }
+    };
+
+    const handleDemoteUser = async (userId) => {
+        try {
+            const response = await fetch(`/api/users/${userId}/demote`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            });
+            if (response.ok) {
+                setSaveMsg('Usuário demovido com sucesso!');
+                fetchUsers();
+            } else {
+                setSaveMsg('Erro ao demover usuário.');
+            }
+        } catch (error) {
+            setSaveMsg('Erro ao demover usuário: ' + error.message);
+        }
+    };
+
+    const handleDeleteUser = async (userId) => {
+        try {
+            const response = await fetch(`/api/users/${userId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            if (response.ok) {
+                setSaveMsg('Usuário excluído com sucesso!');
+                fetchUsers();
+            } else {
+                setSaveMsg('Erro ao excluir usuário.');
+            }
+        } catch (error) {
+            setSaveMsg('Erro ao excluir usuário: ' + error.message);
         }
     };
 
@@ -518,12 +516,158 @@ function Dashboard({ user, onLogout }) {
                     ))}
                 </ul>
             </div>
-            <div style={mainContainerStyle}>{renderModuleContent()}</div>
+            <div style={mainContainerStyle}>
+                {selectedModule === 'usuarios' ? (
+                    <div style={{ backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', padding: '1.5rem', marginBottom: '1rem', overflowX: 'auto' }}>
+                        <h2>Usuários Cadastrados</h2>
+                        {loading ? (
+                            <p>Carregando usuários...</p>
+                        ) : (
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ backgroundColor: '#5de5d9', color: '#000' }}>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>Nome</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>Permissão</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {users
+                                        .sort((a, b) => {
+                                            const nameA = (a.name || a.email).toLowerCase();
+                                            const nameB = (b.name || b.email).toLowerCase();
+                                            if (nameA < nameB) return -1;
+                                            if (nameA > nameB) return 1;
+                                            return 0;
+                                        })
+                                        .map((u) => {
+                                            const isSelf = u._id.toString() === user._id.toString();
+                                            return (
+                                                <tr key={u._id} style={{ borderBottom: '1px solid #ccc' }}>
+                                                    <td style={{ padding: '0.75rem' }}>{u.name || u.email}</td>
+                                                    <td style={{ padding: '0.75rem' }}>
+                                                        {u.role === 'admin' ? 'Admin' : 'Cliente'}
+                                                    </td>
+                                                    <td style={{ padding: '0.75rem' }}>
+                                                        {!isSelf && (
+                                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                                {u.role === 'client' ? (
+                                                                    <button
+                                                                        onClick={() => handlePromoteUser(u._id)}
+                                                                        style={{
+                                                                            padding: '0.5rem',
+                                                                            backgroundColor: '#5de5d9',
+                                                                            border: 'none',
+                                                                            borderRadius: '4px',
+                                                                            color: '#fff',
+                                                                            cursor: 'pointer'
+                                                                        }}
+                                                                    >
+                                                                        Promover
+                                                                    </button>
+                                                                ) : (
+                                                                    <button
+                                                                        onClick={() => handleDemoteUser(u._id)}
+                                                                        style={{
+                                                                            padding: '0.5rem',
+                                                                            backgroundColor: '#f0ad4e',
+                                                                            border: 'none',
+                                                                            borderRadius: '4px',
+                                                                            color: '#fff',
+                                                                            cursor: 'pointer'
+                                                                        }}
+                                                                    >
+                                                                        Demover
+                                                                    </button>
+                                                                )}
+                                                                <button
+                                                                    onClick={() => handleDeleteUser(u._id)}
+                                                                    style={{
+                                                                        padding: '0.5rem',
+                                                                        backgroundColor: '#d9534f',
+                                                                        border: 'none',
+                                                                        borderRadius: '4px',
+                                                                        color: '#fff',
+                                                                        cursor: 'pointer'
+                                                                    }}
+                                                                >
+                                                                    Excluir
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                </tbody>
+                            </table>
+                        )}
+                        {saveMsg && <p style={{ marginTop: '1rem', color: '#5de5d9' }}>{saveMsg}</p>}
+                    </div>
+                ) : (
+                    renderModuleContent()
+                )}
+            </div>
             <footer style={footerStyle}>
                 &copy; {new Date().getFullYear()} BiVisualizer. Todos os direitos reservados.
             </footer>
         </div>
     );
 }
+
+// Funções para promover, demover e excluir usuários
+const handlePromoteUser = async (userId) => {
+    try {
+        const response = await fetch(`/api/users/${userId}/promote`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ role: 'admin' }),
+        });
+        if (response.ok) {
+            alert('Usuário promovido com sucesso!');
+            window.location.reload();
+        } else {
+            alert('Erro ao promover usuário.');
+        }
+    } catch (error) {
+        alert('Erro ao promover usuário: ' + error.message);
+    }
+};
+
+const handleDemoteUser = async (userId) => {
+    try {
+        const response = await fetch(`/api/users/${userId}/demote`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+        });
+        if (response.ok) {
+            alert('Usuário demovido com sucesso!');
+            window.location.reload();
+        } else {
+            alert('Erro ao demover usuário.');
+        }
+    } catch (error) {
+        alert('Erro ao demover usuário: ' + error.message);
+    }
+};
+
+const handleDeleteUser = async (userId) => {
+    try {
+        const response = await fetch(`/api/users/${userId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        if (response.ok) {
+            alert('Usuário excluído com sucesso!');
+            window.location.reload();
+        } else {
+            alert('Erro ao excluir usuário.');
+        }
+    } catch (error) {
+        alert('Erro ao excluir usuário: ' + error.message);
+    }
+};
 
 export default Dashboard;
