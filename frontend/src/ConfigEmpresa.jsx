@@ -439,54 +439,7 @@ function ConfigEmpresa({ user, onLogout }) {
         `}
       </style>
 
-      {/* Header */}
-      <header
-        style={{
-          backgroundColor: '#272631',
-          color: 'white',
-          padding: '1rem 2rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <img src="logo.png" alt="BiVisualizer Logo" style={{ height: '60px' }} />
-          <h1 style={{ marginLeft: '1rem', fontSize: '1.5rem', fontWeight: 'bold' }}>BiVisualizer</h1>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {user && (
-            <div style={{ display: 'flex', alignItems: 'center', marginRight: '1rem' }}>
-              <img
-                src={user.picture ? user.picture : '/default-avatar.png'}
-                alt={user.name || 'Usuário'}
-                style={{
-                  height: '40px',
-                  width: '40px',
-                  borderRadius: '50%',
-                  marginRight: '8px',
-                  objectFit: 'cover',
-                }}
-                onError={(e) => { e.currentTarget.src = '/default-avatar.png'; }}
-              />
-              <span>{user.name}</span>
-            </div>
-          )}
-          <button
-            style={{
-              backgroundColor: '#e3342f',
-              border: 'none',
-              padding: '0.5rem 1rem',
-              borderRadius: '4px',
-              color: 'white',
-              cursor: 'pointer',
-            }}
-            onClick={handleLogout}
-          >
-            {t.logout}
-          </button>
-        </div>
-      </header>
+      {/* Removemos o Header para deixar somente as abas */}
 
       {/* Conteúdo Principal */}
       <main style={{ flexGrow: 1, backgroundColor: '#f5fafd', padding: '2rem' }}>
@@ -835,10 +788,10 @@ function ConfigEmpresa({ user, onLogout }) {
                             {field.name === 'regrasResposta'
                               ? instExplanationsTexts.regrasResposta
                               : field.name === 'linkCalendly'
-                              ? instExplanationsTexts.linkCalendly
-                              : field.name === 'linkSite'
-                              ? instExplanationsTexts.linkSite
-                              : instExplanationsTexts.exemplosAtendimento}
+                                ? instExplanationsTexts.linkCalendly
+                                : field.name === 'linkSite'
+                                  ? instExplanationsTexts.linkSite
+                                  : instExplanationsTexts.exemplosAtendimento}
                           </span>
                         )}
                       </div>
