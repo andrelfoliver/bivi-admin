@@ -74,7 +74,8 @@ const translations = {
     salvar: "Salvar Configuração",
     logout: "Sair",
     languageLabel: "Idioma",
-    successMessage: "Configuração salva com sucesso!",
+    // Mensagem de sucesso atualizada:
+    successMessage: "Cadastro da assistente virtual realizado com sucesso! Você pode editar e salvar as alterações.",
     logoFormatError: "Apenas arquivos PNG ou JPEG são aceitos.",
     envSectionTitle: "Variáveis de Ambiente",
     instrucoesPersonalizadas: "Instruções Personalizadas",
@@ -225,7 +226,7 @@ function ConfigEmpresa({ user, onLogout }) {
       } else {
         setSuccess(true);
         setSubmitError(null);
-        setEmpresa(initialState);
+        // Não resetamos os dados, permitindo edição futura.
       }
     } catch (error) {
       setSubmitError("Erro ao enviar dados: " + error.message);
@@ -772,6 +773,11 @@ function ConfigEmpresa({ user, onLogout }) {
           }}
         >
           {submitError}
+        </div>
+      )}
+      {success && (
+        <div style={{ textAlign: 'center', fontSize: '1.5rem', color: '#5de5d9', marginTop: '1rem' }}>
+          {t.successMessage}
         </div>
       )}
     </div>
