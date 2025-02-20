@@ -88,8 +88,7 @@ function Dashboard({ user, onLogout }) {
                         <p>E-mail: {user?.email}</p>
                         <p>Role: {user?.role}</p>
                         <p>
-                            Esta é a página inicial do seu painel. Personalize com informações
-                            relevantes.
+                            Esta é a página inicial do seu painel. Personalize com informações relevantes.
                         </p>
                     </div>
                 );
@@ -149,7 +148,6 @@ function Dashboard({ user, onLogout }) {
             case 'assistenteVirtual':
                 return (
                     <div style={cardStyle}>
-                        {/* Renderiza o componente ConfigEmpresa para o módulo Assistente Virtual */}
                         <ConfigEmpresa user={user} onLogout={onLogout} />
                     </div>
                 );
@@ -229,9 +227,21 @@ function Dashboard({ user, onLogout }) {
         color: '#000',
     };
 
-    const mainContentStyle = {
+    const mainContainerStyle = {
         flex: 1,
         padding: '1rem 2rem',
+        paddingBottom: '4rem', // espaço para o rodapé
+    };
+
+    const footerStyle = {
+        position: 'fixed',
+        bottom: 0,
+        left: '250px',
+        right: 0,
+        backgroundColor: '#4cc9c0',
+        color: '#fff',
+        textAlign: 'center',
+        padding: '0.75rem 1rem',
     };
 
     return (
@@ -265,7 +275,10 @@ function Dashboard({ user, onLogout }) {
                     ))}
                 </ul>
             </div>
-            <div style={mainContentStyle}>{renderModuleContent()}</div>
+            <div style={mainContainerStyle}>{renderModuleContent()}</div>
+            <footer style={footerStyle}>
+                &copy; {new Date().getFullYear()} BiVisualizer. Todos os direitos reservados.
+            </footer>
         </div>
     );
 }
