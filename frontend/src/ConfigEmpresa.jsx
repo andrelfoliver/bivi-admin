@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Tabs, Tab } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
@@ -74,6 +74,7 @@ const translations = {
     salvar: "Salvar Configuração",
     logout: "Sair",
     languageLabel: "Idioma",
+    // Mensagem de sucesso atualizada:
     successMessage: "Cadastro da assistente virtual realizado com sucesso! Você pode editar e salvar as alterações.",
     logoFormatError: "Apenas arquivos PNG ou JPEG são aceitos.",
     envSectionTitle: "Variáveis de Ambiente",
@@ -96,6 +97,21 @@ function ConfigEmpresa({ user, onLogout }) {
   const navigate = useNavigate();
   const [language, setLanguage] = useState('pt');
   const t = translations[language];
+
+  // Estilos básicos
+  const inputStyle = { width: '100%', padding: '0.75rem', border: '1px solid #ccc', borderRadius: '4px' };
+  const labelStyle = { display: 'block', marginBottom: '0.5rem', color: '#272631' };
+  const errorStyle = { color: 'red', fontSize: '0.875rem', marginTop: '0.25rem' };
+  const dropZoneStyle = {
+    border: '2px dashed #ccc',
+    borderRadius: '4px',
+    padding: '1rem',
+    textAlign: 'center',
+    cursor: 'pointer',
+    position: 'relative',
+  };
+  const explanationIconStyle = { marginLeft: '8px', color: '#007bff', cursor: 'pointer', fontWeight: 'bold' };
+  const explanationTextStyle = { display: 'block', fontSize: '0.8rem', color: '#555', marginTop: '0.5rem', backgroundColor: '#f1f1f1', padding: '0.5rem', borderRadius: '4px' };
 
   // Estado inicial do formulário
   const initialState = {
@@ -135,7 +151,7 @@ function ConfigEmpresa({ user, onLogout }) {
   const logoInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState('dadosBasicos');
 
-  // Tooltips para explicações
+  // Tooltips
   const [envExplanations, setEnvExplanations] = useState({
     verifyToken: false,
     whatsappApiToken: false,
@@ -183,25 +199,7 @@ function ConfigEmpresa({ user, onLogout }) {
     setLanguage(e.target.value);
   };
 
-  // Ao carregar, busca a configuração existente (se houver) via GET em /api/company
-  useEffect(() => {
-    async function fetchCompany() {
-      try {
-        const response = await fetch('/api/company', { credentials: 'include' });
-        if (response.ok) {
-          const data = await response.json();
-          if (data.company) {
-            setEmpresa(data.company);
-          }
-        }
-      } catch (error) {
-        console.error("Erro ao buscar configuração da empresa:", error);
-      }
-    }
-    fetchCompany();
-  }, []);
-
-  // Função de logout (não modificada)
+  // Função de logout
   const handleLogout = async () => {
     try {
       await fetch('/api/logout', { method: 'POST', credentials: 'include' });
@@ -214,96 +212,24 @@ function ConfigEmpresa({ user, onLogout }) {
     }
   };
 
-  // Validação: todos os campos obrigatórios (exceto logo) devem estar preenchidos
-  const validateForm = () => {
-    let newErrors = {};
-    if (!empresa.nome.trim())
-      newErrors.nome = t.nomeEmpresa + " é obrigatório.";
-    if (!empresa.apiKey.trim() || !/^sk-(proj-)?[A-Za-z0-9_-]+$/.test(empresa.apiKey) || empresa.apiKey.length < 50)
-      newErrors.apiKey = t.apiKeyError;
-    const phoneDigits = empresa.telefone.replace(/\D/g, '');
-    if (!empresa.telefone.trim() || phoneDigits.length < 10 || phoneDigits.length > 15)
-      newErrors.telefone = "Telefone inválido. Insira entre 10 e 15 dígitos.";
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!empresa.email.trim() || !emailRegex.test(empresa.email))
-      newErrors.email = "E‑mail inválido.";
-    if (!empresa.saudacao.trim())
-      newErrors.saudacao = "Saudação é obrigatória.";
-    if (!empresa.saudacaoInicial.trim())
-      newErrors.saudacaoInicial = "Saudação Inicial é obrigatória.";
-    if (!empresa.respostaPadrao.trim())
-      newErrors.respostaPadrao = "Resposta Padrão é obrigatória.";
-    if (!empresa.mensagemEncerramento.trim())
-      newErrors.mensagemEncerramento = "Mensagem de Encerramento é obrigatória.";
-    if (!empresa.listaProdutos.trim())
-      newErrors.listaProdutos = "Lista de Produtos/Serviços é obrigatória.";
-    [
-      'verifyToken',
-      'whatsappApiToken',
-      'openaiApiKey',
-      'mongoUri',
-      'phoneNumberId',
-      'emailUser',
-      'emailPass',
-      'emailGestor',
-    ].forEach((field) => {
-      if (!empresa[field] || !empresa[field].trim()) {
-        newErrors[field] = field.toUpperCase() + " é obrigatório.";
-      }
-    });
-    if (!empresa.regrasResposta.trim()) {
-      newErrors.regrasResposta = "Regras de Resposta são obrigatórias.";
-    }
-    if (!empresa.linkCalendly.trim()) {
-      newErrors.linkCalendly = "Link de Calendly é obrigatório.";
-    }
-    if (!empresa.linkSite.trim()) {
-      newErrors.linkSite = "Link do Site é obrigatório.";
-    }
-    if (!empresa.exemplosAtendimento.trim()) {
-      newErrors.exemplosAtendimento = "Exemplos de Perguntas e Respostas são obrigatórios.";
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccess(false);
-    if (!validateForm()) return;
-
     try {
-      let response;
-      if (empresa._id) {
-        // Atualiza a configuração existente via PUT
-        response = await fetch('/api/company', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify(empresa),
-        });
-      } else {
-        // Cria a configuração via POST
-        response = await fetch('/register-company', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify(empresa),
-        });
-      }
+      const response = await fetch('/register-company', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(empresa),
+      });
       const data = await response.json();
       if (!response.ok) {
         setSubmitError(data.error || "Erro ao salvar configuração.");
-        setSuccess(false);
       } else {
         setSuccess(true);
         setSubmitError(null);
-        // Atualiza o estado com os dados retornados para futuras edições
-        setEmpresa(data.company || empresa);
+        // Não resetamos os dados, permitindo edição futura.
       }
     } catch (error) {
       setSubmitError("Erro ao enviar dados: " + error.message);
-      setSuccess(false);
     }
   };
 
@@ -361,7 +287,7 @@ function ConfigEmpresa({ user, onLogout }) {
     switch (name) {
       case 'nome':
         if (!value.trim())
-          error = t.nomeEmpresa + " é obrigatório.";
+          error = language === 'pt' ? 'Nome é obrigatório.' : 'Name is required.';
         break;
       case 'apiKey':
         if (!value.trim() || !/^sk-(proj-)?[A-Za-z0-9_-]+$/.test(value) || value.length < 50)
@@ -370,34 +296,36 @@ function ConfigEmpresa({ user, onLogout }) {
       case 'telefone': {
         const digits = value.replace(/\D/g, '');
         if (digits.length < 10 || digits.length > 15)
-          error = "Telefone inválido. Insira entre 10 e 15 dígitos.";
+          error = language === 'pt'
+            ? 'Telefone inválido. Insira entre 10 e 15 dígitos.'
+            : 'Invalid phone. Enter between 10 and 15 digits.';
         break;
       }
       case 'email': {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         if (!value.trim() || !emailRegex.test(value))
-          error = "E‑mail inválido.";
+          error = language === 'pt' ? 'E‑mail inválido.' : 'Invalid e‑mail.';
         break;
       }
       case 'saudacao':
         if (!value.trim())
-          error = "Saudação é obrigatória.";
+          error = language === 'pt' ? 'Saudação é obrigatória.' : 'Greeting is required.';
         break;
       case 'saudacaoInicial':
         if (!value.trim())
-          error = "Saudação Inicial é obrigatória.";
+          error = language === 'pt' ? 'Saudação Inicial é obrigatória.' : 'Initial Greeting is required.';
         break;
       case 'respostaPadrao':
         if (!value.trim())
-          error = "Resposta Padrão é obrigatória.";
+          error = language === 'pt' ? 'Resposta Padrão é obrigatória.' : 'Standard Response is required.';
         break;
       case 'mensagemEncerramento':
         if (!value.trim())
-          error = "Mensagem de Encerramento é obrigatória.";
+          error = language === 'pt' ? 'Mensagem de Encerramento é obrigatória.' : 'Closing Message is required.';
         break;
       case 'listaProdutos':
         if (!value.trim())
-          error = "Lista de Produtos/Serviços é obrigatória.";
+          error = language === 'pt' ? 'Lista de Produtos/Serviços é obrigatória.' : 'Products/Services List is required.';
         break;
       case 'verifyToken':
       case 'whatsappApiToken':
@@ -408,28 +336,88 @@ function ConfigEmpresa({ user, onLogout }) {
       case 'emailPass':
       case 'emailGestor':
         if (!value.trim())
-          error = name.toUpperCase() + " é obrigatório.";
+          error = language === 'pt' ? `${name.toUpperCase()} é obrigatório.` : `${name.toUpperCase()} is required.`;
         break;
       case 'regrasResposta':
         if (!value.trim())
-          error = "Regras de Resposta são obrigatórias.";
+          error = language === 'pt' ? 'Regras de Resposta são obrigatórias.' : 'Response rules are required.';
         break;
       case 'linkCalendly':
         if (!value.trim())
-          error = "Link de Calendly é obrigatório.";
+          error = language === 'pt' ? 'Link de Calendly é obrigatório.' : 'Calendly link is required.';
         break;
       case 'linkSite':
         if (!value.trim())
-          error = "Link do Site é obrigatório.";
+          error = language === 'pt' ? 'Link do Site é obrigatório.' : 'Site link is required.';
         break;
       case 'exemplosAtendimento':
         if (!value.trim())
-          error = "Exemplos de Perguntas e Respostas são obrigatórios.";
+          error = language === 'pt' ? 'Exemplos de Perguntas e Respostas são obrigatórios.' : 'Examples of Q&A are required.';
         break;
       default:
         break;
     }
     setErrors(prev => ({ ...prev, [name]: error }));
+  };
+
+  const validateForm = () => {
+    let newErrors = {};
+    if (!empresa.nome.trim())
+      newErrors.nome = language === 'pt' ? 'Nome é obrigatório.' : 'Name is required.';
+    if (!empresa.apiKey.trim() || !/^sk-(proj-)?[A-Za-z0-9_-]+$/.test(empresa.apiKey) || empresa.apiKey.length < 50)
+      newErrors.apiKey = t.apiKeyError;
+    const phoneDigits = empresa.telefone.replace(/\D/g, '');
+    if (!empresa.telefone.trim() || phoneDigits.length < 10 || phoneDigits.length > 15)
+      newErrors.telefone = language === 'pt' ? 'Telefone inválido. Insira entre 10 e 15 dígitos.' : 'Invalid phone. Enter between 10 and 15 digits.';
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!empresa.email.trim() || !emailRegex.test(empresa.email))
+      newErrors.email = language === 'pt' ? 'E‑mail inválido.' : 'Invalid e‑mail.';
+    if (!empresa.saudacao.trim())
+      newErrors.saudacao = language === 'pt' ? 'Saudação é obrigatória.' : 'Greeting is required.';
+    if (!empresa.saudacaoInicial.trim())
+      newErrors.saudacaoInicial = language === 'pt' ? 'Saudação Inicial é obrigatória.' : 'Initial Greeting is required.';
+    if (!empresa.respostaPadrao.trim())
+      newErrors.respostaPadrao = language === 'pt' ? 'Resposta Padrão é obrigatória.' : 'Standard Response is required.';
+    if (!empresa.mensagemEncerramento.trim())
+      newErrors.mensagemEncerramento = language === 'pt' ? 'Mensagem de Encerramento é obrigatória.' : 'Closing Message is required.';
+    if (!empresa.listaProdutos.trim())
+      newErrors.listaProdutos = language === 'pt' ? 'Lista de Produtos/Serviços é obrigatória.' : 'Products/Services List is required.';
+    [
+      'verifyToken',
+      'whatsappApiToken',
+      'openaiApiKey',
+      'mongoUri',
+      'phoneNumberId',
+      'emailUser',
+      'emailPass',
+      'emailGestor',
+    ].forEach((field) => {
+      if (!empresa[field].trim()) {
+        newErrors[field] = language === 'pt' ? `${field.toUpperCase()} é obrigatório.` : `${field.toUpperCase()} is required.`;
+      }
+    });
+    if (!empresa.regrasResposta.trim()) {
+      newErrors.regrasResposta = language === 'pt' ? 'Regras de Resposta são obrigatórias.' : 'Response rules are required.';
+    }
+    if (!empresa.linkCalendly.trim()) {
+      newErrors.linkCalendly = language === 'pt' ? 'Link de Calendly é obrigatório.' : 'Calendly link is required.';
+    }
+    if (!empresa.linkSite.trim()) {
+      newErrors.linkSite = language === 'pt' ? 'Link do Site é obrigatório.' : 'Site link is required.';
+    }
+    if (!empresa.exemplosAtendimento.trim()) {
+      newErrors.exemplosAtendimento = language === 'pt' ? 'Exemplos de Perguntas e Respostas são obrigatórios.' : 'Examples of Q&A are required.';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Função para remover o logo selecionado
+  const handleRemoveLogo = () => {
+    setEmpresa(prev => ({ ...prev, logo: null, logoFileName: null }));
+    if (logoInputRef.current) {
+      logoInputRef.current.value = "";
+    }
   };
 
   return (
@@ -445,7 +433,7 @@ function ConfigEmpresa({ user, onLogout }) {
         `}
       </style>
 
-      {/* Apenas os Tabs, sem header ou footer extra */}
+      {/* Conteúdo sem header ou footer extra */}
       <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
         <Tab eventKey="dadosBasicos" title={t.dadosBasicos}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
