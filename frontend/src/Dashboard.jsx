@@ -9,15 +9,15 @@ function Dashboard({ user, onLogout }) {
     const [users, setUsers] = useState([]);
     const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [saveMsg, setSaveMsg] = useState('');
 
-    // Estado para os dados pessoais (inicializados com os valores do usuário)
+    // Estado para os dados pessoais (módulo "Início")
     const [userInfo, setUserInfo] = useState({
         fullName: user?.name || '',
         email: user?.email || '',
         company: user?.company || '',
         telefone: user?.telefone || ''
     });
-
     // Estado para controlar quais campos estão em modo de edição
     const [editing, setEditing] = useState({
         fullName: false,
@@ -25,8 +25,6 @@ function Dashboard({ user, onLogout }) {
         company: false,
         telefone: false
     });
-
-    const [saveMsg, setSaveMsg] = useState('');
 
     useEffect(() => {
         if (!user) {
@@ -93,7 +91,8 @@ function Dashboard({ user, onLogout }) {
         }
     };
 
-    // Atualiza apenas o campo editado; se for 'fullName', envia como 'name'
+    // Função para salvar o campo editado
+    // Se o campo for "fullName", envia como "name" para o backend
     const handleFieldSave = async (field) => {
         const fieldToSend = field === 'fullName' ? 'name' : field;
         try {
@@ -124,9 +123,7 @@ function Dashboard({ user, onLogout }) {
                         <input
                             type={type}
                             value={userInfo[field]}
-                            onChange={(e) =>
-                                setUserInfo({ ...userInfo, [field]: e.target.value })
-                            }
+                            onChange={(e) => setUserInfo({ ...userInfo, [field]: e.target.value })}
                             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
                             required
                         />
@@ -184,6 +181,61 @@ function Dashboard({ user, onLogout }) {
         );
     };
 
+    // Funções para promover, demover e excluir usuários
+    const handlePromoteUser = async (userId) => {
+        try {
+            const response = await fetch(`/api/users/${userId}/promote`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ role: 'admin' }),
+            });
+            if (response.ok) {
+                setSaveMsg('Usuário promovido com sucesso!');
+                fetchUsers();
+            } else {
+                setSaveMsg('Erro ao promover usuário.');
+            }
+        } catch (error) {
+            setSaveMsg('Erro ao promover usuário: ' + error.message);
+        }
+    };
+
+    const handleDemoteUser = async (userId) => {
+        try {
+            const response = await fetch(`/api/users/${userId}/demote`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            });
+            if (response.ok) {
+                setSaveMsg('Usuário demovido com sucesso!');
+                fetchUsers();
+            } else {
+                setSaveMsg('Erro ao demover usuário.');
+            }
+        } catch (error) {
+            setSaveMsg('Erro ao demover usuário: ' + error.message);
+        }
+    };
+
+    const handleDeleteUser = async (userId) => {
+        try {
+            const response = await fetch(`/api/users/${userId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            if (response.ok) {
+                setSaveMsg('Usuário excluído com sucesso!');
+                fetchUsers();
+            } else {
+                setSaveMsg('Erro ao excluir usuário.');
+            }
+        } catch (error) {
+            setSaveMsg('Erro ao excluir usuário: ' + error.message);
+        }
+    };
+
     const renderModuleContent = () => {
         const cardStyle = {
             backgroundColor: '#fff',
@@ -212,13 +264,89 @@ function Dashboard({ user, onLogout }) {
                         {loading ? (
                             <p>Carregando usuários...</p>
                         ) : (
-                            <ul>
-                                {users.map((u) => (
-                                    <li key={u._id}>
-                                        {u.username || u.email} - <strong>{u.role}</strong>
-                                    </li>
-                                ))}
-                            </ul>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    gap: '1rem'
+                                }}
+                            >
+                                {users.map((u) => {
+                                    // Não exibe ações para o usuário logado
+                                    const isSelf = u._id.toString() === user._id.toString();
+                                    return (
+                                        <div
+                                            key={u._id}
+                                            style={{
+                                                flex: '1 1 300px',
+                                                backgroundColor: '#fff',
+                                                borderRadius: '8px',
+                                                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                                padding: '1rem',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                justifyContent: 'space-between'
+                                            }}
+                                        >
+                                            <div>
+                                                <h4 style={{ margin: '0 0 0.5rem 0' }}>
+                                                    {u.username || u.email}
+                                                </h4>
+                                                <p style={{ margin: 0 }}>Role: <strong>{u.role}</strong></p>
+                                            </div>
+                                            {!isSelf && (
+                                                <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                                    {u.role === 'client' ? (
+                                                        <button
+                                                            onClick={() => handlePromoteUser(u._id)}
+                                                            style={{
+                                                                flex: '1 1 auto',
+                                                                padding: '0.5rem',
+                                                                backgroundColor: '#5de5d9',
+                                                                border: 'none',
+                                                                borderRadius: '4px',
+                                                                color: '#fff',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            Promover
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => handleDemoteUser(u._id)}
+                                                            style={{
+                                                                flex: '1 1 auto',
+                                                                padding: '0.5rem',
+                                                                backgroundColor: '#f0ad4e',
+                                                                border: 'none',
+                                                                borderRadius: '4px',
+                                                                color: '#fff',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            Demover
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => handleDeleteUser(u._id)}
+                                                        style={{
+                                                            flex: '1 1 auto',
+                                                            padding: '0.5rem',
+                                                            backgroundColor: '#d9534f',
+                                                            border: 'none',
+                                                            borderRadius: '4px',
+                                                            color: '#fff',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        Excluir
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         )}
                     </div>
                 );
@@ -280,6 +408,7 @@ function Dashboard({ user, onLogout }) {
         }
     };
 
+    // Estilos gerais do Dashboard
     const pageWrapperStyle = {
         display: 'flex',
         minHeight: '100vh',
