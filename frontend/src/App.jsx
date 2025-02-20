@@ -8,6 +8,7 @@ import {
 import LoginPage from './LoginPage';
 import ConfigEmpresa from './ConfigEmpresa';
 import RegisterPage from './RegisterPage';
+import AdminDashboard from './AdminDashboard';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -54,12 +55,40 @@ function App() {
       <Routes>
         <Route 
           path="/login"
-          element={user ? <Navigate to="/config" replace /> : <LoginPage setUser={setUser} />}
+          element={
+            user ? (
+              user.role === 'admin' ? 
+                <Navigate to="/admin" replace /> 
+                : <Navigate to="/config" replace />
+            ) : (
+              <LoginPage setUser={setUser} />
+            )
+          }
         />
         <Route path="/register" element={<RegisterPage />} />
         <Route 
           path="/config"
-          element={user ? <ConfigEmpresa user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />}
+          element={
+            user ? (
+              user.role !== 'admin' ? 
+                <ConfigEmpresa user={user} onLogout={handleLogout} /> 
+                : <Navigate to="/admin" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            user ? (
+              user.role === 'admin' ? 
+                <AdminDashboard user={user} onLogout={handleLogout} /> 
+                : <Navigate to="/config" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
         />
         {/* Sempre redireciona a raiz para /login */}
         <Route path="/" element={<Navigate to="/login" replace />} />

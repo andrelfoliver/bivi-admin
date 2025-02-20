@@ -20,7 +20,7 @@ const app = express();
 // Indica que o Express deve confiar no proxy (necessário para ambientes como o Heroku)
 app.set('trust proxy', 1);
 
-// Middleware para interpretar JSON e dados de formulário (urlencoded)
+// Middlewares para interpretar JSON e dados de formulário
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -30,7 +30,7 @@ mongoose
   .then(() => console.log("Conectado ao MongoDB"))
   .catch((err) => console.error("Erro ao conectar ao MongoDB:", err));
 
-// Configura sessão para persistir dados de login
+// Configuração da sessão
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -55,7 +55,7 @@ passport.deserializeUser((id, done) => {
   User.findById(id).then((user) => done(null, user));
 });
 
-// Configura a estratégia do Google OAuth (permitindo apenas contas Gmail)
+// Estratégia do Google OAuth
 passport.use(
   new GoogleStrategy(
     {
@@ -69,19 +69,21 @@ passport.use(
       }
       const existingUser = await User.findOne({ googleId: profile.id });
       if (existingUser) return done(null, existingUser);
-      // Cria um novo usuário incluindo a foto do perfil
+      // Cria um novo usuário com role 'client' por padrão
       const newUser = await new User({
         googleId: profile.id,
         email: profile.emails[0].value,
         name: profile.displayName,
         picture: profile.photos && profile.photos[0] ? profile.photos[0].value : null,
-        provider: 'google'
+        provider: 'google',
+        role: 'client'
       }).save();
       done(null, newUser);
     }
   )
 );
-// Inicia o fluxo de login com Google, forçando escolha de conta e consentimento
+
+// Rota para iniciar o fluxo de login com Google
 app.get(
   '/auth/google',
   passport.authenticate('google', {
@@ -90,16 +92,14 @@ app.get(
   })
 );
 
-// Callback após autenticação
+// Callback após autenticação com Google
 app.get(
   '/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
-    // Login bem-sucedido: redireciona para a página principal
     res.redirect('/');
   }
 );
-
 
 // Endpoint para registro manual de usuário
 app.post('/api/auth/register', async (req, res) => {
@@ -118,7 +118,8 @@ app.post('/api/auth/register', async (req, res) => {
       email,
       password: hashedPassword,
       name: name || username,
-      provider: 'local'
+      provider: 'local',
+      role: 'client' // Usuários registrados manualmente terão role 'client' por padrão
     });
     const savedUser = await newUser.save();
     res.status(201).send({ message: "Usuário registrado com sucesso!", user: savedUser });
@@ -127,12 +128,11 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-
 // Endpoint para login manual de usuário
 app.post('/api/auth/login', async (req, res, next) => {
   const { username, password } = req.body;
   try {
-    // Se já houver um usuário autenticado, faça logout para limpar a sessão anterior
+    // Se já houver um usuário autenticado, efetua logout para limpar a sessão anterior
     if (req.isAuthenticated()) {
       await new Promise((resolve, reject) => {
         req.logout((err) => {
@@ -161,13 +161,40 @@ app.post('/api/auth/login', async (req, res, next) => {
   }
 });
 
-
 // Endpoint para verificar se o usuário está autenticado
 app.get('/api/current-user', (req, res) => {
   if (req.isAuthenticated()) {
     res.json({ loggedIn: true, user: req.user });
   } else {
     res.json({ loggedIn: false });
+  }
+});
+
+// Middleware para checar se o usuário é admin
+function isAdmin(req, res, next) {
+  if (req.isAuthenticated() && req.user.role === 'admin') {
+    return next();
+  }
+  return res.status(403).json({ error: "Acesso negado. Somente administradores têm acesso." });
+}
+
+// Endpoint para buscar todos os usuários (apenas para admin)
+app.get('/api/users', isAdmin, async (req, res) => {
+  try {
+    const users = await User.find({}).select('-password');
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao buscar usuários: " + err.message });
+  }
+});
+
+// Endpoint para buscar todas as empresas (apenas para admin)
+app.get('/api/companies', isAdmin, async (req, res) => {
+  try {
+    const companies = await Company.find({});
+    res.json(companies);
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao buscar empresas: " + err.message });
   }
 });
 
@@ -184,6 +211,7 @@ app.post('/register-company', async (req, res) => {
     res.status(500).send({ error: "Erro ao cadastrar empresa: " + err.message });
   }
 });
+
 // Endpoint para logout – destrói a sessão e limpa o cookie
 app.post('/api/logout', (req, res, next) => {
   req.logout(err => {

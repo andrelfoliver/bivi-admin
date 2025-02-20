@@ -20,8 +20,15 @@ function LoginPage({ setUser }) {
         body: JSON.stringify({ username, password }),
       });
       if (response.ok) {
-        // Força um reload para atualizar a sessão
-        window.location.href = '/';
+        // Parse do JSON para obter o usuário logado
+        const data = await response.json();
+        setUser(data.user);
+        // Redireciona de acordo com o role do usuário
+        if (data.user.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/config-empresa');
+        }
       } else {
         const data = await response.json();
         setErrorMsg(data.error || 'Usuário ou senha inválidos!');
