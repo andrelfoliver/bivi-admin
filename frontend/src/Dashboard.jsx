@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ConfigEmpresa from './ConfigEmpresa';
 
 function Dashboard({ user, onLogout }) {
     const navigate = useNavigate();
@@ -148,8 +149,8 @@ function Dashboard({ user, onLogout }) {
             case 'assistenteVirtual':
                 return (
                     <div style={cardStyle}>
-                        <h2>Assistente Virtual</h2>
-                        <p>Aqui pode ser incorporado o componente de configuração.</p>
+                        {/* Renderiza o componente ConfigEmpresa para o módulo Assistente Virtual */}
+                        <ConfigEmpresa user={user} onLogout={onLogout} />
                     </div>
                 );
             case 'config':
@@ -198,13 +199,16 @@ function Dashboard({ user, onLogout }) {
     };
 
     const defaultAvatarStyle = {
-        ...avatarStyle,
+        width: '60px',
+        height: '60px',
+        borderRadius: '50%',
         backgroundColor: '#333',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         fontSize: '1.5rem',
         color: '#fff',
+        margin: '0 auto 0.5rem',
     };
 
     const moduleListStyle = {
@@ -238,7 +242,9 @@ function Dashboard({ user, onLogout }) {
                         <img src={user.picture} alt="Avatar" style={avatarStyle} />
                     ) : (
                         <div style={defaultAvatarStyle}>
-                            {user?.name?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase() || 'U'}
+                            {user?.name?.charAt(0).toUpperCase() ||
+                                user?.username?.charAt(0).toUpperCase() ||
+                                'U'}
                         </div>
                     )}
                     <h3 style={{ margin: 0 }}>{user?.name || user?.username}</h3>
