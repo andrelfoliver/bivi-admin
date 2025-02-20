@@ -4,10 +4,9 @@ const userSchema = new mongoose.Schema(
   {
     googleId: { type: String },
     username: { type: String },
-    email: { type: String, required: true },
+    email: { type: String, required: true, unique: true }, // Agora é único
     password: { type: String },
     name: { type: String },
-    company: { type: String }, // novo campo
     picture: { type: String },
     provider: {
       type: String,
@@ -19,6 +18,7 @@ const userSchema = new mongoose.Schema(
       enum: ['admin', 'client'],
       default: 'client'
     },
+    company: { type: String }, // Incluindo empresa caso não esteja no schema
   },
   { timestamps: true }
 );
