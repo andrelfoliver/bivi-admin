@@ -198,6 +198,24 @@ app.get('/api/companies', isAdmin, async (req, res) => {
   }
 });
 
+// Endpoint para promover um usuário a admin (somente para admin)
+app.put('/api/users/:id/promote', isAdmin, async (req, res) => {
+  try {
+    const { role } = req.body;
+    if (role !== "admin") {
+      return res.status(400).json({ error: "Role inválida. Apenas 'admin' é permitido." });
+    }
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, { role }, { new: true });
+    if (!updatedUser) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+    res.json({ message: "Usuário promovido com sucesso!", user: updatedUser });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao promover usuário: " + err.message });
+  }
+});
+
+
 // Endpoint para cadastro de empresas
 app.post('/register-company', async (req, res) => {
   console.log("Requisição recebida em /register-company:", req.body);
