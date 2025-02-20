@@ -97,7 +97,7 @@ function ConfigEmpresa({ user, onLogout }) {
   const [language, setLanguage] = useState('pt');
   const t = translations[language];
 
-  // Estilos
+  // Estilos básicos
   const inputStyle = { width: '100%', padding: '0.75rem', border: '1px solid #ccc', borderRadius: '4px' };
   const labelStyle = { display: 'block', marginBottom: '0.5rem', color: '#272631' };
   const errorStyle = { color: 'red', fontSize: '0.875rem', marginTop: '0.25rem' };
@@ -213,19 +213,13 @@ function ConfigEmpresa({ user, onLogout }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("handleSubmit acionado");
-    console.log("Dados da empresa a serem enviados:", empresa);
-
     try {
       const response = await fetch('/register-company', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(empresa),
       });
-      console.log("Status da resposta:", response.status);
       const data = await response.json();
-      console.log("Resposta do servidor:", data);
-
       if (!response.ok) {
         setSubmitError(data.error || "Erro ao salvar configuração.");
       } else {
@@ -234,7 +228,6 @@ function ConfigEmpresa({ user, onLogout }) {
         setEmpresa(initialState);
       }
     } catch (error) {
-      console.error("Erro ao enviar dados:", error);
       setSubmitError("Erro ao enviar dados: " + error.message);
     }
   };
@@ -427,7 +420,7 @@ function ConfigEmpresa({ user, onLogout }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div>
       <style>
         {`
           .nav-tabs .nav-link.active {
@@ -439,413 +432,348 @@ function ConfigEmpresa({ user, onLogout }) {
         `}
       </style>
 
-      {/* Removemos o Header para deixar somente as abas */}
-
-      {/* Conteúdo Principal */}
-      <main style={{ flexGrow: 1, backgroundColor: '#f5fafd', padding: '2rem' }}>
+      {/* Conteúdo sem header ou footer extra */}
+      <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
+        <Tab eventKey="dadosBasicos" title={t.dadosBasicos}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+            <div style={{ flex: '1 1 300px' }}>
+              <label style={labelStyle}>{t.nomeEmpresa}</label>
+              <input
+                type="text"
+                name="nome"
+                placeholder={t.nomePlaceholder}
+                value={empresa.nome}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                style={inputStyle}
+                required
+              />
+              {errors.nome && <span style={errorStyle}>{errors.nome}</span>}
+            </div>
+            <div style={{ flex: '1 1 300px' }}>
+              <label style={labelStyle}>{t.apiKey}</label>
+              <input
+                type="text"
+                name="apiKey"
+                placeholder={t.apiPlaceholder}
+                value={empresa.apiKey}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                style={inputStyle}
+                required
+              />
+              {errors.apiKey && <span style={errorStyle}>{errors.apiKey}</span>}
+            </div>
+            <div style={{ flex: '1 1 300px' }}>
+              <label style={labelStyle}>{t.telefone}</label>
+              <input
+                type="text"
+                name="telefone"
+                placeholder={t.telefonePlaceholder}
+                value={empresa.telefone}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                style={inputStyle}
+                required
+              />
+              {errors.telefone && <span style={errorStyle}>{errors.telefone}</span>}
+            </div>
+            <div style={{ flex: '1 1 300px' }}>
+              <label style={labelStyle}>{t.email}</label>
+              <input
+                type="email"
+                name="email"
+                placeholder={t.emailPlaceholder}
+                value={empresa.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                style={inputStyle}
+                required
+              />
+              {errors.email && <span style={errorStyle}>{errors.email}</span>}
+            </div>
+            <div style={{ flex: '1 1 100%' }}>
+              <label style={labelStyle}>{t.saudacao}</label>
+              <input
+                type="text"
+                name="saudacao"
+                placeholder={t.saudacaoPlaceholder}
+                value={empresa.saudacao}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                style={inputStyle}
+                required
+              />
+              {errors.saudacao && <span style={errorStyle}>{errors.saudacao}</span>}
+            </div>
+          </div>
+        </Tab>
+        <Tab eventKey="identidadeVisual" title={t.identidadeVisual}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+            <div style={{ flex: '1 1 100%' }}>
+              <label style={labelStyle}>{t.logotipo}</label>
+              <div
+                style={dropZoneStyle}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onClick={() => logoInputRef.current && logoInputRef.current.click()}
+              >
+                <p>{t.logoDropZone}</p>
+                <input
+                  type="file"
+                  name="logo"
+                  accept="image/png, image/jpeg"
+                  onChange={handleChange}
+                  ref={logoInputRef}
+                  style={{ display: 'none' }}
+                />
+              </div>
+              {empresa.logoFileName && (
+                <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <p style={{ fontStyle: 'italic' }}>Arquivo selecionado: {empresa.logoFileName}</p>
+                  <button
+                    type="button"
+                    onClick={handleRemoveLogo}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#e3342f',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Remover
+                  </button>
+                </div>
+              )}
+              {errors.logo && <span style={errorStyle}>{errors.logo}</span>}
+            </div>
+            <div style={{ flex: '1 1 300px' }}>
+              <label style={labelStyle}>{t.corPrimaria}</label>
+              <input
+                type="color"
+                name="primaryColor"
+                value={empresa.primaryColor}
+                onChange={handleChange}
+                style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }}
+              />
+            </div>
+            <div style={{ flex: '1 1 300px' }}>
+              <label style={labelStyle}>{t.corSecundaria}</label>
+              <input
+                type="color"
+                name="secondaryColor"
+                value={empresa.secondaryColor}
+                onChange={handleChange}
+                style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }}
+              />
+            </div>
+            <div style={{ flex: '1 1 300px' }}>
+              <label style={labelStyle}>{t.corFundo}</label>
+              <input
+                type="color"
+                name="backgroundColor"
+                value={empresa.backgroundColor}
+                onChange={handleChange}
+                style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }}
+              />
+            </div>
+          </div>
+        </Tab>
+        <Tab eventKey="fluxoAtendimento" title={t.configuracaoAtendimento}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+            <div style={{ flex: '1 1 100%' }}>
+              <label style={labelStyle}>{t.saudacaoInicial}</label>
+              <textarea
+                name="saudacaoInicial"
+                rows="2"
+                placeholder={t.saudacaoInicialPlaceholder}
+                value={empresa.saudacaoInicial}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                style={inputStyle}
+                required
+              ></textarea>
+              {errors.saudacaoInicial && <span style={errorStyle}>{errors.saudacaoInicial}</span>}
+            </div>
+            <div style={{ flex: '1 1 100%' }}>
+              <label style={labelStyle}>{t.respostaPadrao}</label>
+              <textarea
+                name="respostaPadrao"
+                rows="2"
+                placeholder={t.respostaPadraoPlaceholder}
+                value={empresa.respostaPadrao}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                style={inputStyle}
+                required
+              ></textarea>
+              {errors.respostaPadrao && <span style={errorStyle}>{errors.respostaPadrao}</span>}
+            </div>
+            <div style={{ flex: '1 1 100%' }}>
+              <label style={labelStyle}>{t.solicitacaoEmail}</label>
+              <textarea
+                name="solicitacaoEmail"
+                rows="2"
+                placeholder={t.solicitacaoEmailPlaceholder}
+                value={empresa.solicitacaoEmail}
+                onChange={handleChange}
+                style={inputStyle}
+              ></textarea>
+            </div>
+            <div style={{ flex: '1 1 100%' }}>
+              <label style={labelStyle}>{t.mensagemEncerramento}</label>
+              <textarea
+                name="mensagemEncerramento"
+                rows="2"
+                placeholder={t.mensagemEncerramentoPlaceholder}
+                value={empresa.mensagemEncerramento}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                style={inputStyle}
+                required
+              ></textarea>
+              {errors.mensagemEncerramento && <span style={errorStyle}>{errors.mensagemEncerramento}</span>}
+            </div>
+            <div style={{ flex: '1 1 100%' }}>
+              <label style={labelStyle}>{t.listaProdutos}</label>
+              <textarea
+                name="listaProdutos"
+                rows="3"
+                placeholder={t.listaProdutosPlaceholder}
+                value={empresa.listaProdutos}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                style={{ ...inputStyle, whiteSpace: 'pre-wrap' }}
+                required
+              ></textarea>
+              {errors.listaProdutos && <span style={errorStyle}>{errors.listaProdutos}</span>}
+            </div>
+          </div>
+        </Tab>
+        <Tab eventKey="envVars" title={t.envSectionTitle}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {[
+              { label: 'VERIFY_TOKEN', name: 'verifyToken' },
+              { label: 'WHATSAPP_API_TOKEN', name: 'whatsappApiToken' },
+              { label: 'MONGO_URI', name: 'mongoUri' },
+              { label: 'PHONE_NUMBER_ID', name: 'phoneNumberId' },
+              { label: 'EMAIL_USER', name: 'emailUser' },
+              { label: 'EMAIL_PASS', name: 'emailPass', type: 'text' },
+              { label: 'EMAIL_GESTOR', name: 'emailGestor' },
+            ].map((field) => (
+              <div key={field.name} style={{ flex: '1 1 100%' }}>
+                <label style={labelStyle}>
+                  {field.label}
+                  <span style={explanationIconStyle} onClick={() => toggleEnvExplanation(field.name)}>
+                    ?
+                  </span>
+                </label>
+                <input
+                  type={field.type ? field.type : 'text'}
+                  name={field.name}
+                  placeholder={field.label}
+                  value={empresa[field.name]}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  style={inputStyle}
+                  required
+                />
+                {errors[field.name] && <span style={errorStyle}>{errors[field.name]}</span>}
+                {envExplanations[field.name] && (
+                  <span style={explanationTextStyle}>
+                    {envExplanationsTexts[field.name]}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </Tab>
+        <Tab eventKey="instrucao" title={t.instrucoesPersonalizadas}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {[
+              { label: t.regrasResposta, name: 'regrasResposta', placeholder: t.regrasRespostaPlaceholder },
+              { label: t.linkCalendly, name: 'linkCalendly', placeholder: t.linkCalendlyPlaceholder },
+              { label: t.linkSite, name: 'linkSite', placeholder: t.linkSitePlaceholder },
+              { label: t.exemplosAtendimento, name: 'exemplosAtendimento', placeholder: t.exemplosAtendimentoPlaceholder },
+            ].map((field) => (
+              <div key={field.name} style={{ flex: '1 1 100%' }}>
+                <label style={labelStyle}>
+                  {field.label}
+                  <span style={explanationIconStyle} onClick={() => toggleInstExplanation(field.name)}>
+                    ?
+                  </span>
+                </label>
+                {field.name === 'regrasResposta' || field.name === 'exemplosAtendimento' ? (
+                  <textarea
+                    name={field.name}
+                    rows="5"
+                    placeholder={field.placeholder}
+                    value={empresa[field.name]}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    style={inputStyle}
+                    required
+                  ></textarea>
+                ) : (
+                  <input
+                    type="text"
+                    name={field.name}
+                    placeholder={field.placeholder}
+                    value={empresa[field.name]}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    style={inputStyle}
+                    required
+                  />
+                )}
+                {errors[field.name] && <span style={errorStyle}>{errors[field.name]}</span>}
+                {instExplanations[field.name] && (
+                  <span style={explanationTextStyle}>
+                    {field.name === 'regrasResposta'
+                      ? instExplanationsTexts.regrasResposta
+                      : field.name === 'linkCalendly'
+                        ? instExplanationsTexts.linkCalendly
+                        : field.name === 'linkSite'
+                          ? instExplanationsTexts.linkSite
+                          : instExplanationsTexts.exemplosAtendimento}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+          <button
+            type="submit"
+            style={{
+              backgroundColor: '#5de5d9',
+              border: 'none',
+              padding: '1rem',
+              borderRadius: '4px',
+              color: 'white',
+              cursor: 'pointer',
+              transition: 'background-color 0.3s',
+              marginTop: '1rem'
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#4cc9c0')}
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#5de5d9')}
+            onClick={handleSubmit}
+          >
+            {t.salvar}
+          </button>
+        </Tab>
+      </Tabs>
+      {submitError && (
         <div
           style={{
-            maxWidth: '800px',
-            margin: '0 auto',
-            backgroundColor: '#ffffff',
-            padding: '2rem',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+            backgroundColor: '#f8d7da',
+            color: '#842029',
+            padding: '1rem',
+            borderRadius: '4px',
+            marginBottom: '1rem',
           }}
         >
-          {/* Título da Página */}
-          <h2
-            style={{
-              textAlign: 'center',
-              color: '#272631',
-              marginBottom: '3rem',
-              fontSize: '2rem',
-              fontWeight: 'bold',
-            }}
-          >
-            Configuração da Assistente Virtual
-          </h2>
-
-          {success ? (
-            <div style={{ textAlign: 'center', fontSize: '1.5rem', color: '#5de5d9' }}>
-              {t.successMessage}
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
-                <Tab eventKey="dadosBasicos" title={t.dadosBasicos}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                    <div style={{ flex: '1 1 300px' }}>
-                      <label style={{ display: 'block', marginBottom: '0.5rem', color: '#272631' }}>
-                        {t.nomeEmpresa}
-                      </label>
-                      <input
-                        type="text"
-                        name="nome"
-                        placeholder={t.nomePlaceholder}
-                        value={empresa.nome}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        style={inputStyle}
-                        required
-                      />
-                      {errors.nome && <span style={errorStyle}>{errors.nome}</span>}
-                    </div>
-                    <div style={{ flex: '1 1 300px' }}>
-                      <label style={labelStyle}>{t.apiKey}</label>
-                      <input
-                        type="text"
-                        name="apiKey"
-                        placeholder={t.apiPlaceholder}
-                        value={empresa.apiKey}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        style={inputStyle}
-                        required
-                      />
-                      {errors.apiKey && <span style={errorStyle}>{errors.apiKey}</span>}
-                    </div>
-                    <div style={{ flex: '1 1 300px' }}>
-                      <label style={labelStyle}>{t.telefone}</label>
-                      <input
-                        type="text"
-                        name="telefone"
-                        placeholder={t.telefonePlaceholder}
-                        value={empresa.telefone}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        style={inputStyle}
-                        required
-                      />
-                      {errors.telefone && <span style={errorStyle}>{errors.telefone}</span>}
-                    </div>
-                    <div style={{ flex: '1 1 300px' }}>
-                      <label style={labelStyle}>{t.email}</label>
-                      <input
-                        type="email"
-                        name="email"
-                        placeholder={t.emailPlaceholder}
-                        value={empresa.email}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        style={inputStyle}
-                        required
-                      />
-                      {errors.email && <span style={errorStyle}>{errors.email}</span>}
-                    </div>
-                    <div style={{ flex: '1 1 100%' }}>
-                      <label style={labelStyle}>{t.saudacao}</label>
-                      <input
-                        type="text"
-                        name="saudacao"
-                        placeholder={t.saudacaoPlaceholder}
-                        value={empresa.saudacao}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        style={inputStyle}
-                        required
-                      />
-                      {errors.saudacao && <span style={errorStyle}>{errors.saudacao}</span>}
-                    </div>
-                  </div>
-                </Tab>
-                <Tab eventKey="identidadeVisual" title={t.identidadeVisual}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                    <div style={{ flex: '1 1 100%' }}>
-                      <label style={labelStyle}>{t.logotipo}</label>
-                      <div
-                        style={dropZoneStyle}
-                        onDrop={handleDrop}
-                        onDragOver={handleDragOver}
-                        onClick={() => logoInputRef.current && logoInputRef.current.click()}
-                      >
-                        <p>{t.logoDropZone}</p>
-                        <input
-                          type="file"
-                          name="logo"
-                          accept="image/png, image/jpeg"
-                          onChange={handleChange}
-                          ref={logoInputRef}
-                          style={{ display: 'none' }}
-                        />
-                      </div>
-                      {empresa.logoFileName && (
-                        <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <p style={{ fontStyle: 'italic' }}>Arquivo selecionado: {empresa.logoFileName}</p>
-                          <button
-                            type="button"
-                            onClick={handleRemoveLogo}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              color: '#e3342f',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            Remover
-                          </button>
-                        </div>
-                      )}
-                      {errors.logo && <span style={errorStyle}>{errors.logo}</span>}
-                    </div>
-                    <div style={{ flex: '1 1 300px' }}>
-                      <label style={labelStyle}>{t.corPrimaria}</label>
-                      <input
-                        type="color"
-                        name="primaryColor"
-                        value={empresa.primaryColor}
-                        onChange={handleChange}
-                        style={{
-                          width: '100%',
-                          height: '3rem',
-                          border: '1px solid #ccc',
-                          borderRadius: '4px',
-                        }}
-                      />
-                    </div>
-                    <div style={{ flex: '1 1 300px' }}>
-                      <label style={labelStyle}>{t.corSecundaria}</label>
-                      <input
-                        type="color"
-                        name="secondaryColor"
-                        value={empresa.secondaryColor}
-                        onChange={handleChange}
-                        style={{
-                          width: '100%',
-                          height: '3rem',
-                          border: '1px solid #ccc',
-                          borderRadius: '4px',
-                        }}
-                      />
-                    </div>
-                    <div style={{ flex: '1 1 300px' }}>
-                      <label style={labelStyle}>{t.corFundo}</label>
-                      <input
-                        type="color"
-                        name="backgroundColor"
-                        value={empresa.backgroundColor}
-                        onChange={handleChange}
-                        style={{
-                          width: '100%',
-                          height: '3rem',
-                          border: '1px solid #ccc',
-                          borderRadius: '4px',
-                        }}
-                      />
-                    </div>
-                  </div>
-                </Tab>
-                <Tab eventKey="fluxoAtendimento" title={t.configuracaoAtendimento}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                    <div style={{ flex: '1 1 100%' }}>
-                      <label style={labelStyle}>{t.saudacaoInicial}</label>
-                      <textarea
-                        name="saudacaoInicial"
-                        rows="2"
-                        placeholder={t.saudacaoInicialPlaceholder}
-                        value={empresa.saudacaoInicial}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        style={inputStyle}
-                        required
-                      ></textarea>
-                      {errors.saudacaoInicial && <span style={errorStyle}>{errors.saudacaoInicial}</span>}
-                    </div>
-                    <div style={{ flex: '1 1 100%' }}>
-                      <label style={labelStyle}>{t.respostaPadrao}</label>
-                      <textarea
-                        name="respostaPadrao"
-                        rows="2"
-                        placeholder={t.respostaPadraoPlaceholder}
-                        value={empresa.respostaPadrao}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        style={inputStyle}
-                        required
-                      ></textarea>
-                      {errors.respostaPadrao && <span style={errorStyle}>{errors.respostaPadrao}</span>}
-                    </div>
-                    <div style={{ flex: '1 1 100%' }}>
-                      <label style={labelStyle}>{t.solicitacaoEmail}</label>
-                      <textarea
-                        name="solicitacaoEmail"
-                        rows="2"
-                        placeholder={t.solicitacaoEmailPlaceholder}
-                        value={empresa.solicitacaoEmail}
-                        onChange={handleChange}
-                        style={inputStyle}
-                      ></textarea>
-                    </div>
-                    <div style={{ flex: '1 1 100%' }}>
-                      <label style={labelStyle}>{t.mensagemEncerramento}</label>
-                      <textarea
-                        name="mensagemEncerramento"
-                        rows="2"
-                        placeholder={t.mensagemEncerramentoPlaceholder}
-                        value={empresa.mensagemEncerramento}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        style={inputStyle}
-                        required
-                      ></textarea>
-                      {errors.mensagemEncerramento && <span style={errorStyle}>{errors.mensagemEncerramento}</span>}
-                    </div>
-                    <div style={{ flex: '1 1 100%' }}>
-                      <label style={labelStyle}>{t.listaProdutos}</label>
-                      <textarea
-                        name="listaProdutos"
-                        rows="3"
-                        placeholder={t.listaProdutosPlaceholder}
-                        value={empresa.listaProdutos}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        style={{ ...inputStyle, whiteSpace: 'pre-wrap' }}
-                        required
-                      ></textarea>
-                      {errors.listaProdutos && <span style={errorStyle}>{errors.listaProdutos}</span>}
-                    </div>
-                  </div>
-                </Tab>
-                <Tab eventKey="envVars" title={t.envSectionTitle}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {[
-                      { label: 'VERIFY_TOKEN', name: 'verifyToken' },
-                      { label: 'WHATSAPP_API_TOKEN', name: 'whatsappApiToken' },
-                      { label: 'MONGO_URI', name: 'mongoUri' },
-                      { label: 'PHONE_NUMBER_ID', name: 'phoneNumberId' },
-                      { label: 'EMAIL_USER', name: 'emailUser' },
-                      { label: 'EMAIL_PASS', name: 'emailPass', type: 'text' },
-                      { label: 'EMAIL_GESTOR', name: 'emailGestor' },
-                    ].map((field) => (
-                      <div key={field.name} style={{ flex: '1 1 100%' }}>
-                        <label style={labelStyle}>
-                          {field.label}
-                          <span style={explanationIconStyle} onClick={() => toggleEnvExplanation(field.name)}>
-                            ?
-                          </span>
-                        </label>
-                        <input
-                          type={field.type ? field.type : 'text'}
-                          name={field.name}
-                          placeholder={field.label}
-                          value={empresa[field.name]}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          style={inputStyle}
-                          required
-                        />
-                        {errors[field.name] && <span style={errorStyle}>{errors[field.name]}</span>}
-                        {envExplanations[field.name] && (
-                          <span style={explanationTextStyle}>
-                            {envExplanationsTexts[field.name]}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </Tab>
-                <Tab eventKey="instrucao" title={t.instrucoesPersonalizadas}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {[
-                      { label: t.regrasResposta, name: 'regrasResposta', placeholder: t.regrasRespostaPlaceholder },
-                      { label: t.linkCalendly, name: 'linkCalendly', placeholder: t.linkCalendlyPlaceholder },
-                      { label: t.linkSite, name: 'linkSite', placeholder: t.linkSitePlaceholder },
-                      { label: t.exemplosAtendimento, name: 'exemplosAtendimento', placeholder: t.exemplosAtendimentoPlaceholder },
-                    ].map((field) => (
-                      <div key={field.name} style={{ flex: '1 1 100%' }}>
-                        <label style={labelStyle}>
-                          {field.label}
-                          <span style={explanationIconStyle} onClick={() => toggleInstExplanation(field.name)}>
-                            ?
-                          </span>
-                        </label>
-                        {field.name === 'regrasResposta' || field.name === 'exemplosAtendimento' ? (
-                          <textarea
-                            name={field.name}
-                            rows="5"
-                            placeholder={field.placeholder}
-                            value={empresa[field.name]}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            style={inputStyle}
-                            required
-                          ></textarea>
-                        ) : (
-                          <input
-                            type="text"
-                            name={field.name}
-                            placeholder={field.placeholder}
-                            value={empresa[field.name]}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            style={inputStyle}
-                            required
-                          />
-                        )}
-                        {errors[field.name] && <span style={errorStyle}>{errors[field.name]}</span>}
-                        {instExplanations[field.name] && (
-                          <span style={explanationTextStyle}>
-                            {field.name === 'regrasResposta'
-                              ? instExplanationsTexts.regrasResposta
-                              : field.name === 'linkCalendly'
-                                ? instExplanationsTexts.linkCalendly
-                                : field.name === 'linkSite'
-                                  ? instExplanationsTexts.linkSite
-                                  : instExplanationsTexts.exemplosAtendimento}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  {/* Botão Salvar aparece somente na última aba */}
-                  <button
-                    type="submit"
-                    style={{
-                      backgroundColor: '#5de5d9',
-                      border: 'none',
-                      padding: '1rem',
-                      borderRadius: '4px',
-                      color: 'white',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.3s',
-                      marginTop: '1rem'
-                    }}
-                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#4cc9c0')}
-                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#5de5d9')}
-                  >
-                    {t.salvar}
-                  </button>
-                </Tab>
-              </Tabs>
-            </form>
-          )}
-          {submitError && (
-            <div
-              style={{
-                backgroundColor: '#f8d7da',
-                color: '#842029',
-                padding: '1rem',
-                borderRadius: '4px',
-                marginBottom: '1rem',
-              }}
-            >
-              {submitError}
-            </div>
-          )}
+          {submitError}
         </div>
-      </main>
-
-      {/* Footer */}
-      <footer
-        style={{
-          backgroundColor: '#4cc9c0',
-          color: 'white',
-          textAlign: 'center',
-          padding: '1rem',
-        }}
-      >
-        &copy; 2025 BiVisualizer. Todos os direitos reservados.
-      </footer>
+      )}
     </div>
   );
 }
