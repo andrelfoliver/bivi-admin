@@ -217,9 +217,20 @@ function Dashboard({ user, onLogout }) {
                                             <th style={{ padding: '0.75rem', textAlign: 'left' }}>Nome</th>
                                             <th style={{ padding: '0.75rem', textAlign: 'left' }}>Permissão</th>
                                             <th style={{ padding: '0.75rem', textAlign: 'left' }}>Ações</th>
+                                            <th style={{ padding: '0.75rem', textAlign: 'left' }}>Cadastrado em</th>
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        {users.map((u) => (
+                                            <tr key={u._id}>
+                                                <td>{u.name || u.email}</td>
+                                                <td>{u.role === 'admin' ? 'Admin' : 'Cliente'}</td>
+                                                <td>{new Date(u.createdAt).toLocaleString('pt-BR')}</td>
+                                                <td>
+                                                    {/* Botões de Ação */}
+                                                </td>
+                                            </tr>
+                                        ))}
                                         {users
                                             .sort((a, b) => {
                                                 const nameA = (a.name || a.email).toLowerCase();
@@ -233,10 +244,18 @@ function Dashboard({ user, onLogout }) {
                                                 return (
                                                     <tr key={u._id} style={{ borderBottom: '1px solid #ccc' }}>
                                                         <td style={{ padding: '0.75rem' }}>{u.name || u.email}</td>
+
                                                         <td style={{ padding: '0.75rem' }}>
                                                             {u.role === 'admin' ? 'Admin' : 'Cliente'}
                                                         </td>
+
+                                                        {/* Nova célula exibindo data/hora de criação */}
                                                         <td style={{ padding: '0.75rem' }}>
+                                                            {new Date(u.createdAt).toLocaleString('pt-BR')}
+                                                        </td>
+
+                                                        <td style={{ padding: '0.75rem' }}>
+                                                            {/* Ações (Promover, Demover, Excluir) */}
                                                             {!isSelf && (
                                                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                                     {u.role === 'client' ? (
