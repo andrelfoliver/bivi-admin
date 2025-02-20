@@ -250,6 +250,35 @@ app.get('/company-registration', (req, res) => {
   }
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+// Endpoint para demover um usuário (tornar cliente)
+app.put('/api/users/:id/demote', isAdmin, async (req, res) => {
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { role: 'client' },
+      { new: true }
+    );
+    if (!updatedUser) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+    res.json({ message: "Usuário demotivado com sucesso!", user: updatedUser });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao demover usuário: " + err.message });
+  }
+});
+
+// Endpoint para excluir um usuário
+app.delete('/api/users/:id', isAdmin, async (req, res) => {
+  try {
+    const deletedUser = await User.findByIdAndDelete(req.params.id);
+    if (!deletedUser) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+    res.json({ message: "Usuário excluído com sucesso!", user: deletedUser });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao excluir usuário: " + err.message });
+  }
+});
 
 // Serve arquivos estáticos da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));

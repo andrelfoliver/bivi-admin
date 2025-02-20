@@ -6,7 +6,7 @@ function AdminDashboard({ user, onLogout }) {
   const [users, setUsers] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
-  const [promoteLoading, setPromoteLoading] = useState({});
+  const [actionLoading, setActionLoading] = useState({});
 
   useEffect(() => {
     if (!user || user.role !== "admin") {
@@ -45,7 +45,7 @@ function AdminDashboard({ user, onLogout }) {
       return;
     }
     try {
-      setPromoteLoading((prev) => ({ ...prev, [userId]: true }));
+      setActionLoading((prev) => ({ ...prev, [userId]: "promote" }));
       const response = await fetch(`/api/users/${userId}/promote`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -62,7 +62,57 @@ function AdminDashboard({ user, onLogout }) {
     } catch (error) {
       alert("Erro ao promover usuário: " + error.message);
     } finally {
-      setPromoteLoading((prev) => ({ ...prev, [userId]: false }));
+      setActionLoading((prev) => ({ ...prev, [userId]: null }));
+    }
+  };
+
+  const handleDemoteUser = async (userId) => {
+    if (!window.confirm("Tem certeza que deseja tornar este usuário cliente?")) {
+      return;
+    }
+    try {
+      setActionLoading((prev) => ({ ...prev, [userId]: "demote" }));
+      const response = await fetch(`/api/users/${userId}/demote`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ role: "client" }),
+      });
+      if (response.ok) {
+        alert("Usuário demotivado para cliente com sucesso!");
+        fetchUsers();
+      } else {
+        const data = await response.json();
+        alert(data.error || "Erro ao demover usuário.");
+      }
+    } catch (error) {
+      alert("Erro ao demover usuário: " + error.message);
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [userId]: null }));
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm("Tem certeza que deseja excluir este usuário?")) {
+      return;
+    }
+    try {
+      setActionLoading((prev) => ({ ...prev, [userId]: "delete" }));
+      const response = await fetch(`/api/users/${userId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (response.ok) {
+        alert("Usuário excluído com sucesso!");
+        fetchUsers();
+      } else {
+        const data = await response.json();
+        alert(data.error || "Erro ao excluir usuário.");
+      }
+    } catch (error) {
+      alert("Erro ao excluir usuário: " + error.message);
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [userId]: null }));
     }
   };
 
@@ -116,14 +166,33 @@ function AdminDashboard({ user, onLogout }) {
     alignItems: "center",
   };
 
-  const promoteButtonStyle = {
+  const buttonGroupStyle = {
+    display: "flex",
+    gap: "0.5rem",
+  };
+
+  const actionButtonStyle = {
     padding: "0.3rem 0.75rem",
-    backgroundColor: "#5de5d9",
     border: "none",
     borderRadius: "4px",
     color: "#fff",
     cursor: "pointer",
     fontSize: "0.9rem",
+  };
+
+  const promoteButtonStyle = {
+    ...actionButtonStyle,
+    backgroundColor: "#5de5d9",
+  };
+
+  const demoteButtonStyle = {
+    ...actionButtonStyle,
+    backgroundColor: "#f39c12",
+  };
+
+  const deleteButtonStyle = {
+    ...actionButtonStyle,
+    backgroundColor: "#e74c3c",
   };
 
   return (
@@ -147,15 +216,32 @@ function AdminDashboard({ user, onLogout }) {
                   <div>
                     <strong>{u.username || u.email}</strong> - {u.role}
                   </div>
-                  {u.role !== "admin" && (
+                  <div style={buttonGroupStyle}>
+                    {u.role === "admin" ? (
+                      <button
+                        onClick={() => handleDemoteUser(u._id)}
+                        style={demoteButtonStyle}
+                        disabled={actionLoading[u._id] === "demote"}
+                      >
+                        {actionLoading[u._id] === "demote" ? "Processando..." : "Tornar Cliente"}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handlePromoteUser(u._id)}
+                        style={promoteButtonStyle}
+                        disabled={actionLoading[u._id] === "promote"}
+                      >
+                        {actionLoading[u._id] === "promote" ? "Processando..." : "Tornar Admin"}
+                      </button>
+                    )}
                     <button
-                      onClick={() => handlePromoteUser(u._id)}
-                      style={promoteButtonStyle}
-                      disabled={promoteLoading[u._id]}
+                      onClick={() => handleDeleteUser(u._id)}
+                      style={deleteButtonStyle}
+                      disabled={actionLoading[u._id] === "delete"}
                     >
-                      {promoteLoading[u._id] ? "Promovendo..." : "Tornar Admin"}
+                      {actionLoading[u._id] === "delete" ? "Excluindo..." : "Excluir"}
                     </button>
-                  )}
+                  </div>
                 </li>
               ))}
             </ul>
