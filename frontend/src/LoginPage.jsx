@@ -27,7 +27,7 @@ function LoginPage({ setUser }) {
         if (data.user.role === 'admin') {
           navigate('/admin');
         } else {
-          navigate('/config-empresa');
+          navigate('/config');
         }
       } else {
         const data = await response.json();
