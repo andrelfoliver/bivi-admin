@@ -267,7 +267,7 @@ function AdminDashboard({ user, onLogout }) {
           <ul style={listStyle}>
             {companies.map((c) => (
               <li key={c._id} style={listItemStyle}>
-                {c.name}
+                {c.nome}
               </li>
             ))}
           </ul>
