@@ -4,9 +4,11 @@ const userSchema = new mongoose.Schema(
   {
     googleId: { type: String },
     username: { type: String },
-    email: { type: String, required: true, unique: true }, // Agora é único
+    email: { type: String, required: true, unique: true },
     password: { type: String },
     name: { type: String },
+    company: { type: String },
+    telefone: { type: String }, // Alterado para String
     picture: { type: String },
     provider: {
       type: String,
@@ -18,10 +20,10 @@ const userSchema = new mongoose.Schema(
       enum: ['admin', 'client'],
       default: 'client'
     },
-    company: { type: String }, // Incluindo empresa caso não esteja no schema
   },
   { timestamps: true }
 );
+
 
 const User = mongoose.model('User', userSchema);
 export default User;

@@ -303,15 +303,16 @@ app.put('/api/user', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: "Não autenticado." });
   }
-  const { name, email, company } = req.body;
+  const { name, email, company, telefone } = req.body;
   try {
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
-      { name, email, company },
-      { new: true }
+      { name, email, company, telefone },
+      { new: true, runValidators: true }
     ).select('-password');
     res.json({ message: "Usuário atualizado com sucesso!", user: updatedUser });
   } catch (err) {
+    console.error("Erro ao atualizar usuário:", err);
     res.status(500).json({ error: "Erro ao atualizar usuário: " + err.message });
   }
 });

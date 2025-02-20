@@ -4,23 +4,28 @@ import ConfigEmpresa from './ConfigEmpresa';
 
 function Dashboard({ user, onLogout }) {
     const navigate = useNavigate();
+
     const [selectedModule, setSelectedModule] = useState('inicio');
     const [users, setUsers] = useState([]);
     const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // Estado para edição dos dados pessoais
+    // Estado para os dados pessoais (inicializados com os valores do usuário)
     const [userInfo, setUserInfo] = useState({
         fullName: user?.name || '',
         email: user?.email || '',
-        company: user?.company || ''
+        company: user?.company || '',
+        telefone: user?.telefone || ''
     });
+
     // Estado para controlar quais campos estão em modo de edição
     const [editing, setEditing] = useState({
         fullName: false,
         email: false,
         company: false,
+        telefone: false
     });
+
     const [saveMsg, setSaveMsg] = useState('');
 
     useEffect(() => {
@@ -81,30 +86,26 @@ function Dashboard({ user, onLogout }) {
         } else {
             setSelectedModule(mod);
             setSaveMsg('');
-            // Reseta os modos de edição quando muda de módulo
-            setEditing({ fullName: false, email: false, company: false });
+            // Reseta os modos de edição ao mudar de módulo
+            setEditing({ fullName: false, email: false, company: false, telefone: false });
             if (mod === 'usuarios') fetchUsers();
             if (mod === 'empresas') fetchCompanies();
         }
     };
 
-    // Função para atualizar os dados pessoais via PUT no endpoint /api/user
-    const handleFieldSave = async () => {
+    // Função que atualiza apenas o campo editado
+    const handleFieldSave = async (field) => {
         try {
             const response = await fetch('/api/user', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({
-                    name: userInfo.fullName,
-                    email: userInfo.email,
-                    company: userInfo.company,
-                }),
+                // Envia somente o campo que foi alterado
+                body: JSON.stringify({ [field]: userInfo[field] }),
             });
             if (response.ok) {
                 setSaveMsg('Informações atualizadas com sucesso!');
-                // Sai do modo de edição para todos os campos
-                setEditing({ fullName: false, email: false, company: false });
+                setEditing((prev) => ({ ...prev, [field]: false }));
             } else {
                 setSaveMsg('Erro ao atualizar informações.');
             }
@@ -113,7 +114,6 @@ function Dashboard({ user, onLogout }) {
         }
     };
 
-    // Renderiza o módulo selecionado
     const renderModuleContent = () => {
         const cardStyle = {
             backgroundColor: '#fff',
@@ -128,6 +128,7 @@ function Dashboard({ user, onLogout }) {
                 return (
                     <div style={cardStyle}>
                         <h2>Dados Pessoais</h2>
+                        {/* Nome Completo */}
                         <div style={{ marginBottom: '1rem' }}>
                             <label style={{ fontWeight: 'bold' }}>Nome Completo:</label>
                             {editing.fullName ? (
@@ -139,33 +140,49 @@ function Dashboard({ user, onLogout }) {
                                             setUserInfo({ ...userInfo, fullName: e.target.value })
                                         }
                                         style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                        required
                                     />
                                     <button
-                                        onClick={handleFieldSave}
-                                        style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer' }}
+                                        onClick={() => handleFieldSave('fullName')}
+                                        style={{
+                                            marginTop: '0.5rem',
+                                            padding: '0.5rem 1rem',
+                                            backgroundColor: '#5de5d9',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            color: '#fff',
+                                            cursor: 'pointer',
+                                        }}
                                     >
                                         Salvar
                                     </button>
                                     <button
-                                        onClick={() =>
-                                            setEditing({ ...editing, fullName: false })
-                                        }
-                                        style={{ marginLeft: '0.5rem', marginTop: '0.5rem', padding: '0.5rem 1rem', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', color: '#000', cursor: 'pointer' }}
+                                        onClick={() => setEditing({ ...editing, fullName: false })}
+                                        style={{
+                                            marginLeft: '0.5rem',
+                                            marginTop: '0.5rem',
+                                            padding: '0.5rem 1rem',
+                                            backgroundColor: '#ccc',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            color: '#000',
+                                            cursor: 'pointer',
+                                        }}
                                     >
                                         Cancelar
                                     </button>
                                 </>
                             ) : (
                                 <div
-                                    onClick={() =>
-                                        setEditing({ ...editing, fullName: true })
-                                    }
+                                    onClick={() => setEditing({ ...editing, fullName: true })}
                                     style={{ padding: '0.5rem', cursor: 'pointer' }}
                                 >
                                     {userInfo.fullName || 'Clique para editar'}
                                 </div>
                             )}
                         </div>
+
+                        {/* E‑mail */}
                         <div style={{ marginBottom: '1rem' }}>
                             <label style={{ fontWeight: 'bold' }}>E‑mail:</label>
                             {editing.email ? (
@@ -177,33 +194,49 @@ function Dashboard({ user, onLogout }) {
                                             setUserInfo({ ...userInfo, email: e.target.value })
                                         }
                                         style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                        required
                                     />
                                     <button
-                                        onClick={handleFieldSave}
-                                        style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer' }}
+                                        onClick={() => handleFieldSave('email')}
+                                        style={{
+                                            marginTop: '0.5rem',
+                                            padding: '0.5rem 1rem',
+                                            backgroundColor: '#5de5d9',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            color: '#fff',
+                                            cursor: 'pointer',
+                                        }}
                                     >
                                         Salvar
                                     </button>
                                     <button
-                                        onClick={() =>
-                                            setEditing({ ...editing, email: false })
-                                        }
-                                        style={{ marginLeft: '0.5rem', marginTop: '0.5rem', padding: '0.5rem 1rem', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', color: '#000', cursor: 'pointer' }}
+                                        onClick={() => setEditing({ ...editing, email: false })}
+                                        style={{
+                                            marginLeft: '0.5rem',
+                                            marginTop: '0.5rem',
+                                            padding: '0.5rem 1rem',
+                                            backgroundColor: '#ccc',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            color: '#000',
+                                            cursor: 'pointer',
+                                        }}
                                     >
                                         Cancelar
                                     </button>
                                 </>
                             ) : (
                                 <div
-                                    onClick={() =>
-                                        setEditing({ ...editing, email: true })
-                                    }
+                                    onClick={() => setEditing({ ...editing, email: true })}
                                     style={{ padding: '0.5rem', cursor: 'pointer' }}
                                 >
                                     {userInfo.email || 'Clique para editar'}
                                 </div>
                             )}
                         </div>
+
+                        {/* Empresa */}
                         <div style={{ marginBottom: '1rem' }}>
                             <label style={{ fontWeight: 'bold' }}>Empresa:</label>
                             {editing.company ? (
@@ -215,34 +248,102 @@ function Dashboard({ user, onLogout }) {
                                             setUserInfo({ ...userInfo, company: e.target.value })
                                         }
                                         style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                        required
                                     />
                                     <button
-                                        onClick={handleFieldSave}
-                                        style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer' }}
+                                        onClick={() => handleFieldSave('company')}
+                                        style={{
+                                            marginTop: '0.5rem',
+                                            padding: '0.5rem 1rem',
+                                            backgroundColor: '#5de5d9',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            color: '#fff',
+                                            cursor: 'pointer',
+                                        }}
                                     >
                                         Salvar
                                     </button>
                                     <button
-                                        onClick={() =>
-                                            setEditing({ ...editing, company: false })
-                                        }
-                                        style={{ marginLeft: '0.5rem', marginTop: '0.5rem', padding: '0.5rem 1rem', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', color: '#000', cursor: 'pointer' }}
+                                        onClick={() => setEditing({ ...editing, company: false })}
+                                        style={{
+                                            marginLeft: '0.5rem',
+                                            marginTop: '0.5rem',
+                                            padding: '0.5rem 1rem',
+                                            backgroundColor: '#ccc',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            color: '#000',
+                                            cursor: 'pointer',
+                                        }}
                                     >
                                         Cancelar
                                     </button>
                                 </>
                             ) : (
                                 <div
-                                    onClick={() =>
-                                        setEditing({ ...editing, company: true })
-                                    }
+                                    onClick={() => setEditing({ ...editing, company: true })}
                                     style={{ padding: '0.5rem', cursor: 'pointer' }}
                                 >
                                     {userInfo.company || 'Clique para editar'}
                                 </div>
                             )}
                         </div>
-                        {saveMsg && <p style={{ color: '#5de5d9' }}>{saveMsg}</p>}
+
+                        {/* Telefone */}
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={{ fontWeight: 'bold' }}>Telefone:</label>
+                            {editing.telefone ? (
+                                <>
+                                    <input
+                                        type="text"
+                                        value={userInfo.telefone}
+                                        onChange={(e) =>
+                                            setUserInfo({ ...userInfo, telefone: e.target.value })
+                                        }
+                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                        required
+                                    />
+                                    <button
+                                        onClick={() => handleFieldSave('telefone')}
+                                        style={{
+                                            marginTop: '0.5rem',
+                                            padding: '0.5rem 1rem',
+                                            backgroundColor: '#5de5d9',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            color: '#fff',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        Salvar
+                                    </button>
+                                    <button
+                                        onClick={() => setEditing({ ...editing, telefone: false })}
+                                        style={{
+                                            marginLeft: '0.5rem',
+                                            marginTop: '0.5rem',
+                                            padding: '0.5rem 1rem',
+                                            backgroundColor: '#ccc',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            color: '#000',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        Cancelar
+                                    </button>
+                                </>
+                            ) : (
+                                <div
+                                    onClick={() => setEditing({ ...editing, telefone: true })}
+                                    style={{ padding: '0.5rem', cursor: 'pointer' }}
+                                >
+                                    {userInfo.telefone || 'Clique para editar'}
+                                </div>
+                            )}
+                        </div>
+                        {saveMsg && <p style={{ marginTop: '1rem', color: '#5de5d9' }}>{saveMsg}</p>}
                     </div>
                 );
             case 'usuarios':
