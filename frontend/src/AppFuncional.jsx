@@ -6,8 +6,9 @@ import {
   Navigate,
 } from 'react-router-dom';
 import LoginPage from './LoginPage';
+import ConfigEmpresa from './ConfigEmpresa';
 import RegisterPage from './RegisterPage';
-import Dashboard from './Dashboard'; // Novo componente de dashboard unificado
+import AdminDashboard from './AdminDashboard';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -47,53 +48,50 @@ function App() {
     }
   };
 
-  if (loading) return <div>Carregando...</div>;
+  if (loading) return <div>Loading...</div>;
 
   return (
     <Router>
       <Routes>
-        {/* Rota de Login */}
-        <Route
+        <Route 
           path="/login"
           element={
             user ? (
-              // Se já estiver logado, redireciona para /dashboard
-              <Navigate to="/dashboard" replace />
+              user.role === 'admin' ? 
+                <Navigate to="/admin" replace /> 
+                : <Navigate to="/config" replace />
             ) : (
               <LoginPage setUser={setUser} />
             )
           }
         />
-        {/* Rota de Registro */}
         <Route path="/register" element={<RegisterPage />} />
-
-        {/* Rota do Dashboard unificado (admin e cliente) */}
-        <Route
-          path="/dashboard"
+        <Route 
+          path="/config"
           element={
             user ? (
-              <Dashboard user={user} onLogout={handleLogout} />
-            ) : (
-              // Se não estiver logado, redireciona para /login
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-
-        {/* Redireciona a raiz para /dashboard se estiver logado, senão para /login */}
-        <Route
-          path="/"
-          element={
-            user ? (
-              <Navigate to="/dashboard" replace />
+              user.role !== 'admin' ? 
+                <ConfigEmpresa user={user} onLogout={handleLogout} /> 
+                : <Navigate to="/admin" replace />
             ) : (
               <Navigate to="/login" replace />
             )
           }
         />
-
-        {/* Rota curinga: se chegar em algo que não existe, redireciona para / */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route
+          path="/admin"
+          element={
+            user ? (
+              user.role === 'admin' ? 
+                <AdminDashboard user={user} onLogout={handleLogout} /> 
+                : <Navigate to="/config" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        {/* Sempre redireciona a raiz para /login */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
   );
