@@ -135,7 +135,7 @@ function ConfigEmpresa({ user, onLogout }) {
   const logoInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState('dadosBasicos');
 
-  // Tooltips
+  // Tooltips para explicações
   const [envExplanations, setEnvExplanations] = useState({
     verifyToken: false,
     whatsappApiToken: false,
@@ -183,7 +183,7 @@ function ConfigEmpresa({ user, onLogout }) {
     setLanguage(e.target.value);
   };
 
-  // Ao carregar, busca a configuração existente, se houver
+  // Ao carregar, busca a configuração existente (se houver) via GET em /api/company
   useEffect(() => {
     async function fetchCompany() {
       try {
@@ -201,7 +201,7 @@ function ConfigEmpresa({ user, onLogout }) {
     fetchCompany();
   }, []);
 
-  // Função de logout
+  // Função de logout (não modificada)
   const handleLogout = async () => {
     try {
       await fetch('/api/logout', { method: 'POST', credentials: 'include' });
@@ -214,7 +214,7 @@ function ConfigEmpresa({ user, onLogout }) {
     }
   };
 
-  // Validação: todos os campos obrigatórios (exceto logo) devem ser preenchidos
+  // Validação: todos os campos obrigatórios (exceto logo) devem estar preenchidos
   const validateForm = () => {
     let newErrors = {};
     if (!empresa.nome.trim())
@@ -298,7 +298,7 @@ function ConfigEmpresa({ user, onLogout }) {
       } else {
         setSuccess(true);
         setSubmitError(null);
-        // Atualiza o estado com os dados retornados para permitir futuras edições
+        // Atualiza o estado com os dados retornados para futuras edições
         setEmpresa(data.company || empresa);
       }
     } catch (error) {
@@ -408,7 +408,7 @@ function ConfigEmpresa({ user, onLogout }) {
       case 'emailPass':
       case 'emailGestor':
         if (!value.trim())
-          error = fieldNameToLabel(name) + " é obrigatório.";
+          error = name.toUpperCase() + " é obrigatório.";
         break;
       case 'regrasResposta':
         if (!value.trim())
@@ -431,9 +431,6 @@ function ConfigEmpresa({ user, onLogout }) {
     }
     setErrors(prev => ({ ...prev, [name]: error }));
   };
-
-  // Função auxiliar para converter nome de campo em label (opcional)
-  const fieldNameToLabel = (name) => name.toUpperCase();
 
   return (
     <div>
