@@ -9,6 +9,14 @@ function Dashboard({ user, onLogout }) {
     const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    // Novo estado para edição de informações pessoais no módulo "Início"
+    const [userInfo, setUserInfo] = useState({
+        fullName: user?.name || '',
+        email: user?.email || '',
+        company: user?.company || ''
+    });
+    const [saveMsg, setSaveMsg] = useState('');
+
     useEffect(() => {
         if (!user) {
             navigate('/');
@@ -66,8 +74,34 @@ function Dashboard({ user, onLogout }) {
             onLogout();
         } else {
             setSelectedModule(mod);
+            setSaveMsg('');
             if (mod === 'usuarios') fetchUsers();
             if (mod === 'empresas') fetchCompanies();
+        }
+    };
+
+    // Função para salvar as alterações do módulo "Início"
+    const handleSaveUserInfo = async (e) => {
+        e.preventDefault();
+        // Exemplo: Envia a atualização via PUT para um endpoint de usuário
+        try {
+            const response = await fetch('/api/user', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    name: userInfo.fullName,
+                    email: userInfo.email,
+                    company: userInfo.company,
+                }),
+            });
+            if (response.ok) {
+                setSaveMsg('Informações atualizadas com sucesso!');
+            } else {
+                setSaveMsg('Erro ao atualizar informações.');
+            }
+        } catch (error) {
+            setSaveMsg('Erro ao atualizar informações: ' + error.message);
         }
     };
 
@@ -84,12 +118,53 @@ function Dashboard({ user, onLogout }) {
             case 'inicio':
                 return (
                     <div style={cardStyle}>
-                        <h2>Bem-vindo(a), {user?.name || user?.username}!</h2>
-                        <p>E-mail: {user?.email}</p>
-                        <p>Role: {user?.role}</p>
-                        <p>
-                            Esta é a página inicial do seu painel. Personalize com informações relevantes.
-                        </p>
+                        <h2>Dados Pessoais</h2>
+                        <form onSubmit={handleSaveUserInfo}>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Nome Completo:</label>
+                                <input
+                                    type="text"
+                                    value={userInfo.fullName}
+                                    onChange={(e) => setUserInfo({ ...userInfo, fullName: e.target.value })}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                    required
+                                />
+                            </div>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>E-mail:</label>
+                                <input
+                                    type="email"
+                                    value={userInfo.email}
+                                    onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                    required
+                                />
+                            </div>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Empresa:</label>
+                                <input
+                                    type="text"
+                                    value={userInfo.company}
+                                    onChange={(e) => setUserInfo({ ...userInfo, company: e.target.value })}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                    required
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                style={{
+                                    backgroundColor: '#5de5d9',
+                                    border: 'none',
+                                    padding: '0.75rem 1.5rem',
+                                    borderRadius: '4px',
+                                    color: '#fff',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Salvar
+                            </button>
+                            {saveMsg && <p style={{ marginTop: '1rem', color: '#5de5d9' }}>{saveMsg}</p>}
+                        </form>
                     </div>
                 );
             case 'usuarios':
@@ -167,6 +242,7 @@ function Dashboard({ user, onLogout }) {
         }
     };
 
+    // Estilos gerais
     const pageWrapperStyle = {
         display: 'flex',
         minHeight: '100vh',
@@ -209,6 +285,7 @@ function Dashboard({ user, onLogout }) {
         margin: '0 auto 0.5rem',
     };
 
+    // Ajuste de espaçamento para os botões do menu lateral:
     const moduleListStyle = {
         listStyle: 'none',
         padding: 0,
@@ -216,10 +293,11 @@ function Dashboard({ user, onLogout }) {
     };
 
     const moduleItemStyle = {
-        padding: '0.5rem 0',
+        padding: '0.75rem 1rem', // aumento do padding horizontal e vertical
         cursor: 'pointer',
         borderRadius: '4px',
         transition: 'background-color 0.3s',
+        marginBottom: '0.5rem', // espaço entre os botões
     };
 
     const moduleItemHoverStyle = {
