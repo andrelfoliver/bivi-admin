@@ -74,7 +74,6 @@ const translations = {
     salvar: "Salvar Configuração",
     logout: "Sair",
     languageLabel: "Idioma",
-    // Mensagem de sucesso atualizada:
     successMessage: "Cadastro da assistente virtual realizado com sucesso! Você pode editar e salvar as alterações.",
     logoFormatError: "Apenas arquivos PNG ou JPEG são aceitos.",
     envSectionTitle: "Variáveis de Ambiente",
@@ -184,7 +183,7 @@ function ConfigEmpresa({ user, onLogout }) {
     setLanguage(e.target.value);
   };
 
-  // Ao carregar, busca a configuração existente (se houver)
+  // Ao carregar, busca a configuração existente, se houver
   useEffect(() => {
     async function fetchCompany() {
       try {
@@ -215,7 +214,7 @@ function ConfigEmpresa({ user, onLogout }) {
     }
   };
 
-  // Validação: Todos os campos obrigatórios devem ser preenchidos (exceto logo)
+  // Validação: todos os campos obrigatórios (exceto logo) devem ser preenchidos
   const validateForm = () => {
     let newErrors = {};
     if (!empresa.nome.trim())
@@ -270,12 +269,13 @@ function ConfigEmpresa({ user, onLogout }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return; // não envia se houver erros
+    setSuccess(false);
+    if (!validateForm()) return;
 
     try {
-      let response, data;
+      let response;
       if (empresa._id) {
-        // Se já existe, atualiza via PUT
+        // Atualiza a configuração existente via PUT
         response = await fetch('/api/company', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -283,7 +283,7 @@ function ConfigEmpresa({ user, onLogout }) {
           body: JSON.stringify(empresa),
         });
       } else {
-        // Se não existe, cria via POST
+        // Cria a configuração via POST
         response = await fetch('/register-company', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -291,14 +291,14 @@ function ConfigEmpresa({ user, onLogout }) {
           body: JSON.stringify(empresa),
         });
       }
-      data = await response.json();
+      const data = await response.json();
       if (!response.ok) {
         setSubmitError(data.error || "Erro ao salvar configuração.");
         setSuccess(false);
       } else {
         setSuccess(true);
         setSubmitError(null);
-        // Atualiza o estado com os dados retornados (para permitir futuras edições)
+        // Atualiza o estado com os dados retornados para permitir futuras edições
         setEmpresa(data.company || empresa);
       }
     } catch (error) {
@@ -408,7 +408,7 @@ function ConfigEmpresa({ user, onLogout }) {
       case 'emailPass':
       case 'emailGestor':
         if (!value.trim())
-          error = value + " é obrigatório.";
+          error = fieldNameToLabel(name) + " é obrigatório.";
         break;
       case 'regrasResposta':
         if (!value.trim())
@@ -431,6 +431,9 @@ function ConfigEmpresa({ user, onLogout }) {
     }
     setErrors(prev => ({ ...prev, [name]: error }));
   };
+
+  // Função auxiliar para converter nome de campo em label (opcional)
+  const fieldNameToLabel = (name) => name.toUpperCase();
 
   return (
     <div>
