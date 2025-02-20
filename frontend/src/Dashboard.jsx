@@ -9,11 +9,17 @@ function Dashboard({ user, onLogout }) {
     const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // Estado para edição de informações pessoais no módulo "Início"
+    // Estado para edição dos dados pessoais
     const [userInfo, setUserInfo] = useState({
         fullName: user?.name || '',
         email: user?.email || '',
         company: user?.company || ''
+    });
+    // Estado para controlar quais campos estão em modo de edição
+    const [editing, setEditing] = useState({
+        fullName: false,
+        email: false,
+        company: false,
     });
     const [saveMsg, setSaveMsg] = useState('');
 
@@ -75,14 +81,15 @@ function Dashboard({ user, onLogout }) {
         } else {
             setSelectedModule(mod);
             setSaveMsg('');
+            // Reseta os modos de edição quando muda de módulo
+            setEditing({ fullName: false, email: false, company: false });
             if (mod === 'usuarios') fetchUsers();
             if (mod === 'empresas') fetchCompanies();
         }
     };
 
-    // Função para salvar as alterações do módulo "Início"
-    const handleSaveUserInfo = async (e) => {
-        e.preventDefault();
+    // Função para atualizar os dados pessoais via PUT no endpoint /api/user
+    const handleFieldSave = async () => {
         try {
             const response = await fetch('/api/user', {
                 method: 'PUT',
@@ -96,6 +103,8 @@ function Dashboard({ user, onLogout }) {
             });
             if (response.ok) {
                 setSaveMsg('Informações atualizadas com sucesso!');
+                // Sai do modo de edição para todos os campos
+                setEditing({ fullName: false, email: false, company: false });
             } else {
                 setSaveMsg('Erro ao atualizar informações.');
             }
@@ -104,6 +113,7 @@ function Dashboard({ user, onLogout }) {
         }
     };
 
+    // Renderiza o módulo selecionado
     const renderModuleContent = () => {
         const cardStyle = {
             backgroundColor: '#fff',
@@ -118,52 +128,121 @@ function Dashboard({ user, onLogout }) {
                 return (
                     <div style={cardStyle}>
                         <h2>Dados Pessoais</h2>
-                        <form onSubmit={handleSaveUserInfo}>
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Nome Completo:</label>
-                                <input
-                                    type="text"
-                                    value={userInfo.fullName}
-                                    onChange={(e) => setUserInfo({ ...userInfo, fullName: e.target.value })}
-                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-                                    required
-                                />
-                            </div>
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>E‑mail:</label>
-                                <input
-                                    type="email"
-                                    value={userInfo.email}
-                                    onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
-                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-                                    required
-                                />
-                            </div>
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Empresa:</label>
-                                <input
-                                    type="text"
-                                    value={userInfo.company}
-                                    onChange={(e) => setUserInfo({ ...userInfo, company: e.target.value })}
-                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-                                    required
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                style={{
-                                    backgroundColor: '#5de5d9',
-                                    border: 'none',
-                                    padding: '0.75rem 1.5rem',
-                                    borderRadius: '4px',
-                                    color: '#fff',
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                Salvar
-                            </button>
-                            {saveMsg && <p style={{ marginTop: '1rem', color: '#5de5d9' }}>{saveMsg}</p>}
-                        </form>
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={{ fontWeight: 'bold' }}>Nome Completo:</label>
+                            {editing.fullName ? (
+                                <>
+                                    <input
+                                        type="text"
+                                        value={userInfo.fullName}
+                                        onChange={(e) =>
+                                            setUserInfo({ ...userInfo, fullName: e.target.value })
+                                        }
+                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                    />
+                                    <button
+                                        onClick={handleFieldSave}
+                                        style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer' }}
+                                    >
+                                        Salvar
+                                    </button>
+                                    <button
+                                        onClick={() =>
+                                            setEditing({ ...editing, fullName: false })
+                                        }
+                                        style={{ marginLeft: '0.5rem', marginTop: '0.5rem', padding: '0.5rem 1rem', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', color: '#000', cursor: 'pointer' }}
+                                    >
+                                        Cancelar
+                                    </button>
+                                </>
+                            ) : (
+                                <div
+                                    onClick={() =>
+                                        setEditing({ ...editing, fullName: true })
+                                    }
+                                    style={{ padding: '0.5rem', cursor: 'pointer' }}
+                                >
+                                    {userInfo.fullName || 'Clique para editar'}
+                                </div>
+                            )}
+                        </div>
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={{ fontWeight: 'bold' }}>E‑mail:</label>
+                            {editing.email ? (
+                                <>
+                                    <input
+                                        type="email"
+                                        value={userInfo.email}
+                                        onChange={(e) =>
+                                            setUserInfo({ ...userInfo, email: e.target.value })
+                                        }
+                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                    />
+                                    <button
+                                        onClick={handleFieldSave}
+                                        style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer' }}
+                                    >
+                                        Salvar
+                                    </button>
+                                    <button
+                                        onClick={() =>
+                                            setEditing({ ...editing, email: false })
+                                        }
+                                        style={{ marginLeft: '0.5rem', marginTop: '0.5rem', padding: '0.5rem 1rem', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', color: '#000', cursor: 'pointer' }}
+                                    >
+                                        Cancelar
+                                    </button>
+                                </>
+                            ) : (
+                                <div
+                                    onClick={() =>
+                                        setEditing({ ...editing, email: true })
+                                    }
+                                    style={{ padding: '0.5rem', cursor: 'pointer' }}
+                                >
+                                    {userInfo.email || 'Clique para editar'}
+                                </div>
+                            )}
+                        </div>
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={{ fontWeight: 'bold' }}>Empresa:</label>
+                            {editing.company ? (
+                                <>
+                                    <input
+                                        type="text"
+                                        value={userInfo.company}
+                                        onChange={(e) =>
+                                            setUserInfo({ ...userInfo, company: e.target.value })
+                                        }
+                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                    />
+                                    <button
+                                        onClick={handleFieldSave}
+                                        style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer' }}
+                                    >
+                                        Salvar
+                                    </button>
+                                    <button
+                                        onClick={() =>
+                                            setEditing({ ...editing, company: false })
+                                        }
+                                        style={{ marginLeft: '0.5rem', marginTop: '0.5rem', padding: '0.5rem 1rem', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', color: '#000', cursor: 'pointer' }}
+                                    >
+                                        Cancelar
+                                    </button>
+                                </>
+                            ) : (
+                                <div
+                                    onClick={() =>
+                                        setEditing({ ...editing, company: true })
+                                    }
+                                    style={{ padding: '0.5rem', cursor: 'pointer' }}
+                                >
+                                    {userInfo.company || 'Clique para editar'}
+                                </div>
+                            )}
+                        </div>
+                        {saveMsg && <p style={{ color: '#5de5d9' }}>{saveMsg}</p>}
                     </div>
                 );
             case 'usuarios':
@@ -241,7 +320,7 @@ function Dashboard({ user, onLogout }) {
         }
     };
 
-    // Estilos gerais
+    // Estilos gerais do Dashboard
     const pageWrapperStyle = {
         display: 'flex',
         minHeight: '100vh',
@@ -284,7 +363,7 @@ function Dashboard({ user, onLogout }) {
         margin: '0 auto 0.5rem',
     };
 
-    // Ajuste de espaçamento para os botões do menu lateral:
+    // Ajuste de espaçamento para os botões do menu lateral
     const moduleListStyle = {
         listStyle: 'none',
         padding: 0,
