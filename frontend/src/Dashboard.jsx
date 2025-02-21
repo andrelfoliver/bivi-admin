@@ -33,6 +33,9 @@ function Dashboard({ user, onLogout }) {
     // Estado para controle do modal de confirmação de exclusão
     const [companyToDelete, setCompanyToDelete] = useState(null);
 
+    // Estado para identificar o item do menu em hover
+    const [hoveredModule, setHoveredModule] = useState(null);
+
     useEffect(() => {
         if (!user) {
             navigate('/');
@@ -228,13 +231,13 @@ function Dashboard({ user, onLogout }) {
                 credentials: 'include',
             });
             if (response.ok) {
-                alert('Empresa excluída com sucesso!');
+                setSaveMsg('Empresa excluída com sucesso!');
                 fetchCompanies();
             } else {
-                alert('Erro ao excluir empresa.');
+                setSaveMsg('Erro ao excluir empresa.');
             }
         } catch (error) {
-            alert('Erro ao excluir empresa: ' + error.message);
+            setSaveMsg('Erro ao excluir empresa: ' + error.message);
         }
     };
 
@@ -532,13 +535,13 @@ function Dashboard({ user, onLogout }) {
                 body: JSON.stringify({ role: 'admin' }),
             });
             if (response.ok) {
-                alert('Usuário promovido com sucesso!');
+                setSaveMsg('Usuário promovido com sucesso!');
                 fetchUsers();
             } else {
-                alert('Erro ao promover usuário.');
+                setSaveMsg('Erro ao promover usuário.');
             }
         } catch (error) {
-            alert('Erro ao promover usuário: ' + error.message);
+            setSaveMsg('Erro ao promover usuário: ' + error.message);
         }
     };
 
@@ -550,13 +553,13 @@ function Dashboard({ user, onLogout }) {
                 credentials: 'include'
             });
             if (response.ok) {
-                alert('Usuário demovido com sucesso!');
+                setSaveMsg('Usuário demovido com sucesso!');
                 fetchUsers();
             } else {
-                alert('Erro ao demover usuário.');
+                setSaveMsg('Erro ao demover usuário.');
             }
         } catch (error) {
-            alert('Erro ao demover usuário: ' + error.message);
+            setSaveMsg('Erro ao demover usuário: ' + error.message);
         }
     };
 
@@ -567,13 +570,13 @@ function Dashboard({ user, onLogout }) {
                 credentials: 'include'
             });
             if (response.ok) {
-                alert('Usuário excluído com sucesso!');
+                setSaveMsg('Usuário excluído com sucesso!');
                 fetchUsers();
             } else {
-                alert('Erro ao excluir usuário.');
+                setSaveMsg('Erro ao excluir usuário.');
             }
         } catch (error) {
-            alert('Erro ao excluir usuário: ' + error.message);
+            setSaveMsg('Erro ao excluir usuário: ' + error.message);
         }
     };
 
@@ -677,9 +680,13 @@ function Dashboard({ user, onLogout }) {
                             key={mod.id}
                             style={{
                                 ...moduleItemStyle,
-                                ...(selectedModule === mod.id ? moduleItemHoverStyle : {}),
+                                ...(selectedModule === mod.id || hoveredModule === mod.id
+                                    ? moduleItemHoverStyle
+                                    : {}),
                             }}
                             onClick={() => handleModuleClick(mod.id)}
+                            onMouseEnter={() => setHoveredModule(mod.id)}
+                            onMouseLeave={() => setHoveredModule(null)}
                         >
                             {mod.label}
                         </li>
