@@ -74,7 +74,8 @@ const translations = {
     mensagemEncerramento: "Mensagem de Encerramento",
     mensagemEncerramentoPlaceholder: "Ex.: Obrigado pelo contato! Estamos à disposição.",
     listaProdutos: "Lista de Produtos/Serviços",
-    listaProdutosPlaceholder: "Ex.: - Dashboards Interativos\n- Atendimento Virtual com IA\n- Soluções Integradas",
+    listaProdutosPlaceholder:
+      "Ex.: - Dashboards Interativos\n- Atendimento Virtual com IA\n- Soluções Integradas",
     salvar: "Salvar Configuração",
     logout: "Sair",
     languageLabel: "Idioma",
@@ -134,6 +135,7 @@ function ConfigEmpresa({ user, onLogout }) {
     solicitacaoEmail: '',
     mensagemEncerramento: '',
     listaProdutos: '',
+    // Campos que serão obrigatórios apenas para admin
     verifyToken: '',
     whatsappApiToken: '',
     openaiApiKey: '',
@@ -192,11 +194,11 @@ function ConfigEmpresa({ user, onLogout }) {
   };
 
   const toggleEnvExplanation = (field) => {
-    setEnvExplanations(prev => ({ ...prev, [field]: !prev[field] }));
+    setEnvExplanations((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
   const toggleInstExplanation = (field) => {
-    setInstExplanations(prev => ({ ...prev, [field]: !prev[field] }));
+    setInstExplanations((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
   const handleLanguageChange = (e) => {
@@ -218,12 +220,13 @@ function ConfigEmpresa({ user, onLogout }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Enviando dados da empresa:", empresa);
     if (!validateForm()) return;
     try {
       const response = await fetch('/register-company', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // adicionado para enviar os cookies da sessão
+        credentials: 'include',
         body: JSON.stringify(empresa),
       });
       const data = await response.json();
@@ -232,13 +235,11 @@ function ConfigEmpresa({ user, onLogout }) {
       } else {
         setSuccess(true);
         setSubmitError(null);
-        // Permite a edição futura sem resetar os dados
       }
     } catch (error) {
       setSubmitError("Erro ao enviar dados: " + error.message);
     }
   };
-
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
@@ -247,7 +248,7 @@ function ConfigEmpresa({ user, onLogout }) {
       if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
         const reader = new FileReader();
         reader.onloadend = () => {
-          setEmpresa(prev => ({
+          setEmpresa((prev) => ({
             ...prev,
             logo: reader.result,
             logoFileName: file.name,
@@ -255,11 +256,11 @@ function ConfigEmpresa({ user, onLogout }) {
         };
         reader.readAsDataURL(file);
       } else {
-        setErrors(prev => ({ ...prev, logo: t.logoFormatError }));
-        setEmpresa(prev => ({ ...prev, logo: '', logoFileName: null }));
+        setErrors((prev) => ({ ...prev, logo: t.logoFormatError }));
+        setEmpresa((prev) => ({ ...prev, logo: '', logoFileName: null }));
       }
     } else {
-      setEmpresa(prev => ({ ...prev, [name]: value }));
+      setEmpresa((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -270,7 +271,7 @@ function ConfigEmpresa({ user, onLogout }) {
       if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
         const reader = new FileReader();
         reader.onloadend = () => {
-          setEmpresa(prev => ({
+          setEmpresa((prev) => ({
             ...prev,
             logo: reader.result,
             logoFileName: file.name,
@@ -278,7 +279,7 @@ function ConfigEmpresa({ user, onLogout }) {
         };
         reader.readAsDataURL(file);
       } else {
-        setErrors(prev => ({ ...prev, logo: t.logoFormatError }));
+        setErrors((prev) => ({ ...prev, logo: t.logoFormatError }));
       }
       e.dataTransfer.clearData();
     }
@@ -353,49 +354,13 @@ function ConfigEmpresa({ user, onLogout }) {
             ? 'Lista de Produtos/Serviços é obrigatória.'
             : 'Products/Services List is required.';
         break;
-      case 'verifyToken':
-      case 'whatsappApiToken':
-      case 'openaiApiKey':
-      case 'mongoUri':
-      case 'phoneNumberId':
-      case 'emailUser':
-      case 'emailPass':
-      case 'emailGestor':
-        if (!value.trim())
-          error = language === 'pt'
-            ? `${name.toUpperCase()} é obrigatório.`
-            : `${name.toUpperCase()} is required.`;
-        break;
-      case 'regrasResposta':
-        if (!value.trim())
-          error = language === 'pt'
-            ? 'Regras de Resposta são obrigatórias.'
-            : 'Response rules are required.';
-        break;
-      case 'linkCalendly':
-        if (!value.trim())
-          error = language === 'pt'
-            ? 'Link de Calendly é obrigatório.'
-            : 'Calendly link is required.';
-        break;
-      case 'linkSite':
-        if (!value.trim())
-          error = language === 'pt'
-            ? 'Link do Site é obrigatório.'
-            : 'Site link is required.';
-        break;
-      case 'exemplosAtendimento':
-        if (!value.trim())
-          error = language === 'pt'
-            ? 'Exemplos de Perguntas e Respostas são obrigatórios.'
-            : 'Examples of Q&A are required.';
-        break;
       default:
         break;
     }
-    setErrors(prev => ({ ...prev, [name]: error }));
+    setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
+  // A validação de campos extras será feita somente para admin.
   const validateForm = () => {
     let newErrors = {};
     if (!empresa.nome.trim())
@@ -438,49 +403,52 @@ function ConfigEmpresa({ user, onLogout }) {
       newErrors.listaProdutos = language === 'pt'
         ? 'Lista de Produtos/Serviços é obrigatória.'
         : 'Products/Services List is required.';
-    [
-      'verifyToken',
-      'whatsappApiToken',
-      'openaiApiKey',
-      'mongoUri',
-      'phoneNumberId',
-      'emailUser',
-      'emailPass',
-      'emailGestor',
-    ].forEach((field) => {
-      if (!empresa[field].trim()) {
-        newErrors[field] = language === 'pt'
-          ? `${field.toUpperCase()} é obrigatório.`
-          : `${field.toUpperCase()} is required.`;
+
+    // Valida campos extras apenas se o usuário for admin.
+    if (user && user.role === 'admin') {
+      [
+        'verifyToken',
+        'whatsappApiToken',
+        'openaiApiKey',
+        'mongoUri',
+        'phoneNumberId',
+        'emailUser',
+        'emailPass',
+        'emailGestor',
+      ].forEach((field) => {
+        if (!empresa[field].trim()) {
+          newErrors[field] = language === 'pt'
+            ? `${field.toUpperCase()} é obrigatório.`
+            : `${field.toUpperCase()} is required.`;
+        }
+      });
+      if (!empresa.regrasResposta.trim()) {
+        newErrors.regrasResposta = language === 'pt'
+          ? 'Regras de Resposta são obrigatórias.'
+          : 'Response rules are required.';
       }
-    });
-    if (!empresa.regrasResposta.trim()) {
-      newErrors.regrasResposta = language === 'pt'
-        ? 'Regras de Resposta são obrigatórias.'
-        : 'Response rules are required.';
-    }
-    if (!empresa.linkCalendly.trim()) {
-      newErrors.linkCalendly = language === 'pt'
-        ? 'Link de Calendly é obrigatório.'
-        : 'Calendly link is required.';
-    }
-    if (!empresa.linkSite.trim()) {
-      newErrors.linkSite = language === 'pt'
-        ? 'Link do Site é obrigatório.'
-        : 'Site link is required.';
-    }
-    if (!empresa.exemplosAtendimento.trim()) {
-      newErrors.exemplosAtendimento = language === 'pt'
-        ? 'Exemplos de Perguntas e Respostas são obrigatórios.'
-        : 'Examples of Q&A are required.';
+      if (!empresa.linkCalendly.trim()) {
+        newErrors.linkCalendly = language === 'pt'
+          ? 'Link de Calendly é obrigatório.'
+          : 'Calendly link is required.';
+      }
+      if (!empresa.linkSite.trim()) {
+        newErrors.linkSite = language === 'pt'
+          ? 'Link do Site é obrigatório.'
+          : 'Site link is required.';
+      }
+      if (!empresa.exemplosAtendimento.trim()) {
+        newErrors.exemplosAtendimento = language === 'pt'
+          ? 'Exemplos de Perguntas e Respostas são obrigatórios.'
+          : 'Examples of Q&A are required.';
+      }
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Função para remover o logo selecionado
   const handleRemoveLogo = () => {
-    setEmpresa(prev => ({ ...prev, logo: null, logoFileName: null }));
+    setEmpresa((prev) => ({ ...prev, logo: null, logoFileName: null }));
     if (logoInputRef.current) {
       logoInputRef.current.value = "";
     }
@@ -488,18 +456,15 @@ function ConfigEmpresa({ user, onLogout }) {
 
   return (
     <div>
-      <style>
-        {`
-          .nav-tabs .nav-link.active {
-            background-color: #5de5d9 !important;
-            color: white !important;
-            border-color: #4cc9c0 !important;
-            font-weight: bold;
-          }
-        `}
-      </style>
+      <style>{`
+        .nav-tabs .nav-link.active {
+          background-color: #5de5d9 !important;
+          color: white !important;
+          border-color: #4cc9c0 !important;
+          font-weight: bold;
+        }
+      `}</style>
 
-      {/* Conteúdo sem header ou footer extra */}
       <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
         <Tab eventKey="dadosBasicos" title={t.dadosBasicos}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
@@ -615,12 +580,7 @@ function ConfigEmpresa({ user, onLogout }) {
                   <button
                     type="button"
                     onClick={handleRemoveLogo}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#e3342f',
-                      cursor: 'pointer',
-                    }}
+                    style={{ background: 'none', border: 'none', color: '#e3342f', cursor: 'pointer' }}
                   >
                     Remover
                   </button>
@@ -745,9 +705,7 @@ function ConfigEmpresa({ user, onLogout }) {
               <div key={field.name} style={{ flex: '1 1 100%' }}>
                 <label style={labelStyle}>
                   {field.label}
-                  <span style={explanationIconStyle} onClick={() => toggleEnvExplanation(field.name)}>
-                    ?
-                  </span>
+                  <span style={explanationIconStyle} onClick={() => toggleEnvExplanation(field.name)}>?</span>
                 </label>
                 <input
                   type={field.type ? field.type : 'text'}
@@ -757,7 +715,7 @@ function ConfigEmpresa({ user, onLogout }) {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   style={inputStyle}
-                  required
+                  required={user && user.role === 'admin'}
                 />
                 {errors[field.name] && <span style={errorStyle}>{errors[field.name]}</span>}
                 {envExplanations[field.name] && (
@@ -780,9 +738,7 @@ function ConfigEmpresa({ user, onLogout }) {
               <div key={field.name} style={{ flex: '1 1 100%' }}>
                 <label style={labelStyle}>
                   {field.label}
-                  <span style={explanationIconStyle} onClick={() => toggleInstExplanation(field.name)}>
-                    ?
-                  </span>
+                  <span style={explanationIconStyle} onClick={() => toggleInstExplanation(field.name)}>?</span>
                 </label>
                 {field.name === 'regrasResposta' || field.name === 'exemplosAtendimento' ? (
                   <textarea
@@ -793,7 +749,7 @@ function ConfigEmpresa({ user, onLogout }) {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     style={inputStyle}
-                    required
+                    required={user && user.role === 'admin'}
                   ></textarea>
                 ) : (
                   <input
@@ -804,7 +760,7 @@ function ConfigEmpresa({ user, onLogout }) {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     style={inputStyle}
-                    required
+                    required={user && user.role === 'admin'}
                   />
                 )}
                 {errors[field.name] && <span style={errorStyle}>{errors[field.name]}</span>}
