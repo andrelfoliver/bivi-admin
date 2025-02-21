@@ -515,9 +515,10 @@ function Dashboard({ user, onLogout }) {
             case 'config':
                 return (
                     <div style={cardStyle}>
-                        <Settings onLogout={onLogout} />
+                        <Settings user={user} onLogout={onLogout} />
                     </div>
                 );
+
 
             default:
                 return (
