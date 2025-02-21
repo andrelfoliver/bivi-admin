@@ -248,13 +248,15 @@ function ConfigEmpresa({ user, onLogout }) {
     try {
       let response;
       if (empresa._id) {
-        response = await fetch(`/api/companies/${empresa._id}`, {
+        // Atualização: utiliza o endpoint PUT /api/company
+        response = await fetch('/api/company', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
           body: JSON.stringify(empresa),
         });
       } else {
+        // Cadastro inicial: utiliza o endpoint POST /register-company
         response = await fetch('/register-company', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -268,6 +270,7 @@ function ConfigEmpresa({ user, onLogout }) {
       } else {
         setSuccess(true);
         setSubmitError(null);
+        // Atualiza os dados da empresa no estado para que não percam os inputs
         if (data.company) {
           setEmpresa(prev => ({ ...prev, ...data.company }));
         }
@@ -276,6 +279,7 @@ function ConfigEmpresa({ user, onLogout }) {
       setSubmitError("Erro ao enviar dados: " + error.message);
     }
   };
+
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;

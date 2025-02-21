@@ -215,19 +215,22 @@ app.put('/api/users/:id/promote', isAdmin, async (req, res) => {
   }
 });
 
-
-// Endpoint para cadastro de empresas
-// Endpoint para cadastro de empresas
+// Endpoint para cadastro de empresas (cliente)
+// Se o usuário já tiver uma empresa cadastrada, retorna erro
 app.post('/register-company', async (req, res) => {
   console.log("Requisição recebida em /register-company:", req.body);
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: "Não autenticado." });
+  }
+  if (req.user.company) {
+    return res.status(400).json({ error: "Empresa já cadastrada. Utilize o endpoint de atualização." });
+  }
   try {
     const newCompany = new Company(req.body);
     const savedCompany = await newCompany.save();
     console.log("Empresa cadastrada:", savedCompany);
-    // Se o usuário estiver autenticado, atualiza o campo "company" do usuário com o _id da empresa cadastrada.
-    if (req.isAuthenticated() && req.user) {
-      await User.findByIdAndUpdate(req.user._id, { company: savedCompany._id });
-    }
+    // Atualiza o usuário com o _id da nova empresa
+    await User.findByIdAndUpdate(req.user._id, { company: savedCompany._id });
     res.status(201).send({ message: "Empresa cadastrada com sucesso!", company: savedCompany });
   } catch (err) {
     console.error("Erro ao cadastrar empresa:", err);
@@ -235,48 +238,44 @@ app.post('/register-company', async (req, res) => {
   }
 });
 
-// Endpoint para o cliente obter os dados da sua empresa
+// Endpoint para que o cliente obtenha os dados da sua empresa
 app.get('/api/company', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: "Não autenticado." });
   }
+  if (!req.user.company) {
+    return res.json({ company: null });
+  }
   try {
-    // Aqui estamos assumindo que o cadastro da empresa usa o email do usuário para identificação
-    const company = await Company.findOne({ email: req.user.email });
-    if (!company) {
-      return res.json({});
-    }
+    const company = await Company.findById(req.user.company);
     res.json({ company });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Erro ao buscar empresa: " + err.message });
   }
 });
 
-// Endpoint para o cliente atualizar os dados da sua empresa
-app.put('/api/companies/:id', async (req, res) => {
+// Endpoint para que o cliente atualize os dados da sua empresa
+app.put('/api/company', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: "Não autenticado." });
   }
+  if (!req.user.company) {
+    return res.status(400).json({ error: "Nenhuma empresa cadastrada para este usuário." });
+  }
   try {
-    const company = await Company.findById(req.params.id);
-    if (!company) {
-      return res.status(404).json({ error: "Empresa não encontrada." });
-    }
-    // Se o usuário for cliente, garante que ele só possa atualizar sua própria empresa (baseado no email)
-    if (req.user.role === 'client' && company.email !== req.user.email) {
-      return res.status(403).json({ error: "Acesso negado." });
-    }
     const updatedCompany = await Company.findByIdAndUpdate(
-      req.params.id,
+      req.user.company,
       req.body,
       { new: true, runValidators: true }
     );
+    if (!updatedCompany) {
+      return res.status(404).json({ error: "Empresa não encontrada." });
+    }
     res.json({ message: "Empresa atualizada com sucesso!", company: updatedCompany });
   } catch (err) {
     res.status(500).json({ error: "Erro ao atualizar empresa: " + err.message });
   }
 });
-
 
 // Endpoint para logout – destrói a sessão e limpa o cookie
 app.post('/api/logout', (req, res, next) => {
@@ -298,6 +297,7 @@ app.get('/company-registration', (req, res) => {
   }
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
 // Endpoint para demover um usuário (tornar cliente)
 app.put('/api/users/:id/demote', isAdmin, async (req, res) => {
   try {
@@ -335,6 +335,7 @@ app.delete('/api/users/:id', isAdmin, async (req, res) => {
     res.status(500).json({ error: "Erro ao excluir usuário: " + err.message });
   }
 });
+
 // Endpoint para excluir uma empresa (apenas para admin)
 app.delete('/api/companies/:id', isAdmin, async (req, res) => {
   try {
@@ -347,6 +348,8 @@ app.delete('/api/companies/:id', isAdmin, async (req, res) => {
     res.status(500).json({ error: "Erro ao excluir empresa: " + err.message });
   }
 });
+
+// Endpoint para atualizar dados do usuário
 app.put('/api/user', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: "Não autenticado." });
