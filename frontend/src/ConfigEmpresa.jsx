@@ -3,7 +3,9 @@ import { Tabs, Tab } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 function levenshteinDistance(a, b) {
-  const dp = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(null));
+  const dp = Array(a.length + 1)
+    .fill(null)
+    .map(() => Array(b.length + 1).fill(null));
   for (let i = 0; i <= a.length; i++) dp[i][0] = i;
   for (let j = 0; j <= b.length; j++) dp[0][j] = j;
   for (let i = 1; i <= a.length; i++) {
@@ -45,6 +47,8 @@ const translations = {
     dadosBasicos: "Dados Básicos",
     nomeEmpresa: "Nome da Empresa",
     nomePlaceholder: "Digite o nome da empresa",
+    assistenteVirtualNome: "Nome da Assistente Virtual",
+    assistenteVirtualPlaceholder: "Digite o nome da assistente virtual",
     apiKey: "API Key OpenAI",
     apiPlaceholder: "Digite a API Key",
     apiKeyError: "API Key inválida. Deve começar com 'sk-' e ter no mínimo 50 caracteres.",
@@ -74,7 +78,6 @@ const translations = {
     salvar: "Salvar Configuração",
     logout: "Sair",
     languageLabel: "Idioma",
-    // Mensagem de sucesso atualizada:
     successMessage: "Cadastro da assistente virtual realizado com sucesso! Você pode editar e salvar as alterações.",
     logoFormatError: "Apenas arquivos PNG ou JPEG são aceitos.",
     envSectionTitle: "Variáveis de Ambiente",
@@ -113,9 +116,10 @@ function ConfigEmpresa({ user, onLogout }) {
   const explanationIconStyle = { marginLeft: '8px', color: '#007bff', cursor: 'pointer', fontWeight: 'bold' };
   const explanationTextStyle = { display: 'block', fontSize: '0.8rem', color: '#555', marginTop: '0.5rem', backgroundColor: '#f1f1f1', padding: '0.5rem', borderRadius: '4px' };
 
-  // Estado inicial do formulário
+  // Estado inicial do formulário (campo adicionado: nomeAssistenteVirtual)
   const initialState = {
     nome: '',
+    nomeAssistenteVirtual: '',
     apiKey: '',
     telefone: '',
     email: '',
@@ -214,6 +218,7 @@ function ConfigEmpresa({ user, onLogout }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
     try {
       const response = await fetch('/register-company', {
         method: 'POST',
@@ -289,16 +294,27 @@ function ConfigEmpresa({ user, onLogout }) {
         if (!value.trim())
           error = language === 'pt' ? 'Nome é obrigatório.' : 'Name is required.';
         break;
+      case 'nomeAssistenteVirtual':
+        if (!value.trim())
+          error = language === 'pt'
+            ? 'Nome da Assistente Virtual é obrigatório.'
+            : 'Virtual Assistant Name is required.';
+        break;
       case 'apiKey':
-        if (!value.trim() || !/^sk-(proj-)?[A-Za-z0-9_-]+$/.test(value) || value.length < 50)
+        if (
+          !value.trim() ||
+          !/^sk-(proj-)?[A-Za-z0-9_-]+$/.test(value) ||
+          value.length < 50
+        )
           error = t.apiKeyError;
         break;
       case 'telefone': {
         const digits = value.replace(/\D/g, '');
         if (digits.length < 10 || digits.length > 15)
-          error = language === 'pt'
-            ? 'Telefone inválido. Insira entre 10 e 15 dígitos.'
-            : 'Invalid phone. Enter between 10 and 15 digits.';
+          error =
+            language === 'pt'
+              ? 'Telefone inválido. Insira entre 10 e 15 dígitos.'
+              : 'Invalid phone. Enter between 10 and 15 digits.';
         break;
       }
       case 'email': {
@@ -313,19 +329,27 @@ function ConfigEmpresa({ user, onLogout }) {
         break;
       case 'saudacaoInicial':
         if (!value.trim())
-          error = language === 'pt' ? 'Saudação Inicial é obrigatória.' : 'Initial Greeting is required.';
+          error = language === 'pt'
+            ? 'Saudação Inicial é obrigatória.'
+            : 'Initial Greeting is required.';
         break;
       case 'respostaPadrao':
         if (!value.trim())
-          error = language === 'pt' ? 'Resposta Padrão é obrigatória.' : 'Standard Response is required.';
+          error = language === 'pt'
+            ? 'Resposta Padrão é obrigatória.'
+            : 'Standard Response is required.';
         break;
       case 'mensagemEncerramento':
         if (!value.trim())
-          error = language === 'pt' ? 'Mensagem de Encerramento é obrigatória.' : 'Closing Message is required.';
+          error = language === 'pt'
+            ? 'Mensagem de Encerramento é obrigatória.'
+            : 'Closing Message is required.';
         break;
       case 'listaProdutos':
         if (!value.trim())
-          error = language === 'pt' ? 'Lista de Produtos/Serviços é obrigatória.' : 'Products/Services List is required.';
+          error = language === 'pt'
+            ? 'Lista de Produtos/Serviços é obrigatória.'
+            : 'Products/Services List is required.';
         break;
       case 'verifyToken':
       case 'whatsappApiToken':
@@ -336,23 +360,33 @@ function ConfigEmpresa({ user, onLogout }) {
       case 'emailPass':
       case 'emailGestor':
         if (!value.trim())
-          error = language === 'pt' ? `${name.toUpperCase()} é obrigatório.` : `${name.toUpperCase()} is required.`;
+          error = language === 'pt'
+            ? `${name.toUpperCase()} é obrigatório.`
+            : `${name.toUpperCase()} is required.`;
         break;
       case 'regrasResposta':
         if (!value.trim())
-          error = language === 'pt' ? 'Regras de Resposta são obrigatórias.' : 'Response rules are required.';
+          error = language === 'pt'
+            ? 'Regras de Resposta são obrigatórias.'
+            : 'Response rules are required.';
         break;
       case 'linkCalendly':
         if (!value.trim())
-          error = language === 'pt' ? 'Link de Calendly é obrigatório.' : 'Calendly link is required.';
+          error = language === 'pt'
+            ? 'Link de Calendly é obrigatório.'
+            : 'Calendly link is required.';
         break;
       case 'linkSite':
         if (!value.trim())
-          error = language === 'pt' ? 'Link do Site é obrigatório.' : 'Site link is required.';
+          error = language === 'pt'
+            ? 'Link do Site é obrigatório.'
+            : 'Site link is required.';
         break;
       case 'exemplosAtendimento':
         if (!value.trim())
-          error = language === 'pt' ? 'Exemplos de Perguntas e Respostas são obrigatórios.' : 'Examples of Q&A are required.';
+          error = language === 'pt'
+            ? 'Exemplos de Perguntas e Respostas são obrigatórios.'
+            : 'Examples of Q&A are required.';
         break;
       default:
         break;
@@ -364,24 +398,44 @@ function ConfigEmpresa({ user, onLogout }) {
     let newErrors = {};
     if (!empresa.nome.trim())
       newErrors.nome = language === 'pt' ? 'Nome é obrigatório.' : 'Name is required.';
-    if (!empresa.apiKey.trim() || !/^sk-(proj-)?[A-Za-z0-9_-]+$/.test(empresa.apiKey) || empresa.apiKey.length < 50)
+    if (!empresa.nomeAssistenteVirtual.trim())
+      newErrors.nomeAssistenteVirtual = language === 'pt'
+        ? 'Nome da Assistente Virtual é obrigatório.'
+        : 'Virtual Assistant Name is required.';
+    if (
+      !empresa.apiKey.trim() ||
+      !/^sk-(proj-)?[A-Za-z0-9_-]+$/.test(empresa.apiKey) ||
+      empresa.apiKey.length < 50
+    )
       newErrors.apiKey = t.apiKeyError;
     const phoneDigits = empresa.telefone.replace(/\D/g, '');
     if (!empresa.telefone.trim() || phoneDigits.length < 10 || phoneDigits.length > 15)
-      newErrors.telefone = language === 'pt' ? 'Telefone inválido. Insira entre 10 e 15 dígitos.' : 'Invalid phone. Enter between 10 and 15 digits.';
+      newErrors.telefone = language === 'pt'
+        ? 'Telefone inválido. Insira entre 10 e 15 dígitos.'
+        : 'Invalid phone. Enter between 10 and 15 digits.';
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!empresa.email.trim() || !emailRegex.test(empresa.email))
       newErrors.email = language === 'pt' ? 'E‑mail inválido.' : 'Invalid e‑mail.';
     if (!empresa.saudacao.trim())
-      newErrors.saudacao = language === 'pt' ? 'Saudação é obrigatória.' : 'Greeting is required.';
+      newErrors.saudacao = language === 'pt'
+        ? 'Saudação é obrigatória.'
+        : 'Greeting is required.';
     if (!empresa.saudacaoInicial.trim())
-      newErrors.saudacaoInicial = language === 'pt' ? 'Saudação Inicial é obrigatória.' : 'Initial Greeting is required.';
+      newErrors.saudacaoInicial = language === 'pt'
+        ? 'Saudação Inicial é obrigatória.'
+        : 'Initial Greeting is required.';
     if (!empresa.respostaPadrao.trim())
-      newErrors.respostaPadrao = language === 'pt' ? 'Resposta Padrão é obrigatória.' : 'Standard Response is required.';
+      newErrors.respostaPadrao = language === 'pt'
+        ? 'Resposta Padrão é obrigatória.'
+        : 'Standard Response is required.';
     if (!empresa.mensagemEncerramento.trim())
-      newErrors.mensagemEncerramento = language === 'pt' ? 'Mensagem de Encerramento é obrigatória.' : 'Closing Message is required.';
+      newErrors.mensagemEncerramento = language === 'pt'
+        ? 'Mensagem de Encerramento é obrigatória.'
+        : 'Closing Message is required.';
     if (!empresa.listaProdutos.trim())
-      newErrors.listaProdutos = language === 'pt' ? 'Lista de Produtos/Serviços é obrigatória.' : 'Products/Services List is required.';
+      newErrors.listaProdutos = language === 'pt'
+        ? 'Lista de Produtos/Serviços é obrigatória.'
+        : 'Products/Services List is required.';
     [
       'verifyToken',
       'whatsappApiToken',
@@ -393,20 +447,30 @@ function ConfigEmpresa({ user, onLogout }) {
       'emailGestor',
     ].forEach((field) => {
       if (!empresa[field].trim()) {
-        newErrors[field] = language === 'pt' ? `${field.toUpperCase()} é obrigatório.` : `${field.toUpperCase()} is required.`;
+        newErrors[field] = language === 'pt'
+          ? `${field.toUpperCase()} é obrigatório.`
+          : `${field.toUpperCase()} is required.`;
       }
     });
     if (!empresa.regrasResposta.trim()) {
-      newErrors.regrasResposta = language === 'pt' ? 'Regras de Resposta são obrigatórias.' : 'Response rules are required.';
+      newErrors.regrasResposta = language === 'pt'
+        ? 'Regras de Resposta são obrigatórias.'
+        : 'Response rules are required.';
     }
     if (!empresa.linkCalendly.trim()) {
-      newErrors.linkCalendly = language === 'pt' ? 'Link de Calendly é obrigatório.' : 'Calendly link is required.';
+      newErrors.linkCalendly = language === 'pt'
+        ? 'Link de Calendly é obrigatório.'
+        : 'Calendly link is required.';
     }
     if (!empresa.linkSite.trim()) {
-      newErrors.linkSite = language === 'pt' ? 'Link do Site é obrigatório.' : 'Site link is required.';
+      newErrors.linkSite = language === 'pt'
+        ? 'Link do Site é obrigatório.'
+        : 'Site link is required.';
     }
     if (!empresa.exemplosAtendimento.trim()) {
-      newErrors.exemplosAtendimento = language === 'pt' ? 'Exemplos de Perguntas e Respostas são obrigatórios.' : 'Examples of Q&A are required.';
+      newErrors.exemplosAtendimento = language === 'pt'
+        ? 'Exemplos de Perguntas e Respostas são obrigatórios.'
+        : 'Examples of Q&A are required.';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -450,6 +514,20 @@ function ConfigEmpresa({ user, onLogout }) {
                 required
               />
               {errors.nome && <span style={errorStyle}>{errors.nome}</span>}
+            </div>
+            <div style={{ flex: '1 1 300px' }}>
+              <label style={labelStyle}>{t.assistenteVirtualNome}</label>
+              <input
+                type="text"
+                name="nomeAssistenteVirtual"
+                placeholder={t.assistenteVirtualPlaceholder}
+                value={empresa.nomeAssistenteVirtual}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                style={inputStyle}
+                required
+              />
+              {errors.nomeAssistenteVirtual && <span style={errorStyle}>{errors.nomeAssistenteVirtual}</span>}
             </div>
             <div style={{ flex: '1 1 300px' }}>
               <label style={labelStyle}>{t.apiKey}</label>
