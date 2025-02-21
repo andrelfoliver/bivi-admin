@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ConfigEmpresa from './ConfigEmpresa';
+import AssistVirtual from './AssistVirtual';
+
 
 function Dashboard({ user, onLogout }) {
     const navigate = useNavigate();
@@ -485,8 +487,7 @@ function Dashboard({ user, onLogout }) {
             case 'assistentes':
                 return (
                     <div style={cardStyle}>
-                        <h2>Assistentes Virtuais Cadastradas</h2>
-                        <p>Gerencie os assistentes virtuais aqui.</p>
+                        <AssistVirtual onClose={() => setSelectedModule('inicio')} />
                     </div>
                 );
             case 'bizap':
