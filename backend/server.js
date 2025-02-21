@@ -349,6 +349,34 @@ app.delete('/api/companies/:id', isAdmin, async (req, res) => {
   }
 });
 
+// Endpoint para alteração de senha do usuário
+app.put('/api/user/password', async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: "Não autenticado." });
+  }
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return res.status(400).json({ error: "Todos os campos são obrigatórios." });
+  }
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ error: "A nova senha e a confirmação não conferem." });
+  }
+  try {
+    const user = await User.findById(req.user._id);
+    // Verifica se a senha atual confere
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Senha atual incorreta." });
+    }
+    // Hash da nova senha
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+    res.json({ message: "Senha atualizada com sucesso!" });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao atualizar senha: " + err.message });
+  }
+});
 // Endpoint para atualizar dados do usuário
 app.put('/api/user', async (req, res) => {
   if (!req.isAuthenticated()) {

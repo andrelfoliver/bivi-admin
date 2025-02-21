@@ -513,10 +513,10 @@ function Dashboard({ user, onLogout }) {
             case 'config':
                 return (
                     <div style={cardStyle}>
-                        <h2>Configuração</h2>
-                        <p>Módulo em desenvolvimento.</p>
+                        <Settings onLogout={onLogout} />
                     </div>
                 );
+
             default:
                 return (
                     <div style={cardStyle}>
