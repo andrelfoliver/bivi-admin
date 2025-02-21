@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ConfigEmpresa from './ConfigEmpresa';
 import AssistVirtual from './AssistVirtual';
+import Settings from './Settings';
+
 
 
 function Dashboard({ user, onLogout }) {
