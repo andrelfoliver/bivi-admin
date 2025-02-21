@@ -7,7 +7,7 @@ function LoginPage({ setUser }) {
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
 
-  // Lógica de submit do login manual
+  // Lógica de submit dodf login manual
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');

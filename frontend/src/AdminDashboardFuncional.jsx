@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// Componente de modal para confirmação de ações
+// Componente de mddodal para confirmação de ações
 function ConfirmationModal({ message, onConfirm, onCancel }) {
   const modalOverlayStyle = {
     position: "fixed",

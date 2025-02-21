@@ -109,7 +109,7 @@ const AssistVirtual = ({ onClose }) => {
                 </Modal>
             )}
 
-            {/* Botão para fechar o componente e voltar ao Dashboard 
+            {/* Botãoo para fechar o componente e voltar ao Dashboard 
             <Button variant="primary" style={{ marginTop: '1rem' }} onClick={onClose}>
                 Voltar
             </Button>*/}

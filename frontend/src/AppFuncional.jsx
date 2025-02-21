@@ -53,12 +53,12 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route 
+        <Route
           path="/login"
           element={
             user ? (
-              user.role === 'admin' ? 
-                <Navigate to="/admin" replace /> 
+              user.role === 'admin' ?
+                <Navigate to="/admin" replace />
                 : <Navigate to="/config" replace />
             ) : (
               <LoginPage setUser={setUser} />
@@ -66,12 +66,12 @@ function App() {
           }
         />
         <Route path="/register" element={<RegisterPage />} />
-        <Route 
+        <Route
           path="/config"
           element={
             user ? (
-              user.role !== 'admin' ? 
-                <ConfigEmpresa user={user} onLogout={handleLogout} /> 
+              user.role !== 'admin' ?
+                <ConfigEmpresa user={user} onLogout={handleLogout} />
                 : <Navigate to="/admin" replace />
             ) : (
               <Navigate to="/login" replace />
@@ -82,8 +82,8 @@ function App() {
           path="/admin"
           element={
             user ? (
-              user.role === 'admin' ? 
-                <AdminDashboard user={user} onLogout={handleLogout} /> 
+              user.role === 'admin' ?
+                <AdminDashboard user={user} onLogout={handleLogout} />
                 : <Navigate to="/config" replace />
             ) : (
               <Navigate to="/login" replace />
