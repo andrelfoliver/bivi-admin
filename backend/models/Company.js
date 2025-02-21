@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const companySchema = new mongoose.Schema({
   nome: { type: String, required: true },
-  nomeAssistenteVirtual: { type: String, required: true }, // Novo campo: Nome da Assistente Virtual
+  nomeAssistenteVirtual: { type: String }, // novo campo adicionado
   apiKey: { type: String },
   telefone: { type: String },
   email: { type: String },

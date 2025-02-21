@@ -223,6 +223,7 @@ function ConfigEmpresa({ user, onLogout }) {
       const response = await fetch('/register-company', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // adicionado para enviar os cookies da sessão
         body: JSON.stringify(empresa),
       });
       const data = await response.json();
@@ -231,12 +232,13 @@ function ConfigEmpresa({ user, onLogout }) {
       } else {
         setSuccess(true);
         setSubmitError(null);
-        // Permite edição futura sem resetar os dados.
+        // Permite a edição futura sem resetar os dados
       }
     } catch (error) {
       setSubmitError("Erro ao enviar dados: " + error.message);
     }
   };
+
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
