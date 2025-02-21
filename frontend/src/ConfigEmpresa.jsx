@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Tabs, Tab } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 function levenshteinDistance(a, b) {
-  const dp = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(null));
+  const dp = Array(a.length + 1)
+    .fill(null)
+    .map(() => Array(b.length + 1).fill(null));
   for (let i = 0; i <= a.length; i++) dp[i][0] = i;
   for (let j = 0; j <= b.length; j++) dp[0][j] = j;
   for (let i = 1; i <= a.length; i++) {
@@ -76,7 +78,7 @@ const translations = {
     salvar: "Salvar Configuração",
     logout: "Sair",
     languageLabel: "Idioma",
-    successMessage: "Assistente virtual cadastrado com sucesso! Você pode editar e salvar as alterações.",
+    successMessage: "Assistente virtual cadastrada com sucesso! Você pode editar e salvar as alterações.",
     logoFormatError: "Apenas arquivos PNG ou JPEG são aceitos.",
     envSectionTitle: "Variáveis de Ambiente",
     instrucoesPersonalizadas: "Instruções Personalizadas",
@@ -99,7 +101,7 @@ function ConfigEmpresa({ user, onLogout }) {
   const [language, setLanguage] = useState('pt');
   const t = translations[language];
 
-  // Estado inicial do formulário – adicionado o campo nomeAssistenteVirtual
+  // Estado inicial do formulário
   const initialState = {
     nome: '',
     nomeAssistenteVirtual: '',
@@ -199,7 +201,7 @@ function ConfigEmpresa({ user, onLogout }) {
     }
   };
 
-  // Fetch para carregar a configuração da empresa (se já cadastrada)
+  // Ao montar o componente, busca os dados da empresa vinculada ao usuário (se existir)
   useEffect(() => {
     async function fetchCompany() {
       try {
@@ -207,24 +209,23 @@ function ConfigEmpresa({ user, onLogout }) {
         if (response.ok) {
           const data = await response.json();
           if (data.company) {
-            setEmpresa(data.company);
+            setEmpresa(prev => ({ ...prev, ...data.company }));
           }
         }
       } catch (error) {
-        console.error("Erro ao buscar os dados da empresa:", error);
+        console.error("Erro ao buscar dados da empresa:", error);
       }
     }
     fetchCompany();
   }, []);
 
-  // Ajusta o envio do formulário: se empresa._id existir, atualiza; caso contrário, cria
+  // Ao enviar o formulário, se a empresa já existe (empresa._id), atualiza via PUT; caso contrário, cria via POST
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
     try {
       let response;
       if (empresa._id) {
-        // Atualiza a configuração existente
         response = await fetch(`/api/companies/${empresa._id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -232,7 +233,6 @@ function ConfigEmpresa({ user, onLogout }) {
           body: JSON.stringify(empresa),
         });
       } else {
-        // Cadastra uma nova empresa
         response = await fetch('/register-company', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -246,9 +246,8 @@ function ConfigEmpresa({ user, onLogout }) {
       } else {
         setSuccess(true);
         setSubmitError(null);
-        // Atualiza o estado com o ID da empresa, caso seja nova criação
-        if (data.company && data.company._id) {
-          setEmpresa(prev => ({ ...prev, _id: data.company._id }));
+        if (data.company) {
+          setEmpresa(prev => ({ ...prev, ...data.company }));
         }
       }
     } catch (error) {
@@ -494,7 +493,6 @@ function ConfigEmpresa({ user, onLogout }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Função para remover o logo selecionado
   const handleRemoveLogo = () => {
     setEmpresa(prev => ({ ...prev, logo: null, logoFileName: null }));
     if (logoInputRef.current) {
@@ -515,7 +513,6 @@ function ConfigEmpresa({ user, onLogout }) {
         `}
       </style>
 
-      {/* Conteúdo sem header ou footer extra */}
       <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
         <Tab eventKey="dadosBasicos" title={t.dadosBasicos}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
