@@ -236,21 +236,20 @@ app.post('/register-company', async (req, res) => {
 });
 
 // Novo endpoint: Buscar a empresa vinculada ao usuário autenticado
+// Endpoint para buscar a empresa do cliente
 app.get('/api/company', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: "Não autenticado." });
   }
   try {
-    // Se o usuário não tiver uma empresa vinculada, retorna null.
-    if (!req.user.company) {
-      return res.json({ company: null });
-    }
-    const company = await Company.findById(req.user.company);
+    // Supondo que a empresa esteja vinculada ao usuário pelo e‑mail
+    const company = await Company.findOne({ email: req.user.email });
     res.json({ company });
   } catch (err) {
     res.status(500).json({ error: "Erro ao buscar empresa: " + err.message });
   }
 });
+
 
 // Novo endpoint: Atualizar a empresa
 app.put('/api/companies/:id', async (req, res) => {
