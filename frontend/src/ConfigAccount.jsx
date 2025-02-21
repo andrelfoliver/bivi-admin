@@ -1,32 +1,36 @@
-// src/Settings.jsx
+// src/ConfigAccount.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function Settings({ user, onLogout }) {
+function ConfigAccount({ user }) {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [message, setMessage] = useState('');
-    const [error, setError] = useState('');
+    const [errorMsg, setErrorMsg] = useState('');
+    const [successMsg, setSuccessMsg] = useState('');
     const navigate = useNavigate();
 
-    // Validação da senha: mínimo 8 caracteres, pelo menos uma letra maiúscula, uma minúscula, um dígito e um caractere especial.
     const validatePassword = (password) => {
-        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        // Exemplo de critérios de senha (mínimo 8 caracteres, pelo menos uma letra maiúscula, uma minúscula e um dígito)
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
         return regex.test(password);
     };
 
-    const handlePasswordChange = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setMessage('');
-        setError('');
+        setErrorMsg('');
+        setSuccessMsg('');
 
-        if (newPassword !== confirmPassword) {
-            setError("A nova senha e a confirmação não coincidem.");
+        // Verifica se as senhas atendem aos critérios
+        if (!validatePassword(newPassword)) {
+            setErrorMsg(
+                "A nova senha deve ter no mínimo 8 caracteres, incluir pelo menos uma letra maiúscula, uma minúscula e um dígito."
+            );
             return;
         }
-        if (!validatePassword(newPassword)) {
-            setError("A nova senha deve ter no mínimo 8 caracteres, com pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial.");
+
+        if (newPassword !== confirmPassword) {
+            setErrorMsg("As senhas não coincidem.");
             return;
         }
 
@@ -35,27 +39,30 @@ function Settings({ user, onLogout }) {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ currentPassword, newPassword }),
+                body: JSON.stringify({
+                    currentPassword,
+                    newPassword,
+                }),
             });
-            const data = await response.json();
-            if (!response.ok) {
-                setError(data.error || "Erro ao atualizar a senha.");
-            } else {
-                setMessage(data.message || "Senha atualizada com sucesso!");
-                // Limpa os campos após sucesso
+            if (response.ok) {
+                setSuccessMsg("Senha alterada com sucesso!");
+                // Opcional: limpar os campos
                 setCurrentPassword('');
                 setNewPassword('');
                 setConfirmPassword('');
+            } else {
+                const data = await response.json();
+                setErrorMsg(data.error || "Erro ao alterar a senha.");
             }
-        } catch (err) {
-            setError("Erro ao enviar dados: " + err.message);
+        } catch (error) {
+            setErrorMsg("Erro de conexão. Tente novamente.");
         }
     };
 
     // Se o usuário não for autenticado de forma manual, exibe mensagem informativa
     if (user.provider !== 'local') {
         return (
-            <div style={{ padding: '1rem' }}>
+            <div>
                 <h2>Alterar Senha</h2>
                 <p>
                     Você está autenticado via <strong>{user.provider}</strong>. Para alterar sua senha, acesse a página do seu provedor (ex.: Google).
@@ -65,9 +72,9 @@ function Settings({ user, onLogout }) {
     }
 
     return (
-        <div style={{ padding: '1rem' }}>
+        <div>
             <h2>Alterar Senha</h2>
-            <form onSubmit={handlePasswordChange}>
+            <form onSubmit={handleSubmit}>
                 <div style={{ marginBottom: '1rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.5rem' }}>Senha Atual:</label>
                     <input
@@ -98,24 +105,14 @@ function Settings({ user, onLogout }) {
                         style={{ width: '100%', padding: '0.5rem' }}
                     />
                 </div>
-                <button
-                    type="submit"
-                    style={{
-                        padding: '0.75rem 1.5rem',
-                        backgroundColor: '#5de5d9',
-                        border: 'none',
-                        borderRadius: '4px',
-                        color: '#fff',
-                        cursor: 'pointer'
-                    }}
-                >
-                    Atualizar Senha
+                <button type="submit" style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer' }}>
+                    Alterar Senha
                 </button>
             </form>
-            {message && <p style={{ color: 'green', marginTop: '1rem' }}>{message}</p>}
-            {error && <p style={{ color: 'red', marginTop: '1rem' }}>{error}</p>}
+            {errorMsg && <p style={{ color: 'red', marginTop: '1rem' }}>{errorMsg}</p>}
+            {successMsg && <p style={{ color: 'green', marginTop: '1rem' }}>{successMsg}</p>}
         </div>
     );
 }
 
-export default Settings;
+export default ConfigAccount;

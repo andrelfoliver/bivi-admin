@@ -377,6 +377,36 @@ app.put('/api/user/password', async (req, res) => {
     res.status(500).json({ error: "Erro ao atualizar senha: " + err.message });
   }
 });
+// Endpoint para alteração de senha
+app.put('/api/user/change-password', async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: "Não autenticado." });
+  }
+
+  const { currentPassword, newPassword } = req.body;
+
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+
+    // Verifica se a senha atual está correta
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Senha atual incorreta." });
+    }
+
+    // Validação do novo password pode ser feita aqui se desejar (mas já estamos validando no front-end)
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: "Senha alterada com sucesso!" });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao alterar senha: " + err.message });
+  }
+});
 // Endpoint para atualizar dados do usuário
 app.put('/api/user', async (req, res) => {
   if (!req.isAuthenticated()) {
