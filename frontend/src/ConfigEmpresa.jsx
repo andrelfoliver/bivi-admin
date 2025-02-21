@@ -231,7 +231,7 @@ function ConfigEmpresa({ user, onLogout }) {
       } else {
         setSuccess(true);
         setSubmitError(null);
-        // Não resetamos os dados, permitindo edição futura.
+        // Permite edição futura sem resetar os dados.
       }
     } catch (error) {
       setSubmitError("Erro ao enviar dados: " + error.message);
