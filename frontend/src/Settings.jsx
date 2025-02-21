@@ -7,10 +7,28 @@ function Settings({ onLogout }) {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
 
+    // Função para validar a senha com os critérios de segurança:
+    // Mínimo 8 caracteres, pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial.
+    const validatePassword = (password) => {
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        return regex.test(password);
+    };
+
     const handlePasswordChange = async (e) => {
         e.preventDefault();
         setMessage('');
         setError('');
+
+        // Validação dos campos:
+        if (newPassword !== confirmPassword) {
+            setError("A nova senha e a confirmação não coincidem.");
+            return;
+        }
+        if (!validatePassword(newPassword)) {
+            setError("A nova senha deve ter no mínimo 8 caracteres, com pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial.");
+            return;
+        }
+
         try {
             const response = await fetch('/api/user/password', {
                 method: 'PUT',
@@ -20,10 +38,10 @@ function Settings({ onLogout }) {
             });
             const data = await response.json();
             if (!response.ok) {
-                setError(data.error || "Erro ao atualizar senha.");
+                setError(data.error || "Erro ao atualizar a senha.");
             } else {
-                setMessage(data.message);
-                // Opcional: Limpar os campos
+                setMessage(data.message || "Senha atualizada com sucesso!");
+                // Limpa os campos após sucesso
                 setCurrentPassword('');
                 setNewPassword('');
                 setConfirmPassword('');
