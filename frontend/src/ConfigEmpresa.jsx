@@ -101,6 +101,28 @@ function ConfigEmpresa({ user, onLogout }) {
   const [language, setLanguage] = useState('pt');
   const t = translations[language];
 
+  // Definição dos estilos usados pelo componente
+  const labelStyle = { display: 'block', marginBottom: '0.5rem', color: '#272631' };
+  const inputStyle = { width: '100%', padding: '0.75rem', border: '1px solid #ccc', borderRadius: '4px' };
+  const errorStyle = { color: 'red', fontSize: '0.875rem', marginTop: '0.25rem' };
+  const dropZoneStyle = {
+    border: '2px dashed #ccc',
+    borderRadius: '4px',
+    padding: '1rem',
+    textAlign: 'center',
+    cursor: 'pointer',
+    position: 'relative',
+  };
+  const explanationIconStyle = { marginLeft: '8px', color: '#007bff', cursor: 'pointer', fontWeight: 'bold' };
+  const explanationTextStyle = {
+    display: 'block',
+    fontSize: '0.8rem',
+    color: '#555',
+    marginTop: '0.5rem',
+    backgroundColor: '#f1f1f1',
+    padding: '0.5rem',
+    borderRadius: '4px'
+  };
   // Estado inicial do formulário
   const initialState = {
     nome: '',
@@ -203,21 +225,21 @@ function ConfigEmpresa({ user, onLogout }) {
 
   // Ao montar o componente, busca os dados da empresa vinculada ao usuário (se existir)
   useEffect(() => {
-    async function fetchCompany() {
-      try {
-        const response = await fetch('/api/company', { credentials: 'include' });
-        if (response.ok) {
-          const data = await response.json();
+    // Se o usuário for cliente, busca os dados da empresa cadastrada
+    if (user && user.role === 'client') {
+      fetch('/api/company', { credentials: 'include' })
+        .then((res) => res.json())
+        .then((data) => {
           if (data.company) {
-            setEmpresa(prev => ({ ...prev, ...data.company }));
+            // Atualiza o estado "empresa" com os dados retornados.
+            // Use o spread para mesclar com os campos iniciais, se necessário.
+            setEmpresa((prev) => ({ ...prev, ...data.company }));
           }
-        }
-      } catch (error) {
-        console.error("Erro ao buscar dados da empresa:", error);
-      }
+        })
+        .catch((err) => console.error("Erro ao buscar empresa:", err));
     }
-    fetchCompany();
-  }, []);
+  }, [user]);
+
 
   // Ao enviar o formulário, se a empresa já existe (empresa._id), atualiza via PUT; caso contrário, cria via POST
   const handleSubmit = async (e) => {
