@@ -235,7 +235,6 @@ app.post('/register-company', async (req, res) => {
   }
 });
 
-// Endpoint para buscar a empresa do cliente
 // Endpoint para o cliente obter os dados da sua empresa
 app.get('/api/company', async (req, res) => {
   if (!req.isAuthenticated()) {

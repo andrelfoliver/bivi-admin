@@ -435,6 +435,7 @@ function ConfigEmpresa({ user, onLogout }) {
 
   const validateForm = () => {
     let newErrors = {};
+    // Campos essenciais (sempre exigidos)
     if (!empresa.nome.trim())
       newErrors.nome = language === 'pt' ? 'Nome é obrigatório.' : 'Name is required.';
     if (!empresa.nomeAssistenteVirtual.trim())
@@ -475,45 +476,42 @@ function ConfigEmpresa({ user, onLogout }) {
       newErrors.listaProdutos = language === 'pt'
         ? 'Lista de Produtos/Serviços é obrigatória.'
         : 'Products/Services List is required.';
-    [
-      'verifyToken',
-      'whatsappApiToken',
-      'openaiApiKey',
-      'mongoUri',
-      'phoneNumberId',
-      'emailUser',
-      'emailPass',
-      'emailGestor',
-    ].forEach((field) => {
-      if (!empresa[field].trim()) {
-        newErrors[field] = language === 'pt'
-          ? `${field.toUpperCase()} é obrigatório.`
-          : `${field.toUpperCase()} is required.`;
+
+    // Se o usuário for admin, exige também as variáveis de ambiente
+    if (user.role === 'admin') {
+      ['verifyToken', 'whatsappApiToken', 'openaiApiKey', 'mongoUri', 'phoneNumberId', 'emailUser', 'emailPass', 'emailGestor'].forEach((field) => {
+        if (!empresa[field].trim()) {
+          newErrors[field] = language === 'pt'
+            ? `${field.toUpperCase()} é obrigatório.`
+            : `${field.toUpperCase()} is required.`;
+        }
+      });
+      if (!empresa.regrasResposta.trim()) {
+        newErrors.regrasResposta = language === 'pt'
+          ? 'Regras de Resposta são obrigatórias.'
+          : 'Response rules are required.';
       }
-    });
-    if (!empresa.regrasResposta.trim()) {
-      newErrors.regrasResposta = language === 'pt'
-        ? 'Regras de Resposta são obrigatórias.'
-        : 'Response rules are required.';
+      if (!empresa.linkCalendly.trim()) {
+        newErrors.linkCalendly = language === 'pt'
+          ? 'Link de Calendly é obrigatório.'
+          : 'Calendly link is required.';
+      }
+      if (!empresa.linkSite.trim()) {
+        newErrors.linkSite = language === 'pt'
+          ? 'Link do Site é obrigatório.'
+          : 'Site link is required.';
+      }
+      if (!empresa.exemplosAtendimento.trim()) {
+        newErrors.exemplosAtendimento = language === 'pt'
+          ? 'Exemplos de Perguntas e Respostas são obrigatórios.'
+          : 'Examples of Q&A are required.';
+      }
     }
-    if (!empresa.linkCalendly.trim()) {
-      newErrors.linkCalendly = language === 'pt'
-        ? 'Link de Calendly é obrigatório.'
-        : 'Calendly link is required.';
-    }
-    if (!empresa.linkSite.trim()) {
-      newErrors.linkSite = language === 'pt'
-        ? 'Link do Site é obrigatório.'
-        : 'Site link is required.';
-    }
-    if (!empresa.exemplosAtendimento.trim()) {
-      newErrors.exemplosAtendimento = language === 'pt'
-        ? 'Exemplos de Perguntas e Respostas são obrigatórios.'
-        : 'Examples of Q&A are required.';
-    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
 
   const handleRemoveLogo = () => {
     setEmpresa(prev => ({ ...prev, logo: null, logoFileName: null }));
