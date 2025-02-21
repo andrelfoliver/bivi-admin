@@ -236,42 +236,42 @@ app.post('/register-company', async (req, res) => {
 });
 
 // Endpoint para buscar a empresa do cliente
+// Endpoint para o cliente obter os dados da sua empresa
 app.get('/api/company', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: "Não autenticado." });
   }
   try {
-    // Supondo que a empresa esteja associada pelo e‑mail do usuário
+    // Aqui estamos assumindo que o cadastro da empresa usa o email do usuário para identificação
     const company = await Company.findOne({ email: req.user.email });
     if (!company) {
-      return res.status(404).json({ error: "Empresa não encontrada." });
+      return res.json({});
     }
     res.json({ company });
   } catch (err) {
-    res.status(500).json({ error: "Erro ao buscar empresa: " + err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
-
-
-// Novo endpoint: Atualizar a empresa
+// Endpoint para o cliente atualizar os dados da sua empresa
 app.put('/api/companies/:id', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: "Não autenticado." });
   }
   try {
-    // Se o usuário não for admin, ele só pode atualizar sua própria empresa.
-    if (req.user.role !== 'admin' && (!req.user.company || req.user.company.toString() !== req.params.id)) {
-      return res.status(403).json({ error: "Você não tem permissão para atualizar essa empresa." });
+    const company = await Company.findById(req.params.id);
+    if (!company) {
+      return res.status(404).json({ error: "Empresa não encontrada." });
+    }
+    // Se o usuário for cliente, garante que ele só possa atualizar sua própria empresa (baseado no email)
+    if (req.user.role === 'client' && company.email !== req.user.email) {
+      return res.status(403).json({ error: "Acesso negado." });
     }
     const updatedCompany = await Company.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
-    if (!updatedCompany) {
-      return res.status(404).json({ error: "Empresa não encontrada." });
-    }
     res.json({ message: "Empresa atualizada com sucesso!", company: updatedCompany });
   } catch (err) {
     res.status(500).json({ error: "Erro ao atualizar empresa: " + err.message });
