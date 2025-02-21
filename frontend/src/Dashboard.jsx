@@ -30,6 +30,8 @@ function Dashboard({ user, onLogout }) {
     // Estados para edição de empresas
     const [editingCompanyId, setEditingCompanyId] = useState(null);
     const [editingCompanyName, setEditingCompanyName] = useState('');
+    // Estado para controle do modal de confirmação de exclusão
+    const [companyToDelete, setCompanyToDelete] = useState(null);
 
     useEffect(() => {
         if (!user) {
@@ -91,7 +93,6 @@ function Dashboard({ user, onLogout }) {
             setSaveMsg('');
             // Reseta os modos de edição ao mudar de módulo
             setEditing({ fullName: false, email: false, company: false, telefone: false });
-            // Reseta a edição de empresas
             setEditingCompanyId(null);
             setEditingCompanyName('');
             if (mod === 'usuarios') fetchUsers();
@@ -237,6 +238,29 @@ function Dashboard({ user, onLogout }) {
         }
     };
 
+    // Estilos para o modal de confirmação
+    const modalOverlayStyle = {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+    };
+
+    const modalContentStyle = {
+        backgroundColor: '#fff',
+        padding: '1.5rem',
+        borderRadius: '8px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        maxWidth: '400px',
+        width: '100%',
+    };
+
     const renderModuleContent = () => {
         const cardStyle = {
             backgroundColor: '#fff',
@@ -288,9 +312,7 @@ function Dashboard({ user, onLogout }) {
                                                 const isSelf = u._id.toString() === user._id.toString();
                                                 return (
                                                     <tr key={u._id} style={{ borderBottom: '1px solid #ccc' }}>
-                                                        <td style={{ padding: '0.75rem' }}>
-                                                            {u.name || u.email}
-                                                        </td>
+                                                        <td style={{ padding: '0.75rem' }}>{u.name || u.email}</td>
                                                         <td style={{ padding: '0.75rem' }}>
                                                             {u.role === 'admin' ? 'Admin' : 'Cliente'}
                                                         </td>
@@ -366,6 +388,7 @@ function Dashboard({ user, onLogout }) {
                                 <thead>
                                     <tr style={{ backgroundColor: '#5de5d9', color: '#000' }}>
                                         <th style={{ padding: '0.75rem', textAlign: 'left' }}>Nome</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>Criado em</th>
                                         <th style={{ padding: '0.75rem', textAlign: 'left' }}>Ações</th>
                                     </tr>
                                 </thead>
@@ -383,6 +406,9 @@ function Dashboard({ user, onLogout }) {
                                                 ) : (
                                                     company.nome
                                                 )}
+                                            </td>
+                                            <td style={{ padding: '0.75rem' }}>
+                                                {new Date(company.createdAt).toLocaleString('pt-BR')}
                                             </td>
                                             <td style={{ padding: '0.75rem' }}>
                                                 {editingCompanyId === company._id ? (
@@ -430,7 +456,7 @@ function Dashboard({ user, onLogout }) {
                                                             Editar
                                                         </button>
                                                         <button
-                                                            onClick={() => handleDeleteCompany(company._id)}
+                                                            onClick={() => setCompanyToDelete(company)}
                                                             style={{
                                                                 padding: '0.5rem 1rem',
                                                                 backgroundColor: '#d9534f',
@@ -768,6 +794,45 @@ function Dashboard({ user, onLogout }) {
             <footer style={footerStyle}>
                 &copy; {new Date().getFullYear()} BiVisualizer. Todos os direitos reservados.
             </footer>
+            {/* Modal de confirmação customizado para exclusão de empresa */}
+            {companyToDelete && (
+                <div style={modalOverlayStyle}>
+                    <div style={modalContentStyle}>
+                        <p>Tem certeza que deseja excluir a empresa <strong>"{companyToDelete.nome}"</strong>?</p>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
+                            <button
+                                onClick={() => {
+                                    handleDeleteCompany(companyToDelete._id);
+                                    setCompanyToDelete(null);
+                                }}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    backgroundColor: '#d9534f',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    color: '#fff',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Confirmar
+                            </button>
+                            <button
+                                onClick={() => setCompanyToDelete(null)}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    backgroundColor: '#ccc',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    color: '#000',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
