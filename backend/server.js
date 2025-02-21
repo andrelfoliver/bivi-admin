@@ -217,18 +217,65 @@ app.put('/api/users/:id/promote', isAdmin, async (req, res) => {
 
 
 // Endpoint para cadastro de empresas
+// Endpoint para cadastro de empresas
 app.post('/register-company', async (req, res) => {
   console.log("Requisição recebida em /register-company:", req.body);
   try {
     const newCompany = new Company(req.body);
     const savedCompany = await newCompany.save();
     console.log("Empresa cadastrada:", savedCompany);
+    // Se o usuário estiver autenticado, atualiza o campo "company" do usuário com o _id da empresa cadastrada.
+    if (req.isAuthenticated() && req.user) {
+      await User.findByIdAndUpdate(req.user._id, { company: savedCompany._id });
+    }
     res.status(201).send({ message: "Empresa cadastrada com sucesso!", company: savedCompany });
   } catch (err) {
     console.error("Erro ao cadastrar empresa:", err);
     res.status(500).send({ error: "Erro ao cadastrar empresa: " + err.message });
   }
 });
+
+// Novo endpoint: Buscar a empresa vinculada ao usuário autenticado
+app.get('/api/company', async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: "Não autenticado." });
+  }
+  try {
+    // Se o usuário não tiver uma empresa vinculada, retorna null.
+    if (!req.user.company) {
+      return res.json({ company: null });
+    }
+    const company = await Company.findById(req.user.company);
+    res.json({ company });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao buscar empresa: " + err.message });
+  }
+});
+
+// Novo endpoint: Atualizar a empresa
+app.put('/api/companies/:id', async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: "Não autenticado." });
+  }
+  try {
+    // Se o usuário não for admin, ele só pode atualizar sua própria empresa.
+    if (req.user.role !== 'admin' && (!req.user.company || req.user.company.toString() !== req.params.id)) {
+      return res.status(403).json({ error: "Você não tem permissão para atualizar essa empresa." });
+    }
+    const updatedCompany = await Company.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!updatedCompany) {
+      return res.status(404).json({ error: "Empresa não encontrada." });
+    }
+    res.json({ message: "Empresa atualizada com sucesso!", company: updatedCompany });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao atualizar empresa: " + err.message });
+  }
+});
+
 
 // Endpoint para logout – destrói a sessão e limpa o cookie
 app.post('/api/logout', (req, res, next) => {
