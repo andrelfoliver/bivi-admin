@@ -11,7 +11,7 @@ function Dashboard({ user, onLogout }) {
     const [loading, setLoading] = useState(false);
     const [saveMsg, setSaveMsg] = useState('');
 
-    // Estado para os dados pessoais (inicializados com os valores do usuário)
+    // Estado para os dados pessoais
     const [userInfo, setUserInfo] = useState({
         fullName: user?.name || '',
         email: user?.email || '',
@@ -19,13 +19,17 @@ function Dashboard({ user, onLogout }) {
         telefone: user?.telefone || ''
     });
 
-    // Estado para controlar quais campos estão em modo de edição
+    // Estado para controle de edição dos dados pessoais
     const [editing, setEditing] = useState({
         fullName: false,
         email: false,
         company: false,
         telefone: false
     });
+
+    // Estados para edição de empresas
+    const [editingCompanyId, setEditingCompanyId] = useState(null);
+    const [editingCompanyName, setEditingCompanyName] = useState('');
 
     useEffect(() => {
         if (!user) {
@@ -87,6 +91,9 @@ function Dashboard({ user, onLogout }) {
             setSaveMsg('');
             // Reseta os modos de edição ao mudar de módulo
             setEditing({ fullName: false, email: false, company: false, telefone: false });
+            // Reseta a edição de empresas
+            setEditingCompanyId(null);
+            setEditingCompanyName('');
             if (mod === 'usuarios') fetchUsers();
             if (mod === 'empresas') fetchCompanies();
         }
@@ -179,6 +186,55 @@ function Dashboard({ user, onLogout }) {
                 )}
             </div>
         );
+    };
+
+    // Funções para editar e excluir empresas
+    const handleEditCompany = (company) => {
+        setEditingCompanyId(company._id);
+        setEditingCompanyName(company.nome);
+    };
+
+    const handleCancelCompanyEdit = () => {
+        setEditingCompanyId(null);
+        setEditingCompanyName('');
+    };
+
+    const handleSaveCompanyEdit = async (companyId) => {
+        try {
+            const response = await fetch(`/api/companies/${companyId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ nome: editingCompanyName }),
+            });
+            if (response.ok) {
+                setSaveMsg('Empresa atualizada com sucesso!');
+                fetchCompanies();
+                setEditingCompanyId(null);
+                setEditingCompanyName('');
+            } else {
+                setSaveMsg('Erro ao atualizar empresa.');
+            }
+        } catch (error) {
+            setSaveMsg('Erro ao atualizar empresa: ' + error.message);
+        }
+    };
+
+    const handleDeleteCompany = async (companyId) => {
+        try {
+            const response = await fetch(`/api/companies/${companyId}`, {
+                method: 'DELETE',
+                credentials: 'include',
+            });
+            if (response.ok) {
+                alert('Empresa excluída com sucesso!');
+                fetchCompanies();
+            } else {
+                alert('Erro ao excluir empresa.');
+            }
+        } catch (error) {
+            alert('Erro ao excluir empresa: ' + error.message);
+        }
     };
 
     const renderModuleContent = () => {
@@ -306,12 +362,95 @@ function Dashboard({ user, onLogout }) {
                         {loading ? (
                             <p>Carregando empresas...</p>
                         ) : (
-                            <ul>
-                                {companies.map((c) => (
-                                    <li key={c._id}>{c.nome}</li>
-                                ))}
-                            </ul>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ backgroundColor: '#5de5d9', color: '#000' }}>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>Nome</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {companies.map((company) => (
+                                        <tr key={company._id} style={{ borderBottom: '1px solid #ccc' }}>
+                                            <td style={{ padding: '0.75rem' }}>
+                                                {editingCompanyId === company._id ? (
+                                                    <input
+                                                        type="text"
+                                                        value={editingCompanyName}
+                                                        onChange={(e) => setEditingCompanyName(e.target.value)}
+                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                                    />
+                                                ) : (
+                                                    company.nome
+                                                )}
+                                            </td>
+                                            <td style={{ padding: '0.75rem' }}>
+                                                {editingCompanyId === company._id ? (
+                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                        <button
+                                                            onClick={() => handleSaveCompanyEdit(company._id)}
+                                                            style={{
+                                                                padding: '0.5rem 1rem',
+                                                                backgroundColor: '#5de5d9',
+                                                                border: 'none',
+                                                                borderRadius: '4px',
+                                                                color: '#fff',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            Salvar
+                                                        </button>
+                                                        <button
+                                                            onClick={handleCancelCompanyEdit}
+                                                            style={{
+                                                                padding: '0.5rem 1rem',
+                                                                backgroundColor: '#ccc',
+                                                                border: 'none',
+                                                                borderRadius: '4px',
+                                                                color: '#000',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            Cancelar
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                        <button
+                                                            onClick={() => handleEditCompany(company)}
+                                                            style={{
+                                                                padding: '0.5rem 1rem',
+                                                                backgroundColor: '#5de5d9',
+                                                                border: 'none',
+                                                                borderRadius: '4px',
+                                                                color: '#fff',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            Editar
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteCompany(company._id)}
+                                                            style={{
+                                                                padding: '0.5rem 1rem',
+                                                                backgroundColor: '#d9534f',
+                                                                border: 'none',
+                                                                borderRadius: '4px',
+                                                                color: '#fff',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            Excluir
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         )}
+                        {saveMsg && <p style={{ marginTop: '1rem', color: '#5de5d9' }}>{saveMsg}</p>}
                     </div>
                 );
             case 'assistentes':
@@ -412,7 +551,6 @@ function Dashboard({ user, onLogout }) {
         }
     };
 
-    // Estilos gerais do Dashboard
     const pageWrapperStyle = {
         display: 'flex',
         minHeight: '100vh',
@@ -633,60 +771,5 @@ function Dashboard({ user, onLogout }) {
         </div>
     );
 }
-
-// Funções para promover, demover e excluir usuários
-const handlePromoteUser = async (userId) => {
-    try {
-        const response = await fetch(`/api/users/${userId}/promote`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ role: 'admin' }),
-        });
-        if (response.ok) {
-            alert('Usuário promovido com sucesso!');
-            fetchUsers();
-        } else {
-            alert('Erro ao promover usuário.');
-        }
-    } catch (error) {
-        alert('Erro ao promover usuário: ' + error.message);
-    }
-};
-
-const handleDemoteUser = async (userId) => {
-    try {
-        const response = await fetch(`/api/users/${userId}/demote`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include'
-        });
-        if (response.ok) {
-            alert('Usuário demovido com sucesso!');
-            fetchUsers();
-        } else {
-            alert('Erro ao demover usuário.');
-        }
-    } catch (error) {
-        alert('Erro ao demover usuário: ' + error.message);
-    }
-};
-
-const handleDeleteUser = async (userId) => {
-    try {
-        const response = await fetch(`/api/users/${userId}`, {
-            method: 'DELETE',
-            credentials: 'include'
-        });
-        if (response.ok) {
-            alert('Usuário excluído com sucesso!');
-            fetchUsers();
-        } else {
-            alert('Erro ao excluir usuário.');
-        }
-    } catch (error) {
-        alert('Erro ao excluir usuário: ' + error.message);
-    }
-};
 
 export default Dashboard;
