@@ -284,7 +284,6 @@ function Dashboard({ user, onLogout }) {
                         <h2>Dados Pessoais</h2>
                         {renderEditableField('Nome Completo', 'fullName')}
                         {renderEditableField('E‑mail', 'email', 'email')}
-                        {renderEditableField('Empresa', 'company')}
                         {renderEditableField('Telefone', 'telefone')}
                         {saveMsg && <p style={{ marginTop: '1rem', color: '#5de5d9' }}>{saveMsg}</p>}
                     </div>
