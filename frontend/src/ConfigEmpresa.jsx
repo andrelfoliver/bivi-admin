@@ -553,32 +553,7 @@ function ConfigEmpresa({ user, onLogout }) {
         `}
       </style>
 
-      {/* Botão global para alternar entre modo visual e edição */}
-      {!isEditable ? (
-        <div style={{ margin: '1rem 0' }}>
-          <button
-            onClick={() => setIsEditable(true)}
-            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer' }}
-          >
-            Editar
-          </button>
-        </div>
-      ) : (
-        <div style={{ margin: '1rem 0' }}>
-          <button
-            onClick={handleSaveClick}
-            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', marginRight: '0.5rem' }}
-          >
-            Salvar
-          </button>
-          <button
-            onClick={handleCancelEdit}
-            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', color: '#000', cursor: 'pointer' }}
-          >
-            Cancelar
-          </button>
-        </div>
-      )}
+
 
       <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
         <Tab eventKey="dadosBasicos" title={t.dadosBasicos}>
@@ -960,7 +935,32 @@ function ConfigEmpresa({ user, onLogout }) {
           {t.successMessage}
         </div>
       )}
-
+      {/* Botão global para alternar entre modo visual e edição */}
+      {!isEditable ? (
+        <div style={{ margin: '1rem 0' }}>
+          <button
+            onClick={() => setIsEditable(true)}
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer' }}
+          >
+            Editar
+          </button>
+        </div>
+      ) : (
+        <div style={{ margin: '1rem 0' }}>
+          <button
+            onClick={handleSaveClick}
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', marginRight: '0.5rem' }}
+          >
+            Salvar
+          </button>
+          <button
+            onClick={handleCancelEdit}
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', color: '#000', cursor: 'pointer' }}
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
       {/* Modal de confirmação */}
       <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)} centered>
         <Modal.Header closeButton>
