@@ -1,14 +1,6 @@
 // src/History.jsx
 import React, { useEffect, useState } from 'react';
 
-const cardStyle = {
-    backgroundColor: '#fff',
-    borderRadius: '8px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-    padding: '1.5rem',
-    marginBottom: '1rem'
-};
-
 const styles = {
     filters: {
         display: 'flex',
@@ -82,7 +74,7 @@ function History() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
-    // Constrói a URL da API com filtros e paginação
+    // Função para construir a URL da API com filtros e paginação
     const buildApiUrl = (page) => {
         let url = `/api/historico?page=${page}`;
         if (nameFilter.trim() !== '') {
@@ -100,7 +92,7 @@ function History() {
         return url;
     };
 
-    // Função para buscar as mensagens
+    // Função para buscar mensagens
     const fetchMessages = async (page = 1) => {
         try {
             const response = await fetch(buildApiUrl(page), { credentials: 'include' });
@@ -163,7 +155,7 @@ function History() {
     };
 
     return (
-        <div style={cardStyle}>
+        <>
             <h2>Histórico de Mensagens</h2>
             <div style={styles.filters}>
                 <input
@@ -243,7 +235,7 @@ function History() {
                     Próximo
                 </button>
             </div>
-        </div>
+        </>
     );
 }
 
