@@ -431,21 +431,24 @@ app.put('/api/user/change-password', async (req, res) => {
   }
 });
 // Endpoint para atualizar dados do usuário
-// Endpoint para atualizar dados do usuário
 app.put('/api/user', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: "Não autenticado." });
   }
   const { name, email, company, telefone } = req.body;
-  try {
-    // Se o email for fornecido e for diferente do atual, verifica se já existe em outra conta
-    if (email && email !== req.user.email) {
-      const emailExists = await User.findOne({ email });
-      if (emailExists) {
-        return res.status(400).json({ error: "Não é possível atualizar: email já utilizado por outra conta." });
-      }
-    }
 
+  // Se um email foi informado, verifica se ele já está em uso por outro usuário
+  if (email) {
+    const emailExists = await User.findOne({
+      email,
+      _id: { $ne: req.user._id }
+    });
+    if (emailExists) {
+      return res.status(400).json({ error: "Este email já está em uso." });
+    }
+  }
+
+  try {
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
       { name, email, company, telefone },
@@ -457,7 +460,6 @@ app.put('/api/user', async (req, res) => {
     res.status(500).json({ error: "Erro ao atualizar usuário: " + err.message });
   }
 });
-
 
 
 // Serve arquivos estáticos da pasta 'public'
