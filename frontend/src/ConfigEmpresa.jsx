@@ -853,7 +853,12 @@ function ConfigEmpresa({ user, onLogout }) {
           <Modal.Title>Campos Obrigatórios</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>{t.fillAllFields}</p>
+          <p>Por favor, preencha os seguintes campos obrigatórios:</p>
+          <ul>
+            {Object.keys(errors).map((fieldKey, index) => (
+              <li key={index}>{errors[fieldKey]}</li>
+            ))}
+          </ul>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="primary" onClick={handleErrorModalClose}>
@@ -861,6 +866,7 @@ function ConfigEmpresa({ user, onLogout }) {
           </Button>
         </Modal.Footer>
       </Modal>
+
     </div>
   );
 }
