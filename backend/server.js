@@ -402,16 +402,20 @@ app.delete('/api/companies/:id', isAdmin, async (req, res) => {
       }
       const tenantUri = process.env.MONGO_URI_TEMPLATE.replace('{DB_NAME}', deletedCompany.banco);
       console.log("Conectando ao banco tenant:", tenantUri);
+      console.log("Nome do banco a ser droppado:", deletedCompany.banco);
 
       const client = new MongoClient(tenantUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });
-
       await client.connect();
-      const db = client.db();
-      const dropResult = await db.dropDatabase();
-      console.log("Resultado do drop:", dropResult);
+
+      // Seleciona explicitamente o banco usando o nome armazenado
+      const db = client.db(deletedCompany.banco);
+      // Tente executar o comando de dropDatabase explicitamente
+      const dropResult = await db.command({ dropDatabase: 1 });
+      console.log("Resultado do dropDatabase:", dropResult);
+
       await client.close();
       console.log(`Banco do tenant ${deletedCompany.banco} excluído com sucesso.`);
     }
