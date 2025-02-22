@@ -413,7 +413,7 @@ app.delete('/api/companies/:id', isAdmin, async (req, res) => {
       // Seleciona explicitamente o banco usando o nome armazenado
       const db = client.db(deletedCompany.banco);
       // Tente executar o comando de dropDatabase explicitamente
-      const dropResult = await db.command({ dropDatabase: 1 });
+      const dropResult = await db.dropDatabase();
       console.log("Resultado do dropDatabase:", dropResult);
 
       await client.close();
