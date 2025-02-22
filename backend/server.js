@@ -437,11 +437,11 @@ app.put('/api/user', async (req, res) => {
   }
   const { name, email, company, telefone } = req.body;
 
-  // Se um email foi informado, verifica se ele já está em uso por outro usuário
+  // Se um novo email for informado, verifique se ele já está em uso por outro usuário
   if (email) {
     const emailExists = await User.findOne({
       email,
-      _id: { $ne: req.user._id }
+      _id: { $ne: req.user._id } // Ignora o usuário atual
     });
     if (emailExists) {
       return res.status(400).json({ error: "Este email já está em uso." });
@@ -460,6 +460,7 @@ app.put('/api/user', async (req, res) => {
     res.status(500).json({ error: "Erro ao atualizar usuário: " + err.message });
   }
 });
+
 
 
 // Serve arquivos estáticos da pasta 'public'
