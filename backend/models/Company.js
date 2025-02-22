@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 const companySchema = new mongoose.Schema({
   nome: { type: String, required: true },
+  banco: { type: String, required: true }, // Adicionado para garantir que o nome do banco seja salvo
   nomeAssistenteVirtual: { type: String }, // novo campo adicionado
   apiKey: { type: String },
   telefone: { type: String },

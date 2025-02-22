@@ -401,23 +401,19 @@ app.delete('/api/companies/:id', isAdmin, async (req, res) => {
         throw new Error("MONGO_URI_TEMPLATE não definido no ambiente.");
       }
       const tenantUri = process.env.MONGO_URI_TEMPLATE.replace('{DB_NAME}', deletedCompany.banco);
-      console.log("Conectando ao banco tenant:", tenantUri);
-      console.log("Nome do banco a ser droppado:", deletedCompany.banco);
-
+      console.log("[DROP_DB] Conectando ao banco tenant:", tenantUri);
+      console.log("[DROP_DB] Nome do banco a ser droppado:", deletedCompany.banco);
       const client = new MongoClient(tenantUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });
       await client.connect();
-
-      // Seleciona explicitamente o banco usando o nome armazenado
       const db = client.db(deletedCompany.banco);
-      // Tente executar o comando de dropDatabase explicitamente
       const dropResult = await db.dropDatabase();
-      console.log("Resultado do dropDatabase:", dropResult);
-
+      console.log("[DROP_DB] Resultado do dropDatabase:", dropResult);
       await client.close();
-      console.log(`Banco do tenant ${deletedCompany.banco} excluído com sucesso.`);
+      console.log("[DROP_DB] Banco do tenant", deletedCompany.banco, "excluído com sucesso.");
+
     }
 
     res.json({ message: "Empresa e banco do tenant excluídos com sucesso!", company: deletedCompany });
