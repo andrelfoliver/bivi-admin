@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Tabs, Tab } from 'react-bootstrap';
+import { Tabs, Tab, Modal, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 function levenshteinDistance(a, b) {
@@ -101,7 +101,7 @@ function ConfigEmpresa({ user, onLogout }) {
   const [language, setLanguage] = useState('pt');
   const t = translations[language];
 
-  // Estilos usados no componente
+  // Estilos para os inputs e labels
   const labelStyle = { display: 'block', marginBottom: '0.5rem', color: '#272631' };
   const inputStyle = { width: '100%', padding: '0.75rem', border: '1px solid #ccc', borderRadius: '4px' };
   const errorStyle = { color: 'red', fontSize: '0.875rem', marginTop: '0.25rem' };
@@ -124,7 +124,7 @@ function ConfigEmpresa({ user, onLogout }) {
     borderRadius: '4px'
   };
 
-  // Estado inicial do formulário de empresa
+  // Estado inicial do formulário
   const initialState = {
     nome: '',
     nomeAssistenteVirtual: '',
@@ -158,12 +158,18 @@ function ConfigEmpresa({ user, onLogout }) {
 
   const [empresa, setEmpresa] = useState(initialState);
   const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [success, setSuccess] = useState(false);
+
+  // Estado para controle do modo de edição (inputs congelados)
+  const [isEditable, setIsEditable] = useState(false);
+  // Estado para controle do modal de confirmação de salvamento
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
   const logoInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState('dadosBasicos');
 
-  // Tooltips para variáveis de ambiente e instruções
+  // Tooltips
   const [envExplanations, setEnvExplanations] = useState({
     verifyToken: false,
     whatsappApiToken: false,
@@ -231,14 +237,14 @@ function ConfigEmpresa({ user, onLogout }) {
         .then((res) => res.json())
         .then((data) => {
           if (data.company) {
-            setEmpresa(prev => ({ ...prev, ...data.company }));
+            setEmpresa((prev) => ({ ...prev, ...data.company }));
           }
         })
         .catch((err) => console.error("Erro ao buscar empresa:", err));
     }
   }, [user]);
 
-  // Função para validar os campos do formulário
+  // Função de validação (igual ao que você já tinha)
   const validateForm = () => {
     let newErrors = {};
     if (!empresa.nome.trim())
@@ -281,8 +287,6 @@ function ConfigEmpresa({ user, onLogout }) {
       newErrors.listaProdutos = language === 'pt'
         ? 'Lista de Produtos/Serviços é obrigatória.'
         : 'Products/Services List is required.';
-
-    // Para usuários admin, valida também as variáveis de ambiente
     if (user.role === 'admin') {
       ['verifyToken', 'whatsappApiToken', 'openaiApiKey', 'mongoUri', 'phoneNumberId', 'emailUser', 'emailPass', 'emailGestor'].forEach((field) => {
         if (!empresa[field].trim()) {
@@ -312,15 +316,12 @@ function ConfigEmpresa({ user, onLogout }) {
           : 'Examples of Q&A are required.';
       }
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Função de envio do formulário: se empresa já existe, atualiza; senão, cadastra
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+  // Função que efetivamente envia os dados para o servidor
+  const submitData = async () => {
     try {
       let response;
       if (empresa._id) {
@@ -347,10 +348,40 @@ function ConfigEmpresa({ user, onLogout }) {
         if (data.company) {
           setEmpresa(prev => ({ ...prev, ...data.company }));
         }
+        // Após salvar, volta para o modo visual (inputs congelados)
+        setIsEditable(false);
       }
     } catch (error) {
       setSubmitError("Erro ao enviar dados: " + error.message);
     }
+  };
+
+  // Função acionada ao clicar em "Salvar"
+  const handleSaveClick = (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    // Abre o modal de confirmação
+    setShowConfirmModal(true);
+  };
+
+  // Função acionada no modal de confirmação
+  const handleConfirmSave = () => {
+    setShowConfirmModal(false);
+    submitData();
+  };
+
+  // Função para cancelar a edição (reverte para modo visualização)
+  const handleCancelEdit = () => {
+    setIsEditable(false);
+    // Opcional: recarregar os dados do servidor para descartar alterações
+    fetch('/api/company', { credentials: 'include' })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.company) {
+          setEmpresa((prev) => ({ ...prev, ...data.company }));
+        }
+      })
+      .catch((err) => console.error("Erro ao recarregar dados:", err));
   };
 
   const handleChange = (e) => {
@@ -522,6 +553,33 @@ function ConfigEmpresa({ user, onLogout }) {
         `}
       </style>
 
+      {/* Botão global para alternar entre modo visual e edição */}
+      {!isEditable ? (
+        <div style={{ margin: '1rem 0' }}>
+          <button
+            onClick={() => setIsEditable(true)}
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer' }}
+          >
+            Editar
+          </button>
+        </div>
+      ) : (
+        <div style={{ margin: '1rem 0' }}>
+          <button
+            onClick={handleSaveClick}
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', marginRight: '0.5rem' }}
+          >
+            Salvar
+          </button>
+          <button
+            onClick={handleCancelEdit}
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', color: '#000', cursor: 'pointer' }}
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
+
       <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
         <Tab eventKey="dadosBasicos" title={t.dadosBasicos}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
@@ -536,6 +594,7 @@ function ConfigEmpresa({ user, onLogout }) {
                 onBlur={handleBlur}
                 style={inputStyle}
                 required
+                disabled={!isEditable}
               />
               {errors.nome && <span style={errorStyle}>{errors.nome}</span>}
             </div>
@@ -550,6 +609,7 @@ function ConfigEmpresa({ user, onLogout }) {
                 onBlur={handleBlur}
                 style={inputStyle}
                 required
+                disabled={!isEditable}
               />
               {errors.nomeAssistenteVirtual && <span style={errorStyle}>{errors.nomeAssistenteVirtual}</span>}
             </div>
@@ -564,6 +624,7 @@ function ConfigEmpresa({ user, onLogout }) {
                 onBlur={handleBlur}
                 style={inputStyle}
                 required
+                disabled={!isEditable}
               />
               {errors.apiKey && <span style={errorStyle}>{errors.apiKey}</span>}
             </div>
@@ -578,6 +639,7 @@ function ConfigEmpresa({ user, onLogout }) {
                 onBlur={handleBlur}
                 style={inputStyle}
                 required
+                disabled={!isEditable}
               />
               {errors.telefone && <span style={errorStyle}>{errors.telefone}</span>}
             </div>
@@ -592,6 +654,7 @@ function ConfigEmpresa({ user, onLogout }) {
                 onBlur={handleBlur}
                 style={inputStyle}
                 required
+                disabled={!isEditable}
               />
               {errors.email && <span style={errorStyle}>{errors.email}</span>}
             </div>
@@ -606,6 +669,7 @@ function ConfigEmpresa({ user, onLogout }) {
                 onBlur={handleBlur}
                 style={inputStyle}
                 required
+                disabled={!isEditable}
               />
               {errors.saudacao && <span style={errorStyle}>{errors.saudacao}</span>}
             </div>
@@ -629,23 +693,26 @@ function ConfigEmpresa({ user, onLogout }) {
                   onChange={handleChange}
                   ref={logoInputRef}
                   style={{ display: 'none' }}
+                  disabled={!isEditable}
                 />
               </div>
               {empresa.logoFileName && (
                 <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <p style={{ fontStyle: 'italic' }}>Arquivo selecionado: {empresa.logoFileName}</p>
-                  <button
-                    type="button"
-                    onClick={handleRemoveLogo}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#e3342f',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Remover
-                  </button>
+                  {isEditable && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveLogo}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#e3342f',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Remover
+                    </button>
+                  )}
                 </div>
               )}
               {errors.logo && <span style={errorStyle}>{errors.logo}</span>}
@@ -658,6 +725,7 @@ function ConfigEmpresa({ user, onLogout }) {
                 value={empresa.primaryColor}
                 onChange={handleChange}
                 style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }}
+                disabled={!isEditable}
               />
             </div>
             <div style={{ flex: '1 1 300px' }}>
@@ -668,6 +736,7 @@ function ConfigEmpresa({ user, onLogout }) {
                 value={empresa.secondaryColor}
                 onChange={handleChange}
                 style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }}
+                disabled={!isEditable}
               />
             </div>
             <div style={{ flex: '1 1 300px' }}>
@@ -678,6 +747,7 @@ function ConfigEmpresa({ user, onLogout }) {
                 value={empresa.backgroundColor}
                 onChange={handleChange}
                 style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }}
+                disabled={!isEditable}
               />
             </div>
           </div>
@@ -695,6 +765,7 @@ function ConfigEmpresa({ user, onLogout }) {
                 onBlur={handleBlur}
                 style={inputStyle}
                 required
+                disabled={!isEditable}
               ></textarea>
               {errors.saudacaoInicial && <span style={errorStyle}>{errors.saudacaoInicial}</span>}
             </div>
@@ -709,6 +780,7 @@ function ConfigEmpresa({ user, onLogout }) {
                 onBlur={handleBlur}
                 style={inputStyle}
                 required
+                disabled={!isEditable}
               ></textarea>
               {errors.respostaPadrao && <span style={errorStyle}>{errors.respostaPadrao}</span>}
             </div>
@@ -721,6 +793,7 @@ function ConfigEmpresa({ user, onLogout }) {
                 value={empresa.solicitacaoEmail}
                 onChange={handleChange}
                 style={inputStyle}
+                disabled={!isEditable}
               ></textarea>
             </div>
             <div style={{ flex: '1 1 100%' }}>
@@ -734,6 +807,7 @@ function ConfigEmpresa({ user, onLogout }) {
                 onBlur={handleBlur}
                 style={inputStyle}
                 required
+                disabled={!isEditable}
               ></textarea>
               {errors.mensagemEncerramento && <span style={errorStyle}>{errors.mensagemEncerramento}</span>}
             </div>
@@ -748,6 +822,7 @@ function ConfigEmpresa({ user, onLogout }) {
                 onBlur={handleBlur}
                 style={{ ...inputStyle, whiteSpace: 'pre-wrap' }}
                 required
+                disabled={!isEditable}
               ></textarea>
               {errors.listaProdutos && <span style={errorStyle}>{errors.listaProdutos}</span>}
             </div>
@@ -780,6 +855,7 @@ function ConfigEmpresa({ user, onLogout }) {
                   onBlur={handleBlur}
                   style={inputStyle}
                   required
+                  disabled={!isEditable}
                 />
                 {errors[field.name] && <span style={errorStyle}>{errors[field.name]}</span>}
                 {envExplanations[field.name] && (
@@ -816,6 +892,7 @@ function ConfigEmpresa({ user, onLogout }) {
                     onBlur={handleBlur}
                     style={inputStyle}
                     required
+                    disabled={!isEditable}
                   ></textarea>
                 ) : (
                   <input
@@ -827,6 +904,7 @@ function ConfigEmpresa({ user, onLogout }) {
                     onBlur={handleBlur}
                     style={inputStyle}
                     required
+                    disabled={!isEditable}
                   />
                 )}
                 {errors[field.name] && <span style={errorStyle}>{errors[field.name]}</span>}
@@ -858,7 +936,7 @@ function ConfigEmpresa({ user, onLogout }) {
             }}
             onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#4cc9c0')}
             onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#5de5d9')}
-            onClick={handleSubmit}
+            onClick={handleSaveClick}
           >
             {t.salvar}
           </button>
@@ -882,6 +960,24 @@ function ConfigEmpresa({ user, onLogout }) {
           {t.successMessage}
         </div>
       )}
+
+      {/* Modal de confirmação */}
+      <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirmar Alterações</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Deseja realmente salvar as alterações?</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
+            Cancelar
+          </Button>
+          <Button variant="primary" onClick={handleConfirmSave}>
+            Confirmar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
