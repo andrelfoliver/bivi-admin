@@ -102,28 +102,13 @@ function ConfigEmpresa({ user, onLogout }) {
   const [language, setLanguage] = useState('pt');
   const t = translations[language];
 
-  // Estilos para os inputs e labels
+  // Estilos para os inputs, labels e outros elementos
   const labelStyle = { display: 'block', marginBottom: '0.5rem', color: '#272631' };
   const inputStyle = { width: '100%', padding: '0.75rem', border: '1px solid #ccc', borderRadius: '4px' };
   const errorStyle = { color: 'red', fontSize: '0.875rem', marginTop: '0.25rem' };
-  const dropZoneStyle = {
-    border: '2px dashed #ccc',
-    borderRadius: '4px',
-    padding: '1rem',
-    textAlign: 'center',
-    cursor: 'pointer',
-    position: 'relative',
-  };
+  const dropZoneStyle = { border: '2px dashed #ccc', borderRadius: '4px', padding: '1rem', textAlign: 'center', cursor: 'pointer', position: 'relative' };
   const explanationIconStyle = { marginLeft: '8px', color: '#007bff', cursor: 'pointer', fontWeight: 'bold' };
-  const explanationTextStyle = {
-    display: 'block',
-    fontSize: '0.8rem',
-    color: '#555',
-    marginTop: '0.5rem',
-    backgroundColor: '#f1f1f1',
-    padding: '0.5rem',
-    borderRadius: '4px'
-  };
+  const explanationTextStyle = { display: 'block', fontSize: '0.8rem', color: '#555', marginTop: '0.5rem', backgroundColor: '#f1f1f1', padding: '0.5rem', borderRadius: '4px' };
 
   // Estado inicial do formulário
   const initialState = {
@@ -162,7 +147,7 @@ function ConfigEmpresa({ user, onLogout }) {
   const [submitError, setSubmitError] = useState(null);
   const [success, setSuccess] = useState(false);
 
-  // Controle do modo de edição e modais
+  // Controle do modo de edição e dos modais
   const [isEditable, setIsEditable] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -170,7 +155,7 @@ function ConfigEmpresa({ user, onLogout }) {
   const logoInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState('dadosBasicos');
 
-  // Tooltips
+  // Tooltips para variáveis de ambiente e instruções personalizadas
   const [envExplanations, setEnvExplanations] = useState({
     verifyToken: false,
     whatsappApiToken: false,
@@ -231,14 +216,14 @@ function ConfigEmpresa({ user, onLogout }) {
     }
   };
 
-  // Busca os dados da empresa do usuário ao montar o componente
+  // Busca os dados da empresa vinculada ao usuário ao montar o componente
   useEffect(() => {
     if (user && user.role === 'client') {
       fetch('/api/company', { credentials: 'include' })
         .then((res) => res.json())
         .then((data) => {
           if (data.company) {
-            setEmpresa((prev) => ({ ...prev, ...data.company }));
+            setEmpresa(prev => ({ ...prev, ...data.company }));
           }
         })
         .catch((err) => console.error("Erro ao buscar empresa:", err));
@@ -356,8 +341,7 @@ function ConfigEmpresa({ user, onLogout }) {
     }
   };
 
-  // Ao clicar no botão "Salvar", verifica se todos os campos obrigatórios foram preenchidos.
-  // Se não, exibe um modal de erro; caso contrário, exibe o modal de confirmação.
+  // Ao clicar em "Salvar", verifica se todos os campos obrigatórios foram preenchidos.
   const handleSaveClick = (e) => {
     e.preventDefault();
     if (!validateForm()) {
@@ -367,13 +351,13 @@ function ConfigEmpresa({ user, onLogout }) {
     setShowConfirmModal(true);
   };
 
-  // Modal de confirmação: se o usuário confirmar, os dados são enviados.
+  // Modal de confirmação: se confirmado, envia os dados
   const handleConfirmSave = () => {
     setShowConfirmModal(false);
     submitData();
   };
 
-  // Modal de erro: apenas fecha o modal
+  // Modal de erro: fecha o modal
   const handleErrorModalClose = () => {
     setShowErrorModal(false);
   };
@@ -385,7 +369,7 @@ function ConfigEmpresa({ user, onLogout }) {
       .then((res) => res.json())
       .then((data) => {
         if (data.company) {
-          setEmpresa((prev) => ({ ...prev, ...data.company }));
+          setEmpresa(prev => ({ ...prev, ...data.company }));
         }
       })
       .catch((err) => console.error("Erro ao recarregar dados:", err));
@@ -464,10 +448,9 @@ function ConfigEmpresa({ user, onLogout }) {
       case 'telefone': {
         const digits = value.replace(/\D/g, '');
         if (digits.length < 10 || digits.length > 15)
-          error =
-            language === 'pt'
-              ? 'Telefone inválido. Insira entre 10 e 15 dígitos.'
-              : 'Invalid phone. Enter between 10 and 15 digits.';
+          error = language === 'pt'
+            ? 'Telefone inválido. Insira entre 10 e 15 dígitos.'
+            : 'Invalid phone. Enter between 10 and 15 digits.';
         break;
       }
       case 'email': {
@@ -549,43 +532,14 @@ function ConfigEmpresa({ user, onLogout }) {
 
   return (
     <div>
-      <style>
-        {`
-          .nav-tabs .nav-link.active {
-            background-color: #5de5d9 !important;
-            color: white !important;
-            border-color: #4cc9c0 !important;
-            font-weight: bold;
-          }
-        `}
-      </style>
-
-      {/* Botão global para alternar entre modo visual e edição */}
-      {!isEditable ? (
-        <div style={{ margin: '1rem 0' }}>
-          <button
-            onClick={() => setIsEditable(true)}
-            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer' }}
-          >
-            Editar
-          </button>
-        </div>
-      ) : (
-        <div style={{ margin: '1rem 0' }}>
-          <button
-            onClick={handleSaveClick}
-            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', marginRight: '0.5rem' }}
-          >
-            Salvar
-          </button>
-          <button
-            onClick={handleCancelEdit}
-            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', color: '#000', cursor: 'pointer' }}
-          >
-            Cancelar
-          </button>
-        </div>
-      )}
+      <style>{`
+        .nav-tabs .nav-link.active {
+          background-color: #5de5d9 !important;
+          color: white !important;
+          border-color: #4cc9c0 !important;
+          font-weight: bold;
+        }
+      `}</style>
 
       <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
         <Tab eventKey="dadosBasicos" title={t.dadosBasicos}>
@@ -710,12 +664,7 @@ function ConfigEmpresa({ user, onLogout }) {
                     <button
                       type="button"
                       onClick={handleRemoveLogo}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#e3342f',
-                        cursor: 'pointer',
-                      }}
+                      style={{ background: 'none', border: 'none', color: '#e3342f', cursor: 'pointer' }}
                     >
                       Remover
                     </button>
@@ -726,36 +675,15 @@ function ConfigEmpresa({ user, onLogout }) {
             </div>
             <div style={{ flex: '1 1 300px' }}>
               <label style={labelStyle}>{t.corPrimaria}</label>
-              <input
-                type="color"
-                name="primaryColor"
-                value={empresa.primaryColor}
-                onChange={handleChange}
-                style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }}
-                disabled={!isEditable}
-              />
+              <input type="color" name="primaryColor" value={empresa.primaryColor} onChange={handleChange} style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }} disabled={!isEditable} />
             </div>
             <div style={{ flex: '1 1 300px' }}>
               <label style={labelStyle}>{t.corSecundaria}</label>
-              <input
-                type="color"
-                name="secondaryColor"
-                value={empresa.secondaryColor}
-                onChange={handleChange}
-                style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }}
-                disabled={!isEditable}
-              />
+              <input type="color" name="secondaryColor" value={empresa.secondaryColor} onChange={handleChange} style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }} disabled={!isEditable} />
             </div>
             <div style={{ flex: '1 1 300px' }}>
               <label style={labelStyle}>{t.corFundo}</label>
-              <input
-                type="color"
-                name="backgroundColor"
-                value={empresa.backgroundColor}
-                onChange={handleChange}
-                style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }}
-                disabled={!isEditable}
-              />
+              <input type="color" name="backgroundColor" value={empresa.backgroundColor} onChange={handleChange} style={{ width: '100%', height: '3rem', border: '1px solid #ccc', borderRadius: '4px' }} disabled={!isEditable} />
             </div>
           </div>
         </Tab>
@@ -763,74 +691,26 @@ function ConfigEmpresa({ user, onLogout }) {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ flex: '1 1 100%' }}>
               <label style={labelStyle}>{t.saudacaoInicial}</label>
-              <textarea
-                name="saudacaoInicial"
-                rows="2"
-                placeholder={t.saudacaoInicialPlaceholder}
-                value={empresa.saudacaoInicial}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                style={inputStyle}
-                required
-                disabled={!isEditable}
-              ></textarea>
+              <textarea name="saudacaoInicial" rows="2" placeholder={t.saudacaoInicialPlaceholder} value={empresa.saudacaoInicial} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required disabled={!isEditable}></textarea>
               {errors.saudacaoInicial && <span style={errorStyle}>{errors.saudacaoInicial}</span>}
             </div>
             <div style={{ flex: '1 1 100%' }}>
               <label style={labelStyle}>{t.respostaPadrao}</label>
-              <textarea
-                name="respostaPadrao"
-                rows="2"
-                placeholder={t.respostaPadraoPlaceholder}
-                value={empresa.respostaPadrao}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                style={inputStyle}
-                required
-                disabled={!isEditable}
-              ></textarea>
+              <textarea name="respostaPadrao" rows="2" placeholder={t.respostaPadraoPlaceholder} value={empresa.respostaPadrao} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required disabled={!isEditable}></textarea>
               {errors.respostaPadrao && <span style={errorStyle}>{errors.respostaPadrao}</span>}
             </div>
             <div style={{ flex: '1 1 100%' }}>
               <label style={labelStyle}>{t.solicitacaoEmail}</label>
-              <textarea
-                name="solicitacaoEmail"
-                rows="2"
-                placeholder={t.solicitacaoEmailPlaceholder}
-                value={empresa.solicitacaoEmail}
-                onChange={handleChange}
-                style={inputStyle}
-                disabled={!isEditable}
-              ></textarea>
+              <textarea name="solicitacaoEmail" rows="2" placeholder={t.solicitacaoEmailPlaceholder} value={empresa.solicitacaoEmail} onChange={handleChange} style={inputStyle} disabled={!isEditable}></textarea>
             </div>
             <div style={{ flex: '1 1 100%' }}>
               <label style={labelStyle}>{t.mensagemEncerramento}</label>
-              <textarea
-                name="mensagemEncerramento"
-                rows="2"
-                placeholder={t.mensagemEncerramentoPlaceholder}
-                value={empresa.mensagemEncerramento}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                style={inputStyle}
-                required
-                disabled={!isEditable}
-              ></textarea>
+              <textarea name="mensagemEncerramento" rows="2" placeholder={t.mensagemEncerramentoPlaceholder} value={empresa.mensagemEncerramento} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required disabled={!isEditable}></textarea>
               {errors.mensagemEncerramento && <span style={errorStyle}>{errors.mensagemEncerramento}</span>}
             </div>
             <div style={{ flex: '1 1 100%' }}>
               <label style={labelStyle}>{t.listaProdutos}</label>
-              <textarea
-                name="listaProdutos"
-                rows="3"
-                placeholder={t.listaProdutosPlaceholder}
-                value={empresa.listaProdutos}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                style={{ ...inputStyle, whiteSpace: 'pre-wrap' }}
-                required
-                disabled={!isEditable}
-              ></textarea>
+              <textarea name="listaProdutos" rows="3" placeholder={t.listaProdutosPlaceholder} value={empresa.listaProdutos} onChange={handleChange} onBlur={handleBlur} style={{ ...inputStyle, whiteSpace: 'pre-wrap' }} required disabled={!isEditable}></textarea>
               {errors.listaProdutos && <span style={errorStyle}>{errors.listaProdutos}</span>}
             </div>
           </div>
@@ -945,21 +825,43 @@ function ConfigEmpresa({ user, onLogout }) {
             onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#4cc9c0')}
             onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#5de5d9')}
             onClick={handleSaveClick}
+            disabled={!isEditable}
           >
             {t.salvar}
           </button>
         </Tab>
       </Tabs>
+
+      {/* Botão para alternar entre modo visual e edição, agora posicionado abaixo de todas as abas */}
+      {!isEditable && (
+        <div style={{ margin: '1rem 0', textAlign: 'center' }}>
+          <button
+            onClick={() => setIsEditable(true)}
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer' }}
+          >
+            Editar
+          </button>
+        </div>
+      )}
+      {isEditable && (
+        <div style={{ margin: '1rem 0', textAlign: 'center' }}>
+          <button
+            onClick={handleSaveClick}
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', marginRight: '0.5rem' }}
+          >
+            Salvar
+          </button>
+          <button
+            onClick={handleCancelEdit}
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', color: '#000', cursor: 'pointer' }}
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
+
       {submitError && (
-        <div
-          style={{
-            backgroundColor: '#f8d7da',
-            color: '#842029',
-            padding: '1rem',
-            borderRadius: '4px',
-            marginBottom: '1rem',
-          }}
-        >
+        <div style={{ backgroundColor: '#f8d7da', color: '#842029', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
           {submitError}
         </div>
       )}
