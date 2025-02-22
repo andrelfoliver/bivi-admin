@@ -395,20 +395,23 @@ app.delete('/api/companies/:id', isAdmin, async (req, res) => {
       return res.status(404).json({ error: "Empresa não encontrada." });
     }
 
-    // Se o campo 'banco' estiver definido, tenta excluir o banco do tenant
+    // Tenta excluir o banco do tenant, se definido
     if (deletedCompany.banco) {
       if (!process.env.MONGO_URI_TEMPLATE) {
         throw new Error("MONGO_URI_TEMPLATE não definido no ambiente.");
       }
       const tenantUri = process.env.MONGO_URI_TEMPLATE.replace('{DB_NAME}', deletedCompany.banco);
-      console.log("Tentando conectar ao tenant:", tenantUri);
+      console.log("Conectando ao banco tenant:", tenantUri);
+
       const client = new MongoClient(tenantUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });
+
       await client.connect();
-      console.log("Conexão estabelecida. Banco a ser droppado:", client.db().databaseName);
-      await client.db().dropDatabase();
+      const db = client.db();
+      const dropResult = await db.dropDatabase();
+      console.log("Resultado do drop:", dropResult);
       await client.close();
       console.log(`Banco do tenant ${deletedCompany.banco} excluído com sucesso.`);
     }
