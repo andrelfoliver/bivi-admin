@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ConfigEmpresa from './ConfigEmpresa';
 import AssistVirtual from './AssistVirtual';
 import Settings from './Settings';
+import History from './History'; // ajuste o caminho conforme sua estrutura
 
 
 
@@ -503,8 +504,7 @@ function Dashboard({ user, onLogout }) {
             case 'historico':
                 return (
                     <div style={cardStyle}>
-                        <h2>Histórico de Mensagens</h2>
-                        <p>Módulo em desenvolvimento.</p>
+                        <History />
                     </div>
                 );
             case 'assistenteVirtual':
