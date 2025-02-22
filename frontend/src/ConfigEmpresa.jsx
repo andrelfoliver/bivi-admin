@@ -1,10 +1,11 @@
-// ConfigEmpresa.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { Tabs, Tab, Modal, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 function levenshteinDistance(a, b) {
-  const dp = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(null));
+  const dp = Array(a.length + 1)
+    .fill(null)
+    .map(() => Array(b.length + 1).fill(null));
   for (let i = 0; i <= a.length; i++) dp[i][0] = i;
   for (let j = 0; j <= b.length; j++) dp[0][j] = j;
   for (let i = 1; i <= a.length; i++) {
@@ -21,7 +22,13 @@ function levenshteinDistance(a, b) {
 }
 
 function getClosestDomain(typedDomain) {
-  const popularDomains = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "icloud.com"];
+  const popularDomains = [
+    "gmail.com",
+    "yahoo.com",
+    "outlook.com",
+    "hotmail.com",
+    "icloud.com",
+  ];
   let closest = null;
   let minDistance = Infinity;
   popularDomains.forEach((domain) => {
@@ -95,15 +102,14 @@ function ConfigEmpresa({ user, onLogout }) {
   const [language, setLanguage] = useState('pt');
   const t = translations[language];
 
-  // Estilos para inputs e labels
+  // Estilos básicos (sugestão: extrair para um arquivo CSS)
   const labelStyle = { display: 'block', marginBottom: '0.5rem', color: '#272631' };
   const inputStyle = { width: '100%', padding: '0.75rem', border: '1px solid #ccc', borderRadius: '4px' };
   const errorStyle = { color: 'red', fontSize: '0.875rem', marginTop: '0.25rem' };
-  const dropZoneStyle = { border: '2px dashed #ccc', borderRadius: '4px', padding: '1rem', textAlign: 'center', cursor: 'pointer' };
+  const dropZoneStyle = { border: '2px dashed #ccc', borderRadius: '4px', padding: '1rem', textAlign: 'center', cursor: 'pointer', position: 'relative' };
   const explanationIconStyle = { marginLeft: '8px', color: '#007bff', cursor: 'pointer', fontWeight: 'bold' };
   const explanationTextStyle = { display: 'block', fontSize: '0.8rem', color: '#555', marginTop: '0.5rem', backgroundColor: '#f1f1f1', padding: '0.5rem', borderRadius: '4px' };
 
-  // Estado inicial do formulário
   const initialState = {
     nome: '',
     nomeAssistenteVirtual: '',
@@ -139,7 +145,7 @@ function ConfigEmpresa({ user, onLogout }) {
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState(null);
   const [success, setSuccess] = useState(false);
-  // Controle de edição e dos modais
+
   const [isEditable, setIsEditable] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -147,7 +153,6 @@ function ConfigEmpresa({ user, onLogout }) {
   const logoInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState('dadosBasicos');
 
-  // Tooltips para variáveis de ambiente e instruções
   const [envExplanations, setEnvExplanations] = useState({
     verifyToken: false,
     whatsappApiToken: false,
@@ -183,11 +188,18 @@ function ConfigEmpresa({ user, onLogout }) {
     exemplosAtendimento: "Digite exemplos de perguntas e respostas para o atendimento.",
   };
 
-  const toggleEnvExplanation = (field) => setEnvExplanations(prev => ({ ...prev, [field]: !prev[field] }));
-  const toggleInstExplanation = (field) => setInstExplanations(prev => ({ ...prev, [field]: !prev[field] }));
-  const handleLanguageChange = (e) => setLanguage(e.target.value);
+  const toggleEnvExplanation = (field) => {
+    setEnvExplanations(prev => ({ ...prev, [field]: !prev[field] }));
+  };
 
-  // Função de logout
+  const toggleInstExplanation = (field) => {
+    setInstExplanations(prev => ({ ...prev, [field]: !prev[field] }));
+  };
+
+  const handleLanguageChange = (e) => {
+    setLanguage(e.target.value);
+  };
+
   const handleLogout = async () => {
     try {
       await fetch('/api/logout', { method: 'POST', credentials: 'include' });
@@ -200,21 +212,19 @@ function ConfigEmpresa({ user, onLogout }) {
     }
   };
 
-  // Busca os dados da empresa do usuário (se houver)
   useEffect(() => {
     if (user && user.role === 'client') {
       fetch('/api/company', { credentials: 'include' })
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           if (data.company) {
             setEmpresa(prev => ({ ...prev, ...data.company }));
           }
         })
-        .catch(err => console.error("Erro ao buscar empresa:", err));
+        .catch((err) => console.error("Erro ao buscar empresa:", err));
     }
   }, [user]);
 
-  // Validação de todos os campos obrigatórios (todas as abas)
   const validateForm = () => {
     let newErrors = {};
     const requiredFields = [
@@ -234,6 +244,7 @@ function ConfigEmpresa({ user, onLogout }) {
       { key: 'mensagemEncerramento', msg: language === 'pt' ? 'Mensagem de Encerramento é obrigatória.' : 'Closing Message is required.' },
       { key: 'listaProdutos', msg: language === 'pt' ? 'Lista de Produtos/Serviços é obrigatória.' : 'Products/Services List is required.' },
     ];
+
     if (user.role === 'admin') {
       const adminFields = [
         { key: 'verifyToken', msg: language === 'pt' ? 'VERIFY_TOKEN é obrigatório.' : 'VERIFY_TOKEN is required.' },
@@ -251,21 +262,24 @@ function ConfigEmpresa({ user, onLogout }) {
       ];
       requiredFields.push(...adminFields);
     }
-    requiredFields.forEach(field => {
+
+    requiredFields.forEach((field) => {
       const value = empresa[field.key] || "";
       if (field.validator) {
         if (!field.validator(value)) {
           newErrors[field.key] = field.msg;
         }
-      } else if (!value.trim()) {
-        newErrors[field.key] = field.msg;
+      } else {
+        if (!value.trim()) {
+          newErrors[field.key] = field.msg;
+        }
       }
     });
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Função que envia os dados ao servidor
   const submitData = async () => {
     try {
       let response;
@@ -300,7 +314,6 @@ function ConfigEmpresa({ user, onLogout }) {
     }
   };
 
-  // Ao clicar em "Salvar", valida TODOS os campos; se algum estiver faltando, exibe o modal de erro
   const handleSaveClick = (e) => {
     e.preventDefault();
     if (!validateForm()) {
@@ -310,28 +323,30 @@ function ConfigEmpresa({ user, onLogout }) {
     setShowConfirmModal(true);
   };
 
-  // Confirma o salvamento (chama a função de envio dos dados)
   const handleConfirmSave = () => {
     setShowConfirmModal(false);
     submitData();
   };
 
-  // Fecha o modal de erro
   const handleErrorModalClose = () => {
     setShowErrorModal(false);
   };
 
-  // Função para cancelar a edição e recarregar os dados do servidor
   const handleCancelEdit = () => {
     setIsEditable(false);
     fetch('/api/company', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.company) {
           setEmpresa(prev => ({ ...prev, ...data.company }));
         }
       })
-      .catch(err => console.error("Erro ao recarregar dados:", err));
+      .catch((err) => console.error("Erro ao recarregar dados:", err));
+  };
+
+  // Função para remover logo
+  const handleRemoveLogo = () => {
+    setEmpresa(prev => ({ ...prev, logo: null, logoFileName: null }));
   };
 
   const handleChange = (e) => {
@@ -378,7 +393,9 @@ function ConfigEmpresa({ user, onLogout }) {
     }
   };
 
-  const handleDragOver = (e) => e.preventDefault();
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
 
   const handleBlur = (e) => {
     const { name, value } = e.target;
@@ -390,16 +407,24 @@ function ConfigEmpresa({ user, onLogout }) {
         break;
       case 'nomeAssistenteVirtual':
         if (!value.trim())
-          error = language === 'pt' ? 'Nome da Assistente Virtual é obrigatório.' : 'Virtual Assistant Name is required.';
+          error = language === 'pt'
+            ? 'Nome da Assistente Virtual é obrigatório.'
+            : 'Virtual Assistant Name is required.';
         break;
       case 'apiKey':
-        if (!value.trim() || !/^sk-(proj-)?[A-Za-z0-9_-]+$/.test(value) || value.length < 50)
+        if (
+          !value.trim() ||
+          !/^sk-(proj-)?[A-Za-z0-9_-]+$/.test(value) ||
+          value.length < 50
+        )
           error = t.apiKeyError;
         break;
       case 'telefone': {
         const digits = value.replace(/\D/g, '');
         if (digits.length < 10 || digits.length > 15)
-          error = language === 'pt' ? 'Telefone inválido. Insira entre 10 e 15 dígitos.' : 'Invalid phone. Enter between 10 and 15 digits.';
+          error = language === 'pt'
+            ? 'Telefone inválido. Insira entre 10 e 15 dígitos.'
+            : 'Invalid phone. Enter between 10 and 15 digits.';
         break;
       }
       case 'email': {
@@ -414,21 +439,28 @@ function ConfigEmpresa({ user, onLogout }) {
         break;
       case 'saudacaoInicial':
         if (!value.trim())
-          error = language === 'pt' ? 'Saudação Inicial é obrigatória.' : 'Initial Greeting is required.';
+          error = language === 'pt'
+            ? 'Saudação Inicial é obrigatória.'
+            : 'Initial Greeting is required.';
         break;
       case 'respostaPadrao':
         if (!value.trim())
-          error = language === 'pt' ? 'Resposta Padrão é obrigatória.' : 'Standard Response is required.';
+          error = language === 'pt'
+            ? 'Resposta Padrão é obrigatória.'
+            : 'Standard Response is required.';
         break;
       case 'mensagemEncerramento':
         if (!value.trim())
-          error = language === 'pt' ? 'Mensagem de Encerramento é obrigatória.' : 'Closing Message is required.';
+          error = language === 'pt'
+            ? 'Mensagem de Encerramento é obrigatória.'
+            : 'Closing Message is required.';
         break;
       case 'listaProdutos':
         if (!value.trim())
-          error = language === 'pt' ? 'Lista de Produtos/Serviços é obrigatória.' : 'Products/Services List is required.';
+          error = language === 'pt'
+            ? 'Lista de Produtos/Serviços é obrigatória.'
+            : 'Products/Services List is required.';
         break;
-      // Validação dos campos de ambiente (admin)
       case 'verifyToken':
       case 'whatsappApiToken':
       case 'openaiApiKey':
@@ -438,23 +470,33 @@ function ConfigEmpresa({ user, onLogout }) {
       case 'emailPass':
       case 'emailGestor':
         if (!value.trim())
-          error = language === 'pt' ? `${name.toUpperCase()} é obrigatório.` : `${name.toUpperCase()} is required.`;
+          error = language === 'pt'
+            ? `${name.toUpperCase()} é obrigatório.`
+            : `${name.toUpperCase()} is required.`;
         break;
       case 'regrasResposta':
         if (!value.trim())
-          error = language === 'pt' ? 'Regras de Resposta são obrigatórias.' : 'Response rules are required.';
+          error = language === 'pt'
+            ? 'Regras de Resposta são obrigatórias.'
+            : 'Response rules are required.';
         break;
       case 'linkCalendly':
         if (!value.trim())
-          error = language === 'pt' ? 'Link de Calendly é obrigatório.' : 'Calendly link is required.';
+          error = language === 'pt'
+            ? 'Link de Calendly é obrigatório.'
+            : 'Calendly link is required.';
         break;
       case 'linkSite':
         if (!value.trim())
-          error = language === 'pt' ? 'Link do Site é obrigatório.' : 'Site link is required.';
+          error = language === 'pt'
+            ? 'Link do Site é obrigatório.'
+            : 'Site link is required.';
         break;
       case 'exemplosAtendimento':
         if (!value.trim())
-          error = language === 'pt' ? 'Exemplos de Perguntas e Respostas são obrigatórios.' : 'Examples of Q&A are required.';
+          error = language === 'pt'
+            ? 'Exemplos de Perguntas e Respostas são obrigatórios.'
+            : 'Examples of Q&A are required.';
         break;
       default:
         break;
@@ -474,56 +516,130 @@ function ConfigEmpresa({ user, onLogout }) {
       `}</style>
 
       <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
-        {/* Aba Dados Básicos */}
         <Tab eventKey="dadosBasicos" title={t.dadosBasicos}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ flex: '1 1 300px' }}>
               <label style={labelStyle}>{t.nomeEmpresa}</label>
-              <input type="text" name="nome" placeholder={t.nomePlaceholder} value={empresa.nome} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required disabled={!isEditable} />
+              <input
+                type="text"
+                name="nome"
+                placeholder={t.nomePlaceholder}
+                value={empresa.nome}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                style={inputStyle}
+                required
+                disabled={!isEditable}
+              />
               {errors.nome && <span style={errorStyle}>{errors.nome}</span>}
             </div>
             <div style={{ flex: '1 1 300px' }}>
               <label style={labelStyle}>{t.assistenteVirtualNome}</label>
-              <input type="text" name="nomeAssistenteVirtual" placeholder={t.assistenteVirtualPlaceholder} value={empresa.nomeAssistenteVirtual} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required disabled={!isEditable} />
+              <input
+                type="text"
+                name="nomeAssistenteVirtual"
+                placeholder={t.assistenteVirtualPlaceholder}
+                value={empresa.nomeAssistenteVirtual}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                style={inputStyle}
+                required
+                disabled={!isEditable}
+              />
               {errors.nomeAssistenteVirtual && <span style={errorStyle}>{errors.nomeAssistenteVirtual}</span>}
             </div>
             <div style={{ flex: '1 1 300px' }}>
               <label style={labelStyle}>{t.apiKey}</label>
-              <input type="text" name="apiKey" placeholder={t.apiPlaceholder} value={empresa.apiKey} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required disabled={!isEditable} />
+              <input
+                type="text"
+                name="apiKey"
+                placeholder={t.apiPlaceholder}
+                value={empresa.apiKey}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                style={inputStyle}
+                required
+                disabled={!isEditable}
+              />
               {errors.apiKey && <span style={errorStyle}>{errors.apiKey}</span>}
             </div>
             <div style={{ flex: '1 1 300px' }}>
               <label style={labelStyle}>{t.telefone}</label>
-              <input type="text" name="telefone" placeholder={t.telefonePlaceholder} value={empresa.telefone} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required disabled={!isEditable} />
+              <input
+                type="text"
+                name="telefone"
+                placeholder={t.telefonePlaceholder}
+                value={empresa.telefone}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                style={inputStyle}
+                required
+                disabled={!isEditable}
+              />
               {errors.telefone && <span style={errorStyle}>{errors.telefone}</span>}
             </div>
             <div style={{ flex: '1 1 300px' }}>
               <label style={labelStyle}>{t.email}</label>
-              <input type="email" name="email" placeholder={t.emailPlaceholder} value={empresa.email} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required disabled={!isEditable} />
+              <input
+                type="email"
+                name="email"
+                placeholder={t.emailPlaceholder}
+                value={empresa.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                style={inputStyle}
+                required
+                disabled={!isEditable}
+              />
               {errors.email && <span style={errorStyle}>{errors.email}</span>}
             </div>
             <div style={{ flex: '1 1 100%' }}>
               <label style={labelStyle}>{t.saudacao}</label>
-              <input type="text" name="saudacao" placeholder={t.saudacaoPlaceholder} value={empresa.saudacao} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required disabled={!isEditable} />
+              <input
+                type="text"
+                name="saudacao"
+                placeholder={t.saudacaoPlaceholder}
+                value={empresa.saudacao}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                style={inputStyle}
+                required
+                disabled={!isEditable}
+              />
               {errors.saudacao && <span style={errorStyle}>{errors.saudacao}</span>}
             </div>
           </div>
         </Tab>
-
-        {/* Aba Identidade Visual */}
         <Tab eventKey="identidadeVisual" title={t.identidadeVisual}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ flex: '1 1 100%' }}>
               <label style={labelStyle}>{t.logotipo}</label>
-              <div style={dropZoneStyle} onDrop={handleDrop} onDragOver={handleDragOver} onClick={() => logoInputRef.current && logoInputRef.current.click()}>
+              <div
+                style={dropZoneStyle}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onClick={() => logoInputRef.current && logoInputRef.current.click()}
+              >
                 <p>{t.logoDropZone}</p>
-                <input type="file" name="logo" accept="image/png, image/jpeg" onChange={handleChange} ref={logoInputRef} style={{ display: 'none' }} disabled={!isEditable} />
+                <input
+                  type="file"
+                  name="logo"
+                  accept="image/png, image/jpeg"
+                  onChange={handleChange}
+                  ref={logoInputRef}
+                  style={{ display: 'none' }}
+                  disabled={!isEditable}
+                />
               </div>
               {empresa.logoFileName && (
                 <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <p style={{ fontStyle: 'italic' }}>Arquivo selecionado: {empresa.logoFileName}</p>
                   {isEditable && (
-                    <button type="button" onClick={handleRemoveLogo} style={{ background: 'none', border: 'none', color: '#e3342f', cursor: 'pointer' }}>
+                    <button
+                      type="button"
+                      onClick={handleRemoveLogo}
+                      style={{ background: 'none', border: 'none', color: '#e3342f', cursor: 'pointer' }}
+                    >
                       Remover
                     </button>
                   )}
@@ -545,8 +661,6 @@ function ConfigEmpresa({ user, onLogout }) {
             </div>
           </div>
         </Tab>
-
-        {/* Aba Fluxo de Atendimento */}
         <Tab eventKey="fluxoAtendimento" title={t.configuracaoAtendimento}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ flex: '1 1 100%' }}>
@@ -575,8 +689,6 @@ function ConfigEmpresa({ user, onLogout }) {
             </div>
           </div>
         </Tab>
-
-        {/* Aba Variáveis de Ambiente */}
         <Tab eventKey="envVars" title={t.envSectionTitle}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {[
@@ -591,17 +703,31 @@ function ConfigEmpresa({ user, onLogout }) {
               <div key={field.name} style={{ flex: '1 1 100%' }}>
                 <label style={labelStyle}>
                   {field.label}
-                  <span style={explanationIconStyle} onClick={() => toggleEnvExplanation(field.name)}>?</span>
+                  <span style={explanationIconStyle} onClick={() => toggleEnvExplanation(field.name)}>
+                    ?
+                  </span>
                 </label>
-                <input type={field.type ? field.type : 'text'} name={field.name} placeholder={field.label} value={empresa[field.name]} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required disabled={!isEditable} />
+                <input
+                  type={field.type ? field.type : 'text'}
+                  name={field.name}
+                  placeholder={field.label}
+                  value={empresa[field.name]}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  style={inputStyle}
+                  required
+                  disabled={!isEditable}
+                />
                 {errors[field.name] && <span style={errorStyle}>{errors[field.name]}</span>}
-                {envExplanations[field.name] && <span style={explanationTextStyle}>{envExplanationsTexts[field.name]}</span>}
+                {envExplanations[field.name] && (
+                  <span style={explanationTextStyle}>
+                    {envExplanationsTexts[field.name]}
+                  </span>
+                )}
               </div>
             ))}
           </div>
         </Tab>
-
-        {/* Aba Instruções Personalizadas */}
         <Tab eventKey="instrucao" title={t.instrucoesPersonalizadas}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {[
@@ -613,12 +739,34 @@ function ConfigEmpresa({ user, onLogout }) {
               <div key={field.name} style={{ flex: '1 1 100%' }}>
                 <label style={labelStyle}>
                   {field.label}
-                  <span style={explanationIconStyle} onClick={() => toggleInstExplanation(field.name)}>?</span>
+                  <span style={explanationIconStyle} onClick={() => toggleInstExplanation(field.name)}>
+                    ?
+                  </span>
                 </label>
                 {field.name === 'regrasResposta' || field.name === 'exemplosAtendimento' ? (
-                  <textarea name={field.name} rows="5" placeholder={field.placeholder} value={empresa[field.name]} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required disabled={!isEditable}></textarea>
+                  <textarea
+                    name={field.name}
+                    rows="5"
+                    placeholder={field.placeholder}
+                    value={empresa[field.name]}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    style={inputStyle}
+                    required
+                    disabled={!isEditable}
+                  ></textarea>
                 ) : (
-                  <input type="text" name={field.name} placeholder={field.placeholder} value={empresa[field.name]} onChange={handleChange} onBlur={handleBlur} style={inputStyle} required disabled={!isEditable} />
+                  <input
+                    type="text"
+                    name={field.name}
+                    placeholder={field.placeholder}
+                    value={empresa[field.name]}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    style={inputStyle}
+                    required
+                    disabled={!isEditable}
+                  />
                 )}
                 {errors[field.name] && <span style={errorStyle}>{errors[field.name]}</span>}
                 {instExplanations[field.name] && (
@@ -635,19 +783,38 @@ function ConfigEmpresa({ user, onLogout }) {
               </div>
             ))}
           </div>
-          {/* Botão Salvar na parte inferior das abas */}
-          <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-            <button type="button" style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', marginRight: '0.5rem' }} onClick={handleSaveClick} disabled={!isEditable}>
-              {t.salvar}
-            </button>
-            <button type="button" style={{ padding: '0.75rem 1.5rem', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', color: '#000', cursor: 'pointer' }} onClick={handleCancelEdit}>
-              Cancelar
-            </button>
-          </div>
+          {/* O botão de salvar foi removido deste local para evitar duplicidade */}
         </Tab>
       </Tabs>
 
-      {/* Mensagens de erro ou sucesso */}
+      {/* Botões de controle de edição centralizados na parte inferior */}
+      {!isEditable && (
+        <div style={{ margin: '1rem 0', textAlign: 'center' }}>
+          <button
+            onClick={() => setIsEditable(true)}
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer' }}
+          >
+            Editar
+          </button>
+        </div>
+      )}
+      {isEditable && (
+        <div style={{ margin: '1rem 0', textAlign: 'center' }}>
+          <button
+            onClick={handleSaveClick}
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', marginRight: '0.5rem' }}
+          >
+            Salvar
+          </button>
+          <button
+            onClick={handleCancelEdit}
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', color: '#000', cursor: 'pointer' }}
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
+
       {submitError && (
         <div style={{ backgroundColor: '#f8d7da', color: '#842029', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
           {submitError}
@@ -659,7 +826,6 @@ function ConfigEmpresa({ user, onLogout }) {
         </div>
       )}
 
-      {/* Modal de confirmação de salvamento */}
       <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Confirmar Alterações</Modal.Title>
@@ -677,7 +843,6 @@ function ConfigEmpresa({ user, onLogout }) {
         </Modal.Footer>
       </Modal>
 
-      {/* Modal de erro de campos não preenchidos */}
       <Modal show={showErrorModal} onHide={handleErrorModalClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Campos Obrigatórios</Modal.Title>
