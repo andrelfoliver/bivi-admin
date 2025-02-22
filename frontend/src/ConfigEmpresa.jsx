@@ -101,7 +101,7 @@ function ConfigEmpresa({ user, onLogout }) {
   const [language, setLanguage] = useState('pt');
   const t = translations[language];
 
-  // Definição dos estilos usados pelo componente
+  // Estilos usados no componente
   const labelStyle = { display: 'block', marginBottom: '0.5rem', color: '#272631' };
   const inputStyle = { width: '100%', padding: '0.75rem', border: '1px solid #ccc', borderRadius: '4px' };
   const errorStyle = { color: 'red', fontSize: '0.875rem', marginTop: '0.25rem' };
@@ -123,7 +123,8 @@ function ConfigEmpresa({ user, onLogout }) {
     padding: '0.5rem',
     borderRadius: '4px'
   };
-  // Estado inicial do formulário
+
+  // Estado inicial do formulário de empresa
   const initialState = {
     nome: '',
     nomeAssistenteVirtual: '',
@@ -162,7 +163,7 @@ function ConfigEmpresa({ user, onLogout }) {
   const logoInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState('dadosBasicos');
 
-  // Tooltips
+  // Tooltips para variáveis de ambiente e instruções
   const [envExplanations, setEnvExplanations] = useState({
     verifyToken: false,
     whatsappApiToken: false,
@@ -225,30 +226,104 @@ function ConfigEmpresa({ user, onLogout }) {
 
   // Ao montar o componente, busca os dados da empresa vinculada ao usuário (se existir)
   useEffect(() => {
-    // Se o usuário for cliente, busca os dados da empresa cadastrada
     if (user && user.role === 'client') {
       fetch('/api/company', { credentials: 'include' })
         .then((res) => res.json())
         .then((data) => {
           if (data.company) {
-            // Atualiza o estado "empresa" com os dados retornados.
-            // Use o spread para mesclar com os campos iniciais, se necessário.
-            setEmpresa((prev) => ({ ...prev, ...data.company }));
+            setEmpresa(prev => ({ ...prev, ...data.company }));
           }
         })
         .catch((err) => console.error("Erro ao buscar empresa:", err));
     }
   }, [user]);
 
+  // Função para validar os campos do formulário
+  const validateForm = () => {
+    let newErrors = {};
+    if (!empresa.nome.trim())
+      newErrors.nome = language === 'pt' ? 'Nome é obrigatório.' : 'Name is required.';
+    if (!empresa.nomeAssistenteVirtual.trim())
+      newErrors.nomeAssistenteVirtual = language === 'pt'
+        ? 'Nome da Assistente Virtual é obrigatório.'
+        : 'Virtual Assistant Name is required.';
+    if (
+      !empresa.apiKey.trim() ||
+      !/^sk-(proj-)?[A-Za-z0-9_-]+$/.test(empresa.apiKey) ||
+      empresa.apiKey.length < 50
+    )
+      newErrors.apiKey = t.apiKeyError;
+    const phoneDigits = empresa.telefone.replace(/\D/g, '');
+    if (!empresa.telefone.trim() || phoneDigits.length < 10 || phoneDigits.length > 15)
+      newErrors.telefone = language === 'pt'
+        ? 'Telefone inválido. Insira entre 10 e 15 dígitos.'
+        : 'Invalid phone. Enter between 10 and 15 digits.';
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!empresa.email.trim() || !emailRegex.test(empresa.email))
+      newErrors.email = language === 'pt' ? 'E‑mail inválido.' : 'Invalid e‑mail.';
+    if (!empresa.saudacao.trim())
+      newErrors.saudacao = language === 'pt'
+        ? 'Saudação é obrigatória.'
+        : 'Greeting is required.';
+    if (!empresa.saudacaoInicial.trim())
+      newErrors.saudacaoInicial = language === 'pt'
+        ? 'Saudação Inicial é obrigatória.'
+        : 'Initial Greeting is required.';
+    if (!empresa.respostaPadrao.trim())
+      newErrors.respostaPadrao = language === 'pt'
+        ? 'Resposta Padrão é obrigatória.'
+        : 'Standard Response is required.';
+    if (!empresa.mensagemEncerramento.trim())
+      newErrors.mensagemEncerramento = language === 'pt'
+        ? 'Mensagem de Encerramento é obrigatória.'
+        : 'Closing Message is required.';
+    if (!empresa.listaProdutos.trim())
+      newErrors.listaProdutos = language === 'pt'
+        ? 'Lista de Produtos/Serviços é obrigatória.'
+        : 'Products/Services List is required.';
 
-  // Ao enviar o formulário, se a empresa já existe (empresa._id), atualiza via PUT; caso contrário, cria via POST
+    // Para usuários admin, valida também as variáveis de ambiente
+    if (user.role === 'admin') {
+      ['verifyToken', 'whatsappApiToken', 'openaiApiKey', 'mongoUri', 'phoneNumberId', 'emailUser', 'emailPass', 'emailGestor'].forEach((field) => {
+        if (!empresa[field].trim()) {
+          newErrors[field] = language === 'pt'
+            ? `${field.toUpperCase()} é obrigatório.`
+            : `${field.toUpperCase()} is required.`;
+        }
+      });
+      if (!empresa.regrasResposta.trim()) {
+        newErrors.regrasResposta = language === 'pt'
+          ? 'Regras de Resposta são obrigatórias.'
+          : 'Response rules are required.';
+      }
+      if (!empresa.linkCalendly.trim()) {
+        newErrors.linkCalendly = language === 'pt'
+          ? 'Link de Calendly é obrigatório.'
+          : 'Calendly link is required.';
+      }
+      if (!empresa.linkSite.trim()) {
+        newErrors.linkSite = language === 'pt'
+          ? 'Link do Site é obrigatório.'
+          : 'Site link is required.';
+      }
+      if (!empresa.exemplosAtendimento.trim()) {
+        newErrors.exemplosAtendimento = language === 'pt'
+          ? 'Exemplos de Perguntas e Respostas são obrigatórios.'
+          : 'Examples of Q&A are required.';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Função de envio do formulário: se empresa já existe, atualiza; senão, cadastra
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
     try {
       let response;
       if (empresa._id) {
-        // Atualização: utiliza o endpoint PUT /api/company
         response = await fetch('/api/company', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -256,7 +331,6 @@ function ConfigEmpresa({ user, onLogout }) {
           body: JSON.stringify(empresa),
         });
       } else {
-        // Cadastro inicial: utiliza o endpoint POST /register-company
         response = await fetch('/register-company', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -270,7 +344,6 @@ function ConfigEmpresa({ user, onLogout }) {
       } else {
         setSuccess(true);
         setSubmitError(null);
-        // Atualiza os dados da empresa no estado para que não percam os inputs
         if (data.company) {
           setEmpresa(prev => ({ ...prev, ...data.company }));
         }
@@ -279,7 +352,6 @@ function ConfigEmpresa({ user, onLogout }) {
       setSubmitError("Erro ao enviar dados: " + error.message);
     }
   };
-
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
@@ -435,93 +507,6 @@ function ConfigEmpresa({ user, onLogout }) {
         break;
     }
     setErrors(prev => ({ ...prev, [name]: error }));
-  };
-
-  const validateForm = () => {
-    let newErrors = {};
-    // Campos essenciais (sempre exigidos)
-    if (!empresa.nome.trim())
-      newErrors.nome = language === 'pt' ? 'Nome é obrigatório.' : 'Name is required.';
-    if (!empresa.nomeAssistenteVirtual.trim())
-      newErrors.nomeAssistenteVirtual = language === 'pt'
-        ? 'Nome da Assistente Virtual é obrigatório.'
-        : 'Virtual Assistant Name is required.';
-    if (
-      !empresa.apiKey.trim() ||
-      !/^sk-(proj-)?[A-Za-z0-9_-]+$/.test(empresa.apiKey) ||
-      empresa.apiKey.length < 50
-    )
-      newErrors.apiKey = t.apiKeyError;
-    const phoneDigits = empresa.telefone.replace(/\D/g, '');
-    if (!empresa.telefone.trim() || phoneDigits.length < 10 || phoneDigits.length > 15)
-      newErrors.telefone = language === 'pt'
-        ? 'Telefone inválido. Insira entre 10 e 15 dígitos.'
-        : 'Invalid phone. Enter between 10 and 15 digits.';
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!empresa.email.trim() || !emailRegex.test(empresa.email))
-      newErrors.email = language === 'pt' ? 'E‑mail inválido.' : 'Invalid e‑mail.';
-    if (!empresa.saudacao.trim())
-      newErrors.saudacao = language === 'pt'
-        ? 'Saudação é obrigatória.'
-        : 'Greeting is required.';
-    if (!empresa.saudacaoInicial.trim())
-      newErrors.saudacaoInicial = language === 'pt'
-        ? 'Saudação Inicial é obrigatória.'
-        : 'Initial Greeting is required.';
-    if (!empresa.respostaPadrao.trim())
-      newErrors.respostaPadrao = language === 'pt'
-        ? 'Resposta Padrão é obrigatória.'
-        : 'Standard Response is required.';
-    if (!empresa.mensagemEncerramento.trim())
-      newErrors.mensagemEncerramento = language === 'pt'
-        ? 'Mensagem de Encerramento é obrigatória.'
-        : 'Closing Message is required.';
-    if (!empresa.listaProdutos.trim())
-      newErrors.listaProdutos = language === 'pt'
-        ? 'Lista de Produtos/Serviços é obrigatória.'
-        : 'Products/Services List is required.';
-
-    // Se o usuário for admin, exige também as variáveis de ambiente
-    if (user.role === 'admin') {
-      ['verifyToken', 'whatsappApiToken', 'openaiApiKey', 'mongoUri', 'phoneNumberId', 'emailUser', 'emailPass', 'emailGestor'].forEach((field) => {
-        if (!empresa[field].trim()) {
-          newErrors[field] = language === 'pt'
-            ? `${field.toUpperCase()} é obrigatório.`
-            : `${field.toUpperCase()} is required.`;
-        }
-      });
-      if (!empresa.regrasResposta.trim()) {
-        newErrors.regrasResposta = language === 'pt'
-          ? 'Regras de Resposta são obrigatórias.'
-          : 'Response rules are required.';
-      }
-      if (!empresa.linkCalendly.trim()) {
-        newErrors.linkCalendly = language === 'pt'
-          ? 'Link de Calendly é obrigatório.'
-          : 'Calendly link is required.';
-      }
-      if (!empresa.linkSite.trim()) {
-        newErrors.linkSite = language === 'pt'
-          ? 'Link do Site é obrigatório.'
-          : 'Site link is required.';
-      }
-      if (!empresa.exemplosAtendimento.trim()) {
-        newErrors.exemplosAtendimento = language === 'pt'
-          ? 'Exemplos de Perguntas e Respostas são obrigatórios.'
-          : 'Examples of Q&A are required.';
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-
-  const handleRemoveLogo = () => {
-    setEmpresa(prev => ({ ...prev, logo: null, logoFileName: null }));
-    if (logoInputRef.current) {
-      logoInputRef.current.value = "";
-    }
   };
 
   return (
