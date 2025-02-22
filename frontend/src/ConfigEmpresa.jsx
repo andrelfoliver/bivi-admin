@@ -227,12 +227,15 @@ function ConfigEmpresa({ user, onLogout }) {
 
   const validateForm = () => {
     let newErrors = {};
+    // Campos obrigatórios comuns a todas as abas
     const requiredFields = [
       { key: 'nome', msg: language === 'pt' ? 'Nome é obrigatório.' : 'Name is required.' },
       { key: 'nomeAssistenteVirtual', msg: language === 'pt' ? 'Nome da Assistente Virtual é obrigatório.' : 'Virtual Assistant Name is required.' },
       { key: 'apiKey', msg: t.apiKeyError, validator: (value) => value.trim() && /^sk-(proj-)?[A-Za-z0-9_-]+$/.test(value) && value.length >= 50 },
       {
-        key: 'telefone', msg: language === 'pt' ? 'Telefone inválido. Insira entre 10 e 15 dígitos.' : 'Invalid phone. Enter between 10 and 15 digits.', validator: (value) => {
+        key: 'telefone',
+        msg: language === 'pt' ? 'Telefone inválido. Insira entre 10 e 15 dígitos.' : 'Invalid phone. Enter between 10 and 15 digits.',
+        validator: (value) => {
           const digits = value.replace(/\D/g, '');
           return value.trim() && digits.length >= 10 && digits.length <= 15;
         }
@@ -245,24 +248,25 @@ function ConfigEmpresa({ user, onLogout }) {
       { key: 'listaProdutos', msg: language === 'pt' ? 'Lista de Produtos/Serviços é obrigatória.' : 'Products/Services List is required.' },
     ];
 
-    if (user.role === 'admin') {
-      const adminFields = [
-        { key: 'verifyToken', msg: language === 'pt' ? 'VERIFY_TOKEN é obrigatório.' : 'VERIFY_TOKEN is required.' },
-        { key: 'whatsappApiToken', msg: language === 'pt' ? 'WHATSAPP_API_TOKEN é obrigatório.' : 'WHATSAPP_API_TOKEN is required.' },
-        { key: 'openaiApiKey', msg: language === 'pt' ? 'OPENAI_API_KEY é obrigatório.' : 'OPENAI_API_KEY is required.' },
-        { key: 'mongoUri', msg: language === 'pt' ? 'MONGO_URI é obrigatório.' : 'MONGO_URI is required.' },
-        { key: 'phoneNumberId', msg: language === 'pt' ? 'PHONE_NUMBER_ID é obrigatório.' : 'PHONE_NUMBER_ID is required.' },
-        { key: 'emailUser', msg: language === 'pt' ? 'EMAIL_USER é obrigatório.' : 'EMAIL_USER is required.' },
-        { key: 'emailPass', msg: language === 'pt' ? 'EMAIL_PASS é obrigatório.' : 'EMAIL_PASS is required.' },
-        { key: 'emailGestor', msg: language === 'pt' ? 'EMAIL_GESTOR é obrigatório.' : 'EMAIL_GESTOR is required.' },
-        { key: 'regrasResposta', msg: language === 'pt' ? 'Regras de Resposta são obrigatórias.' : 'Response rules are required.' },
-        { key: 'linkCalendly', msg: language === 'pt' ? 'Link de Calendly é obrigatório.' : 'Calendly link is required.' },
-        { key: 'linkSite', msg: language === 'pt' ? 'Link do Site é obrigatório.' : 'Site link is required.' },
-        { key: 'exemplosAtendimento', msg: language === 'pt' ? 'Exemplos de Perguntas e Respostas são obrigatórios.' : 'Examples of Q&A are required.' },
-      ];
-      requiredFields.push(...adminFields);
-    }
+    // Agora, sempre exigimos também os campos das abas Variáveis de Ambiente e Instruções Personalizadas
+    const additionalFields = [
+      { key: 'verifyToken', msg: language === 'pt' ? 'VERIFY_TOKEN é obrigatório.' : 'VERIFY_TOKEN is required.' },
+      { key: 'whatsappApiToken', msg: language === 'pt' ? 'WHATSAPP_API_TOKEN é obrigatório.' : 'WHATSAPP_API_TOKEN is required.' },
+      { key: 'openaiApiKey', msg: language === 'pt' ? 'OPENAI_API_KEY é obrigatório.' : 'OPENAI_API_KEY is required.' },
+      { key: 'mongoUri', msg: language === 'pt' ? 'MONGO_URI é obrigatório.' : 'MONGO_URI is required.' },
+      { key: 'phoneNumberId', msg: language === 'pt' ? 'PHONE_NUMBER_ID é obrigatório.' : 'PHONE_NUMBER_ID is required.' },
+      { key: 'emailUser', msg: language === 'pt' ? 'EMAIL_USER é obrigatório.' : 'EMAIL_USER is required.' },
+      { key: 'emailPass', msg: language === 'pt' ? 'EMAIL_PASS é obrigatório.' : 'EMAIL_PASS is required.' },
+      { key: 'emailGestor', msg: language === 'pt' ? 'EMAIL_GESTOR é obrigatório.' : 'EMAIL_GESTOR is required.' },
+      { key: 'regrasResposta', msg: language === 'pt' ? 'Regras de Resposta são obrigatórias.' : 'Response rules are required.' },
+      { key: 'linkCalendly', msg: language === 'pt' ? 'Link de Calendly é obrigatório.' : 'Calendly link is required.' },
+      { key: 'linkSite', msg: language === 'pt' ? 'Link do Site é obrigatório.' : 'Site link is required.' },
+      { key: 'exemplosAtendimento', msg: language === 'pt' ? 'Exemplos de Perguntas e Respostas são obrigatórios.' : 'Examples of Q&A are required.' },
+    ];
 
+    requiredFields.push(...additionalFields);
+
+    // Validação de cada campo da lista
     requiredFields.forEach((field) => {
       const value = empresa[field.key] || "";
       if (field.validator) {
@@ -279,6 +283,7 @@ function ConfigEmpresa({ user, onLogout }) {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
 
   const submitData = async () => {
     try {
