@@ -396,14 +396,20 @@ app.delete('/api/companies/:id', isAdmin, async (req, res) => {
 
     // Se a empresa possui o campo 'banco' definido, exclui também o banco do tenant
     if (deletedCompany.banco) {
-      // Constrói a URI do tenant substituindo '{DB_NAME}' no template
+      // Verifica se a variável de ambiente MONGO_URI_TEMPLATE está definida
+      if (!process.env.MONGO_URI_TEMPLATE) {
+        throw new Error("MONGO_URI_TEMPLATE não definido no ambiente.");
+      }
+      // Substitui {DB_NAME} pelo nome do banco gerado
       const tenantUri = process.env.MONGO_URI_TEMPLATE.replace('{DB_NAME}', deletedCompany.banco);
+
       // Cria a conexão com o banco do tenant
       const tenantConnection = mongoose.createConnection(tenantUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });
-      // Exclui o banco (dropDatabase)
+
+      // Aguarda a conexão e deleta o banco
       await tenantConnection.dropDatabase();
       tenantConnection.close();
       console.log(`Banco do tenant ${deletedCompany.banco} excluído com sucesso.`);
@@ -414,6 +420,7 @@ app.delete('/api/companies/:id', isAdmin, async (req, res) => {
     res.status(500).json({ error: "Erro ao excluir empresa: " + err.message });
   }
 });
+
 
 // Endpoint para alteração de senha do usuário (manual)
 app.put('/api/user/password', async (req, res) => {
