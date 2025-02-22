@@ -5,8 +5,6 @@ import AssistVirtual from './AssistVirtual';
 import Settings from './Settings';
 import History from './History'; // ajuste o caminho conforme sua estrutura
 
-
-
 function Dashboard({ user, onLogout }) {
     const navigate = useNavigate();
 
@@ -37,6 +35,8 @@ function Dashboard({ user, onLogout }) {
     const [editingCompanyName, setEditingCompanyName] = useState('');
     // Estado para controle do modal de confirmação de exclusão
     const [companyToDelete, setCompanyToDelete] = useState(null);
+    // Estado para armazenar o texto digitado para confirmação
+    const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
     // Estado para identificar o item do menu em hover
     const [hoveredModule, setHoveredModule] = useState(null);
@@ -129,7 +129,6 @@ function Dashboard({ user, onLogout }) {
             setSaveMsg('Erro ao atualizar informações: ' + error.message);
         }
     };
-
 
     // Função auxiliar para renderizar um campo editável com botão "Editar"
     const renderEditableField = (label, field, type = 'text') => {
@@ -361,7 +360,7 @@ function Dashboard({ user, onLogout }) {
                                                                         </button>
                                                                     )}
                                                                     <button
-                                                                        onClick={() => handleDeleteUser(u._id)}
+                                                                        onClick={() => setCompanyToDelete(u)}
                                                                         style={{
                                                                             padding: '0.5rem',
                                                                             backgroundColor: '#d9534f',
@@ -465,7 +464,10 @@ function Dashboard({ user, onLogout }) {
                                                             Editar
                                                         </button>
                                                         <button
-                                                            onClick={() => setCompanyToDelete(company)}
+                                                            onClick={() => {
+                                                                setCompanyToDelete(company);
+                                                                setDeleteConfirmation("");
+                                                            }}
                                                             style={{
                                                                 padding: '0.5rem 1rem',
                                                                 backgroundColor: '#d9534f',
@@ -519,8 +521,6 @@ function Dashboard({ user, onLogout }) {
                         <Settings user={user} onLogout={onLogout} />
                     </div>
                 );
-
-
             default:
                 return (
                     <div style={cardStyle}>
@@ -776,7 +776,7 @@ function Dashboard({ user, onLogout }) {
                                                                     </button>
                                                                 )}
                                                                 <button
-                                                                    onClick={() => handleDeleteUser(u._id)}
+                                                                    onClick={() => setCompanyToDelete(u)}
                                                                     style={{
                                                                         padding: '0.5rem',
                                                                         backgroundColor: '#d9534f',
@@ -806,30 +806,53 @@ function Dashboard({ user, onLogout }) {
             <footer style={footerStyle}>
                 &copy; {new Date().getFullYear()} BiVisualizer. Todos os direitos reservados.
             </footer>
+
             {/* Modal de confirmação customizado para exclusão de empresa */}
             {companyToDelete && (
                 <div style={modalOverlayStyle}>
                     <div style={modalContentStyle}>
-                        <p>Tem certeza que deseja excluir a empresa <strong>"{companyToDelete.nome}"</strong>?</p>
+                        <p>
+                            Tem certeza que deseja excluir a empresa <strong>"{companyToDelete.nome}"</strong>? Essa ação excluirá o registro na coleção companies e removerá o banco de dados associado (formato: <strong>empresa_{companyToDelete.nome.toLowerCase().trim().replace(/\s+/g, '_')}</strong>). Essa ação é irreversível.
+                        </p>
+                        <p>Para confirmar, digite o nome da empresa:</p>
+                        <input
+                            type="text"
+                            value={deleteConfirmation}
+                            onChange={(e) => setDeleteConfirmation(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                borderRadius: '4px',
+                                border: '1px solid #ccc',
+                                marginBottom: '1rem'
+                            }}
+                        />
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
                             <button
                                 onClick={() => {
-                                    handleDeleteCompany(companyToDelete._id);
-                                    setCompanyToDelete(null);
+                                    if (deleteConfirmation === companyToDelete.nome) {
+                                        handleDeleteCompany(companyToDelete._id);
+                                        setCompanyToDelete(null);
+                                        setDeleteConfirmation("");
+                                    }
                                 }}
                                 style={{
                                     padding: '0.5rem 1rem',
-                                    backgroundColor: '#d9534f',
+                                    backgroundColor: deleteConfirmation === companyToDelete.nome ? '#d9534f' : '#ccc',
                                     border: 'none',
                                     borderRadius: '4px',
                                     color: '#fff',
-                                    cursor: 'pointer'
+                                    cursor: deleteConfirmation === companyToDelete.nome ? 'pointer' : 'not-allowed'
                                 }}
+                                disabled={deleteConfirmation !== companyToDelete.nome}
                             >
                                 Confirmar
                             </button>
                             <button
-                                onClick={() => setCompanyToDelete(null)}
+                                onClick={() => {
+                                    setCompanyToDelete(null);
+                                    setDeleteConfirmation("");
+                                }}
                                 style={{
                                     padding: '0.5rem 1rem',
                                     backgroundColor: '#ccc',
