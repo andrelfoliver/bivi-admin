@@ -121,12 +121,14 @@ function Dashboard({ user, onLogout }) {
                 setSaveMsg('Informações atualizadas com sucesso!');
                 setEditing((prev) => ({ ...prev, [field]: false }));
             } else {
-                setSaveMsg('Erro ao atualizar informações.');
+                const data = await response.json();
+                setSaveMsg(data.error || "Erro ao atualizar informações.");
             }
         } catch (error) {
             setSaveMsg('Erro ao atualizar informações: ' + error.message);
         }
     };
+
 
     // Função auxiliar para renderizar um campo editável com botão "Editar"
     const renderEditableField = (label, field, type = 'text') => {
