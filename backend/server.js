@@ -258,11 +258,11 @@ app.post('/register-company', async (req, res) => {
     const savedCompany = await newCompany.save();
     console.log("Empresa cadastrada:", savedCompany);
 
-    // Cria a conexão para o tenant usando a variável MONGO_URI_BASE
-    if (!process.env.MONGO_URI_BASE) {
-      throw new Error("MONGO_URI_BASE não definido no ambiente.");
+    // Cria a conexão para o tenant usando a variável MONGO_URI_TEMPLATE
+    if (!process.env.MONGO_URI_TEMPLATE) {
+      throw new Error("MONGO_URI_TEMPLATE não definido no ambiente.");
     }
-    const tenantUri = `${process.env.MONGO_URI_BASE}/${dbName}`;
+    const tenantUri = process.env.MONGO_URI_TEMPLATE.replace('{DB_NAME}', dbName);
     const tenantConnection = mongoose.createConnection(tenantUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
