@@ -11,7 +11,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import bcrypt from 'bcrypt';
 import User from './models/User.js';
 import Company from './models/Company.js';
-import Message from './models/message.js'; // IMPORTANTE: para usar o schema de Message ao inicializar o banco do tenant
+import Message from './models/Message.js'; // IMPORTANTE: para usar o schema de Message ao inicializar o banco do tenant
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
