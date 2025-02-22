@@ -11,7 +11,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import bcrypt from 'bcrypt';
 import User from './models/User.js';
 import Company from './models/Company.js';
-import Message from './models/Message.js'; // IMPORTANTE: para usar o schema de Message ao inicializar o banco do tenant
+import Message from './models/Message.js'; // Certifique‑se de criar esse modelo conforme instruído
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,7 +25,7 @@ app.set('trust proxy', 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Conecta ao banco principal de empresas (multi-tenant) – este é o banco que guarda as empresas e usuários
+// Conecta ao MongoDB utilizando a connection string definida na variável de ambiente
 mongoose
   .connect(process.env.MONGO_URI_EMPRESAS)
   .then(() => console.log("Conectado ao MongoDB (banco principal)"))
@@ -235,10 +235,7 @@ app.put('/api/users/:id/promote', isAdmin, async (req, res) => {
   }
 });
 
-// Endpoint para cadastro de empresas (multi-tenant)
-// OBSERVAÇÃO: Certifique-se de definir a variável de ambiente MONGO_URI_BASE no .env do backend.
-// Exemplo de valor para MONGO_URI_BASE:
-// mongodb+srv://seu_usuario:sua_senha@seu_cluster.mongodb.net
+// Endpoint para cadastro de empresas (multi‑tenant)
 app.post('/register-company', async (req, res) => {
   console.log("Requisição recebida em /register-company:", req.body);
 
@@ -250,18 +247,21 @@ app.post('/register-company', async (req, res) => {
   }
 
   try {
-    // Cria o documento da empresa
+    // Cria o documento da empresa com os dados recebidos
     const newCompany = new Company(req.body);
 
-    // Gera um nome para o banco (tenant) usando um slug do nome da empresa
+    // Gera um nome para o banco do tenant com base no nome da empresa
     const dbName = "empresa_" + newCompany.nome.toLowerCase().trim().replace(/\s+/g, '_');
-    newCompany.banco = dbName; // Armazena o nome do banco no documento da empresa
+    newCompany.banco = dbName; // Armazena o nome do banco no documento
 
     // Salva a empresa no banco principal
     const savedCompany = await newCompany.save();
     console.log("Empresa cadastrada:", savedCompany);
 
-    // Cria a conexão para o banco do tenant usando a variável MONGO_URI_BASE
+    // Cria a conexão para o tenant usando a variável MONGO_URI_BASE
+    if (!process.env.MONGO_URI_BASE) {
+      throw new Error("MONGO_URI_BASE não definido no ambiente.");
+    }
     const tenantUri = `${process.env.MONGO_URI_BASE}/${dbName}`;
     const tenantConnection = mongoose.createConnection(tenantUri, {
       useNewUrlParser: true,
@@ -277,10 +277,10 @@ app.post('/register-company', async (req, res) => {
       name: "Sistema"
     });
 
-    // Atualiza o usuário com o _id da empresa cadastrada
+    // Atualiza o usuário com o _id da nova empresa cadastrada
     await User.findByIdAndUpdate(req.user._id, { company: savedCompany._id });
 
-    // Fecha a conexão do tenant (ela será reaberta conforme necessário)
+    // Fecha a conexão do tenant
     tenantConnection.close();
 
     res.status(201).send({ message: "Empresa cadastrada com sucesso!", company: savedCompany });
@@ -341,13 +341,15 @@ app.post('/api/logout', (req, res, next) => {
   });
 });
 
-// Rota para servir o frontend (SPA)
-app.use(express.static(path.join(__dirname, 'public')));
-app.get('*', (req, res) => {
+// Rota protegida para servir o frontend (página de configuração da empresa)
+app.get('/company-registration', (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.redirect('/login');
+  }
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Endpoints para gerenciamento de usuários (demover, excluir)
+// Endpoint para demover um usuário (tornar cliente)
 app.put('/api/users/:id/demote', isAdmin, async (req, res) => {
   try {
     if (req.user._id.toString() === req.params.id) {
@@ -367,6 +369,7 @@ app.put('/api/users/:id/demote', isAdmin, async (req, res) => {
   }
 });
 
+// Endpoint para excluir um usuário
 app.delete('/api/users/:id', isAdmin, async (req, res) => {
   try {
     if (req.user._id.toString() === req.params.id) {
@@ -382,6 +385,7 @@ app.delete('/api/users/:id', isAdmin, async (req, res) => {
   }
 });
 
+// Endpoint para excluir uma empresa (apenas para admin)
 app.delete('/api/companies/:id', isAdmin, async (req, res) => {
   try {
     const deletedCompany = await Company.findByIdAndDelete(req.params.id);
@@ -394,7 +398,7 @@ app.delete('/api/companies/:id', isAdmin, async (req, res) => {
   }
 });
 
-// Endpoints para alteração de senha e atualização do usuário
+// Endpoint para alteração de senha do usuário (manual)
 app.put('/api/user/password', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: "Não autenticado." });
@@ -421,6 +425,7 @@ app.put('/api/user/password', async (req, res) => {
   }
 });
 
+// Endpoint para alteração de senha (alternativa)
 app.put('/api/user/change-password', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: "Não autenticado." });
@@ -444,6 +449,7 @@ app.put('/api/user/change-password', async (req, res) => {
   }
 });
 
+// Endpoint para atualizar dados do usuário
 app.put('/api/user', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: "Não autenticado." });
@@ -473,6 +479,8 @@ app.put('/api/user', async (req, res) => {
 
 // Serve arquivos estáticos da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Rota curinga para SPA
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
