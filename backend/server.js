@@ -12,6 +12,7 @@ import bcrypt from 'bcrypt';
 import User from './models/User.js';
 import Company from './models/Company.js';
 import Message from './models/Message.js'; // Certifique‑se de criar esse modelo conforme instruído
+import { MongoClient } from 'mongodb';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -400,24 +401,25 @@ app.delete('/api/companies/:id', isAdmin, async (req, res) => {
         throw new Error("MONGO_URI_TEMPLATE não definido no ambiente.");
       }
       const tenantUri = process.env.MONGO_URI_TEMPLATE.replace('{DB_NAME}', deletedCompany.banco);
-
-      // Aguarda a conexão estar aberta usando asPromise()
-      const tenantConnection = await mongoose.createConnection(tenantUri, {
+      console.log("Tentando conectar ao tenant:", tenantUri);
+      const client = new MongoClient(tenantUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
-      }).asPromise();
-
-      // Dropar o banco do tenant
-      await tenantConnection.dropDatabase();
-      tenantConnection.close();
+      });
+      await client.connect();
+      console.log("Conexão estabelecida. Banco a ser droppado:", client.db().databaseName);
+      await client.db().dropDatabase();
+      await client.close();
       console.log(`Banco do tenant ${deletedCompany.banco} excluído com sucesso.`);
     }
 
     res.json({ message: "Empresa e banco do tenant excluídos com sucesso!", company: deletedCompany });
   } catch (err) {
+    console.error("Erro ao excluir empresa:", err);
     res.status(500).json({ error: "Erro ao excluir empresa: " + err.message });
   }
 });
+
 
 
 // Endpoint para alteração de senha do usuário (manual)
