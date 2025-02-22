@@ -238,28 +238,63 @@ app.put('/api/users/:id/promote', isAdmin, async (req, res) => {
   }
 });
 
-// Endpoint para cadastro de empresas (cliente)
-// Se o usuário já tiver uma empresa cadastrada, retorna erro
+// Endpoint para cadastro de empresas (atualizado para multi-tenant)
 app.post('/register-company', async (req, res) => {
   console.log("Requisição recebida em /register-company:", req.body);
+
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: "Não autenticado." });
   }
   if (req.user.company) {
     return res.status(400).json({ error: "Empresa já cadastrada. Utilize o endpoint de atualização." });
   }
+
   try {
+    // Cria o documento da empresa a partir dos dados do request
     const newCompany = new Company(req.body);
+
+    // Gera um nome para o banco da empresa (tenant) – por exemplo: "empresa_domus"
+    const dbName = "empresa_" + newCompany.nome.toLowerCase().trim().replace(/\s+/g, '_');
+    newCompany.banco = dbName; // armazena o nome do banco no documento da empresa
+
+    // Salva a empresa no banco principal (bivibot-empresas)
     const savedCompany = await newCompany.save();
     console.log("Empresa cadastrada:", savedCompany);
-    // Atualiza o usuário com o _id da nova empresa
+
+    // Cria uma conexão para o novo banco do tenant
+    // A URI base deve estar definida na variável de ambiente MONGO_URI_BASE (sem o nome do banco)
+    const tenantUri = `${process.env.MONGO_URI_BASE}/${dbName}`;
+    const tenantConnection = mongoose.createConnection(tenantUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
+    // Opcional: inicializa coleções no banco do tenant.
+    // Por exemplo, usando o schema de Message (supondo que ele esteja definido em models/message.js)
+    // IMPORTANTE: Certifique-se de importar o modelo ou o schema de Message.
+    // Aqui usamos a mesma definição de Message para criar o model do tenant.
+    const TenantMessage = tenantConnection.model('Message', Message.schema);
+    // Insere um documento inicial para criar a coleção, se desejar:
+    await TenantMessage.create({
+      sender: "system",
+      message: "Bem vindo à sua nova instância de mensagens!",
+      timestamp: new Date(),
+      name: "Sistema"
+    });
+
+    // Atualiza o usuário com o _id da nova empresa cadastrada
     await User.findByIdAndUpdate(req.user._id, { company: savedCompany._id });
+
+    // Fecha a conexão do tenant (ela será reaberta conforme necessário nas operações futuras)
+    tenantConnection.close();
+
     res.status(201).send({ message: "Empresa cadastrada com sucesso!", company: savedCompany });
   } catch (err) {
     console.error("Erro ao cadastrar empresa:", err);
     res.status(500).send({ error: "Erro ao cadastrar empresa: " + err.message });
   }
 });
+
 
 // Endpoint para que o cliente obtenha os dados da sua empresa
 app.get('/api/company', async (req, res) => {
