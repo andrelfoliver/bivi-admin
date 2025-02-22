@@ -90,6 +90,7 @@ const translations = {
     linkSitePlaceholder: "Cole o link do site aqui",
     exemplosAtendimento: "Exemplos de Perguntas e Respostas",
     exemplosAtendimentoPlaceholder: "Digite exemplos de perguntas e respostas para o atendimento",
+    fillAllFields: "Por favor, preencha todos os campos obrigatórios antes de salvar as alterações."
   },
   en: {
     // Traduções em inglês (se necessário)
@@ -161,10 +162,10 @@ function ConfigEmpresa({ user, onLogout }) {
   const [submitError, setSubmitError] = useState(null);
   const [success, setSuccess] = useState(false);
 
-  // Estado para controle do modo de edição (inputs congelados)
+  // Controle do modo de edição e modais
   const [isEditable, setIsEditable] = useState(false);
-  // Estado para controle do modal de confirmação de salvamento
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   const logoInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState('dadosBasicos');
@@ -230,7 +231,7 @@ function ConfigEmpresa({ user, onLogout }) {
     }
   };
 
-  // Ao montar o componente, busca os dados da empresa vinculada ao usuário (se existir)
+  // Busca os dados da empresa do usuário ao montar o componente
   useEffect(() => {
     if (user && user.role === 'client') {
       fetch('/api/company', { credentials: 'include' })
@@ -244,7 +245,7 @@ function ConfigEmpresa({ user, onLogout }) {
     }
   }, [user]);
 
-  // Função de validação (igual ao que você já tinha)
+  // Validação do formulário
   const validateForm = () => {
     let newErrors = {};
     if (!empresa.nome.trim())
@@ -320,7 +321,7 @@ function ConfigEmpresa({ user, onLogout }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Função que efetivamente envia os dados para o servidor
+  // Função para enviar os dados ao servidor
   const submitData = async () => {
     try {
       let response;
@@ -348,7 +349,6 @@ function ConfigEmpresa({ user, onLogout }) {
         if (data.company) {
           setEmpresa(prev => ({ ...prev, ...data.company }));
         }
-        // Após salvar, volta para o modo visual (inputs congelados)
         setIsEditable(false);
       }
     } catch (error) {
@@ -356,24 +356,31 @@ function ConfigEmpresa({ user, onLogout }) {
     }
   };
 
-  // Função acionada ao clicar em "Salvar"
+  // Ao clicar no botão "Salvar", verifica se todos os campos obrigatórios foram preenchidos.
+  // Se não, exibe um modal de erro; caso contrário, exibe o modal de confirmação.
   const handleSaveClick = (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
-    // Abre o modal de confirmação
+    if (!validateForm()) {
+      setShowErrorModal(true);
+      return;
+    }
     setShowConfirmModal(true);
   };
 
-  // Função acionada no modal de confirmação
+  // Modal de confirmação: se o usuário confirmar, os dados são enviados.
   const handleConfirmSave = () => {
     setShowConfirmModal(false);
     submitData();
   };
 
-  // Função para cancelar a edição (reverte para modo visualização)
+  // Modal de erro: apenas fecha o modal
+  const handleErrorModalClose = () => {
+    setShowErrorModal(false);
+  };
+
+  // Função para cancelar a edição e recarregar os dados do servidor
   const handleCancelEdit = () => {
     setIsEditable(false);
-    // Opcional: recarregar os dados do servidor para descartar alterações
     fetch('/api/company', { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => {
@@ -553,7 +560,32 @@ function ConfigEmpresa({ user, onLogout }) {
         `}
       </style>
 
-
+      {/* Botão global para alternar entre modo visual e edição */}
+      {!isEditable ? (
+        <div style={{ margin: '1rem 0' }}>
+          <button
+            onClick={() => setIsEditable(true)}
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer' }}
+          >
+            Editar
+          </button>
+        </div>
+      ) : (
+        <div style={{ margin: '1rem 0' }}>
+          <button
+            onClick={handleSaveClick}
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', marginRight: '0.5rem' }}
+          >
+            Salvar
+          </button>
+          <button
+            onClick={handleCancelEdit}
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', color: '#000', cursor: 'pointer' }}
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
 
       <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
         <Tab eventKey="dadosBasicos" title={t.dadosBasicos}>
@@ -897,14 +929,15 @@ function ConfigEmpresa({ user, onLogout }) {
               </div>
             ))}
           </div>
+          {/* Botão Salvar na parte inferior dos inputs */}
           <button
             type="submit"
             style={{
+              padding: '0.75rem 1.5rem',
               backgroundColor: '#5de5d9',
               border: 'none',
-              padding: '1rem',
               borderRadius: '4px',
-              color: 'white',
+              color: '#fff',
               cursor: 'pointer',
               transition: 'background-color 0.3s',
               marginTop: '1rem'
@@ -935,33 +968,8 @@ function ConfigEmpresa({ user, onLogout }) {
           {t.successMessage}
         </div>
       )}
-      {/* Botão global para alternar entre modo visual e edição */}
-      {!isEditable ? (
-        <div style={{ margin: '1rem 0' }}>
-          <button
-            onClick={() => setIsEditable(true)}
-            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer' }}
-          >
-            Editar
-          </button>
-        </div>
-      ) : (
-        <div style={{ margin: '1rem 0' }}>
-          <button
-            onClick={handleSaveClick}
-            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#5de5d9', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', marginRight: '0.5rem' }}
-          >
-            Salvar
-          </button>
-          <button
-            onClick={handleCancelEdit}
-            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', color: '#000', cursor: 'pointer' }}
-          >
-            Cancelar
-          </button>
-        </div>
-      )}
-      {/* Modal de confirmação */}
+
+      {/* Modal de confirmação de salvamento */}
       <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Confirmar Alterações</Modal.Title>
@@ -975,6 +983,21 @@ function ConfigEmpresa({ user, onLogout }) {
           </Button>
           <Button variant="primary" onClick={handleConfirmSave}>
             Confirmar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Modal de erro de campos não preenchidos */}
+      <Modal show={showErrorModal} onHide={handleErrorModalClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Campos Obrigatórios</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>{t.fillAllFields}</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleErrorModalClose}>
+            OK
           </Button>
         </Modal.Footer>
       </Modal>
