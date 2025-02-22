@@ -386,6 +386,7 @@ app.delete('/api/users/:id', isAdmin, async (req, res) => {
 });
 
 // Endpoint para excluir uma empresa (apenas para admin) e dropar o banco do tenant
+// Endpoint para excluir uma empresa (apenas para admin) – Multi‑tenant
 app.delete('/api/companies/:id', isAdmin, async (req, res) => {
   try {
     // Exclui a empresa do banco principal
@@ -394,21 +395,17 @@ app.delete('/api/companies/:id', isAdmin, async (req, res) => {
       return res.status(404).json({ error: "Empresa não encontrada." });
     }
 
-    // Se a empresa possui o campo 'banco' definido, exclui também o banco do tenant
+    // Se a empresa possui o campo 'banco' definido, tenta excluir o banco do tenant
     if (deletedCompany.banco) {
-      // Verifica se a variável de ambiente MONGO_URI_TEMPLATE está definida
       if (!process.env.MONGO_URI_TEMPLATE) {
         throw new Error("MONGO_URI_TEMPLATE não definido no ambiente.");
       }
-      // Substitui {DB_NAME} pelo nome do banco gerado
       const tenantUri = process.env.MONGO_URI_TEMPLATE.replace('{DB_NAME}', deletedCompany.banco);
-
       // Cria a conexão com o banco do tenant
       const tenantConnection = mongoose.createConnection(tenantUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });
-
       // Aguarda a conexão e deleta o banco
       await tenantConnection.dropDatabase();
       tenantConnection.close();
