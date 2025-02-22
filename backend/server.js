@@ -11,6 +11,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import bcrypt from 'bcrypt';
 import User from './models/User.js';
 import Company from './models/Company.js';
+import Message from './models/message.js'; // IMPORTANTE: para usar o schema de Message ao inicializar o banco do tenant
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,10 +25,10 @@ app.set('trust proxy', 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Conecta ao MongoDB utilizando a connection string definida na variável de ambiente
+// Conecta ao banco principal de empresas (multi-tenant) – este é o banco que guarda as empresas e usuários
 mongoose
   .connect(process.env.MONGO_URI_EMPRESAS)
-  .then(() => console.log("Conectado ao MongoDB"))
+  .then(() => console.log("Conectado ao MongoDB (banco principal)"))
   .catch((err) => console.error("Erro ao conectar ao MongoDB:", err));
 
 // Configuração da sessão
@@ -80,7 +81,6 @@ passport.use(
           // Atualiza o usuário existente para incluir o googleId e mudar o provider
           existingEmailUser.googleId = profile.id;
           existingEmailUser.provider = 'google';
-          // Opcionalmente, atualiza a foto se disponível
           if (profile.photos && profile.photos[0]) {
             existingEmailUser.picture = profile.photos[0].value;
           }
@@ -104,7 +104,6 @@ passport.use(
     }
   )
 );
-
 
 // Rota para iniciar o fluxo de login com Google
 app.get(
@@ -142,7 +141,7 @@ app.post('/api/auth/register', async (req, res) => {
       password: hashedPassword,
       name: name || username,
       provider: 'local',
-      role: 'client' // Usuários registrados manualmente terão role 'client' por padrão
+      role: 'client'
     });
     const savedUser = await newUser.save();
     res.status(201).send({ message: "Usuário registrado com sucesso!", user: savedUser });
@@ -155,7 +154,6 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res, next) => {
   const { username, password } = req.body;
   try {
-    // Se já houver um usuário autenticado, efetua logout para limpar a sessão anterior
     if (req.isAuthenticated()) {
       await new Promise((resolve, reject) => {
         req.logout((err) => {
@@ -171,7 +169,6 @@ app.post('/api/auth/login', async (req, res, next) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).send({ error: "Credenciais inválidas." });
 
-    // Regenera a sessão para garantir que nenhuma informação da sessão anterior seja mantida
     req.session.regenerate((err) => {
       if (err) return next(err);
       req.login(user, (err) => {
@@ -238,7 +235,10 @@ app.put('/api/users/:id/promote', isAdmin, async (req, res) => {
   }
 });
 
-// Endpoint para cadastro de empresas (atualizado para multi-tenant)
+// Endpoint para cadastro de empresas (multi-tenant)
+// OBSERVAÇÃO: Certifique-se de definir a variável de ambiente MONGO_URI_BASE no .env do backend.
+// Exemplo de valor para MONGO_URI_BASE:
+// mongodb+srv://seu_usuario:sua_senha@seu_cluster.mongodb.net
 app.post('/register-company', async (req, res) => {
   console.log("Requisição recebida em /register-company:", req.body);
 
@@ -250,31 +250,26 @@ app.post('/register-company', async (req, res) => {
   }
 
   try {
-    // Cria o documento da empresa a partir dos dados do request
+    // Cria o documento da empresa
     const newCompany = new Company(req.body);
 
-    // Gera um nome para o banco da empresa (tenant) – por exemplo: "empresa_domus"
+    // Gera um nome para o banco (tenant) usando um slug do nome da empresa
     const dbName = "empresa_" + newCompany.nome.toLowerCase().trim().replace(/\s+/g, '_');
-    newCompany.banco = dbName; // armazena o nome do banco no documento da empresa
+    newCompany.banco = dbName; // Armazena o nome do banco no documento da empresa
 
-    // Salva a empresa no banco principal (bivibot-empresas)
+    // Salva a empresa no banco principal
     const savedCompany = await newCompany.save();
     console.log("Empresa cadastrada:", savedCompany);
 
-    // Cria uma conexão para o novo banco do tenant
-    // A URI base deve estar definida na variável de ambiente MONGO_URI_BASE (sem o nome do banco)
+    // Cria a conexão para o banco do tenant usando a variável MONGO_URI_BASE
     const tenantUri = `${process.env.MONGO_URI_BASE}/${dbName}`;
     const tenantConnection = mongoose.createConnection(tenantUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
 
-    // Opcional: inicializa coleções no banco do tenant.
-    // Por exemplo, usando o schema de Message (supondo que ele esteja definido em models/message.js)
-    // IMPORTANTE: Certifique-se de importar o modelo ou o schema de Message.
-    // Aqui usamos a mesma definição de Message para criar o model do tenant.
+    // Inicializa a coleção de mensagens no banco do tenant
     const TenantMessage = tenantConnection.model('Message', Message.schema);
-    // Insere um documento inicial para criar a coleção, se desejar:
     await TenantMessage.create({
       sender: "system",
       message: "Bem vindo à sua nova instância de mensagens!",
@@ -282,10 +277,10 @@ app.post('/register-company', async (req, res) => {
       name: "Sistema"
     });
 
-    // Atualiza o usuário com o _id da nova empresa cadastrada
+    // Atualiza o usuário com o _id da empresa cadastrada
     await User.findByIdAndUpdate(req.user._id, { company: savedCompany._id });
 
-    // Fecha a conexão do tenant (ela será reaberta conforme necessário nas operações futuras)
+    // Fecha a conexão do tenant (ela será reaberta conforme necessário)
     tenantConnection.close();
 
     res.status(201).send({ message: "Empresa cadastrada com sucesso!", company: savedCompany });
@@ -294,7 +289,6 @@ app.post('/register-company', async (req, res) => {
     res.status(500).send({ error: "Erro ao cadastrar empresa: " + err.message });
   }
 });
-
 
 // Endpoint para que o cliente obtenha os dados da sua empresa
 app.get('/api/company', async (req, res) => {
@@ -341,25 +335,21 @@ app.post('/api/logout', (req, res, next) => {
     if (err) return next(err);
     req.session.destroy(err => {
       if (err) return next(err);
-      // Limpa o cookie da sessão (nome padrão é "connect.sid")
       res.clearCookie('connect.sid', { path: '/' });
       return res.send({ message: "Logout successful" });
     });
   });
 });
 
-// Rota protegida para servir o frontend (página de configuração da empresa)
-app.get('/company-registration', (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.redirect('/login');
-  }
+// Rota para servir o frontend (SPA)
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Endpoint para demover um usuário (tornar cliente)
+// Endpoints para gerenciamento de usuários (demover, excluir)
 app.put('/api/users/:id/demote', isAdmin, async (req, res) => {
   try {
-    // Impede que o usuário logado se demova
     if (req.user._id.toString() === req.params.id) {
       return res.status(400).json({ error: "Você não pode se demover." });
     }
@@ -377,10 +367,8 @@ app.put('/api/users/:id/demote', isAdmin, async (req, res) => {
   }
 });
 
-// Endpoint para excluir um usuário
 app.delete('/api/users/:id', isAdmin, async (req, res) => {
   try {
-    // Impede que o usuário logado se exclua
     if (req.user._id.toString() === req.params.id) {
       return res.status(400).json({ error: "Você não pode se excluir." });
     }
@@ -394,7 +382,6 @@ app.delete('/api/users/:id', isAdmin, async (req, res) => {
   }
 });
 
-// Endpoint para excluir uma empresa (apenas para admin)
 app.delete('/api/companies/:id', isAdmin, async (req, res) => {
   try {
     const deletedCompany = await Company.findByIdAndDelete(req.params.id);
@@ -407,7 +394,7 @@ app.delete('/api/companies/:id', isAdmin, async (req, res) => {
   }
 });
 
-// Endpoint para alteração de senha do usuário
+// Endpoints para alteração de senha e atualização do usuário
 app.put('/api/user/password', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: "Não autenticado." });
@@ -421,12 +408,10 @@ app.put('/api/user/password', async (req, res) => {
   }
   try {
     const user = await User.findById(req.user._id);
-    // Verifica se a senha atual confere
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ error: "Senha atual incorreta." });
     }
-    // Hash da nova senha
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
     await user.save();
@@ -435,54 +420,44 @@ app.put('/api/user/password', async (req, res) => {
     res.status(500).json({ error: "Erro ao atualizar senha: " + err.message });
   }
 });
-// Endpoint para alteração de senha
+
 app.put('/api/user/change-password', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: "Não autenticado." });
   }
-
   const { currentPassword, newPassword } = req.body;
-
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ error: "Usuário não encontrado." });
     }
-
-    // Verifica se a senha atual está correta
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ error: "Senha atual incorreta." });
     }
-
-    // Validação do novo password pode ser feita aqui se desejar (mas já estamos validando no front-end)
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
     await user.save();
-
     res.json({ message: "Senha alterada com sucesso!" });
   } catch (err) {
     res.status(500).json({ error: "Erro ao alterar senha: " + err.message });
   }
 });
-// Endpoint para atualizar dados do usuário
+
 app.put('/api/user', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: "Não autenticado." });
   }
   const { name, email, company, telefone } = req.body;
-
-  // Se um novo email for informado, verifique se ele já está em uso por outro usuário
   if (email) {
     const emailExists = await User.findOne({
       email,
-      _id: { $ne: req.user._id } // Ignora o usuário atual
+      _id: { $ne: req.user._id }
     });
     if (emailExists) {
       return res.status(400).json({ error: "Este email já está em uso." });
     }
   }
-
   try {
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
@@ -496,12 +471,8 @@ app.put('/api/user', async (req, res) => {
   }
 });
 
-
-
 // Serve arquivos estáticos da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Rota curinga para SPA
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
