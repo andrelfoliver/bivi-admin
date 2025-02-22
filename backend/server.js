@@ -64,24 +64,47 @@ passport.use(
       callbackURL: "https://app.bivisualizer.com/auth/google/callback"
     },
     async (accessToken, refreshToken, profile, done) => {
-      if (!profile.emails[0].value.endsWith('@gmail.com')) {
-        return done(null, false, { message: 'Apenas contas Gmail são permitidas.' });
+      try {
+        // Apenas permite contas Gmail
+        if (!profile.emails[0].value.endsWith('@gmail.com')) {
+          return done(null, false, { message: 'Apenas contas Gmail são permitidas.' });
+        }
+
+        // Procura primeiro pelo googleId
+        let user = await User.findOne({ googleId: profile.id });
+        if (user) return done(null, user);
+
+        // Se não encontrar, verifica se já existe um usuário com esse e-mail
+        const existingEmailUser = await User.findOne({ email: profile.emails[0].value });
+        if (existingEmailUser) {
+          // Atualiza o usuário existente para incluir o googleId e mudar o provider
+          existingEmailUser.googleId = profile.id;
+          existingEmailUser.provider = 'google';
+          // Opcionalmente, atualiza a foto se disponível
+          if (profile.photos && profile.photos[0]) {
+            existingEmailUser.picture = profile.photos[0].value;
+          }
+          await existingEmailUser.save();
+          return done(null, existingEmailUser);
+        }
+
+        // Caso não exista nenhum usuário com esse e-mail, cria um novo
+        const newUser = await new User({
+          googleId: profile.id,
+          email: profile.emails[0].value,
+          name: profile.displayName,
+          picture: profile.photos && profile.photos[0] ? profile.photos[0].value : null,
+          provider: 'google',
+          role: 'client'
+        }).save();
+        return done(null, newUser);
+      } catch (err) {
+        return done(err);
       }
-      const existingUser = await User.findOne({ googleId: profile.id });
-      if (existingUser) return done(null, existingUser);
-      // Cria um novo usuário com role 'client' por padrão
-      const newUser = await new User({
-        googleId: profile.id,
-        email: profile.emails[0].value,
-        name: profile.displayName,
-        picture: profile.photos && profile.photos[0] ? profile.photos[0].value : null,
-        provider: 'google',
-        role: 'client'
-      }).save();
-      done(null, newUser);
     }
   )
 );
+
 
 // Rota para iniciar o fluxo de login com Google
 app.get(
@@ -415,11 +438,11 @@ app.put('/api/user', async (req, res) => {
   }
   const { name, email, company, telefone } = req.body;
   try {
-    // Se for atualizar o email, e o novo email for diferente do atual, verifica duplicidade
+    // Se o email for fornecido e for diferente do atual, verifica se já existe em outra conta
     if (email && email !== req.user.email) {
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
-        return res.status(400).json({ error: "Este email já está associado a outra conta." });
+      const emailExists = await User.findOne({ email });
+      if (emailExists) {
+        return res.status(400).json({ error: "Não é possível atualizar: email já utilizado por outra conta." });
       }
     }
 
@@ -434,6 +457,7 @@ app.put('/api/user', async (req, res) => {
     res.status(500).json({ error: "Erro ao atualizar usuário: " + err.message });
   }
 });
+
 
 
 // Serve arquivos estáticos da pasta 'public'
