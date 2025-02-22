@@ -699,6 +699,7 @@ function ConfigEmpresa({ user, onLogout }) {
             {[
               { label: 'VERIFY_TOKEN', name: 'verifyToken' },
               { label: 'WHATSAPP_API_TOKEN', name: 'whatsappApiToken' },
+              { label: 'OPENAI_API_KEY', name: 'openaiApiKey' }, // campo adicionado
               { label: 'MONGO_URI', name: 'mongoUri' },
               { label: 'PHONE_NUMBER_ID', name: 'phoneNumberId' },
               { label: 'EMAIL_USER', name: 'emailUser' },
@@ -733,6 +734,7 @@ function ConfigEmpresa({ user, onLogout }) {
             ))}
           </div>
         </Tab>
+
         <Tab eventKey="instrucao" title={t.instrucoesPersonalizadas}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {[
