@@ -811,7 +811,7 @@ function ConfigEmpresa({ user, onLogout }) {
           </div>
           {/* Botão Salvar na parte inferior dos inputs */}
           <button
-            type="submit"
+            type="button"
             style={{
               padding: '0.75rem 1.5rem',
               backgroundColor: '#5de5d9',

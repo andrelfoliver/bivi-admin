@@ -388,46 +388,32 @@ app.delete('/api/users/:id', isAdmin, async (req, res) => {
 // Endpoint para excluir uma empresa (apenas para admin) e dropar o banco do tenant
 app.delete('/api/companies/:id', isAdmin, async (req, res) => {
   try {
-    // Busca a empresa pelo ID
-    const company = await Company.findById(req.params.id);
-    if (!company) {
+    // Exclui a empresa do banco principal
+    const deletedCompany = await Company.findByIdAndDelete(req.params.id);
+    if (!deletedCompany) {
       return res.status(404).json({ error: "Empresa não encontrada." });
     }
 
-    // Se a empresa tiver o campo 'banco' definido, tente dropar o banco do tenant
-    if (company.banco) {
-      if (!process.env.MONGO_URI_TEMPLATE) {
-        return res.status(500).json({ error: "MONGO_URI_TEMPLATE não definido no ambiente." });
-      }
-      // Substitui o marcador {DB_NAME} pelo nome do banco do tenant
-      const tenantUri = process.env.MONGO_URI_TEMPLATE.replace('{DB_NAME}', company.banco);
-      // Cria uma nova conexão para o banco do tenant
+    // Se a empresa possui o campo 'banco' definido, exclui também o banco do tenant
+    if (deletedCompany.banco) {
+      // Constrói a URI do tenant substituindo '{DB_NAME}' no template
+      const tenantUri = process.env.MONGO_URI_TEMPLATE.replace('{DB_NAME}', deletedCompany.banco);
+      // Cria a conexão com o banco do tenant
       const tenantConnection = mongoose.createConnection(tenantUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });
-
-      // Espera a conexão abrir antes de prosseguir
-      await new Promise((resolve, reject) => {
-        tenantConnection.once('open', resolve);
-        tenantConnection.on('error', reject);
-      });
-
-      // Dropar o banco do tenant
+      // Exclui o banco (dropDatabase)
       await tenantConnection.dropDatabase();
-      console.log(`Banco do tenant '${company.banco}' foi excluído.`);
       tenantConnection.close();
+      console.log(`Banco do tenant ${deletedCompany.banco} excluído com sucesso.`);
     }
 
-    // Remove a empresa da coleção 'companies' do banco principal
-    await Company.findByIdAndDelete(req.params.id);
-    res.json({ message: "Empresa excluída com sucesso, e o banco do tenant foi removido." });
+    res.json({ message: "Empresa e banco do tenant excluídos com sucesso!", company: deletedCompany });
   } catch (err) {
-    console.error("Erro ao excluir empresa:", err);
     res.status(500).json({ error: "Erro ao excluir empresa: " + err.message });
   }
 });
-
 
 // Endpoint para alteração de senha do usuário (manual)
 app.put('/api/user/password', async (req, res) => {
