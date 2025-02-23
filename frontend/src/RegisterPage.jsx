@@ -37,6 +37,12 @@ function RegisterPage() {
       return;
     }
 
+    // Validação para permitir apenas um único nome (sem espaços)
+    if (/\s/.test(username)) {
+      setErrorMessage('O nome de usuário não pode conter espaços.');
+      return;
+    }
+
     if (password !== confirmPassword) {
       setErrorMessage('As senhas não coincidem.');
       return;
@@ -73,6 +79,7 @@ function RegisterPage() {
       setErrorMessage('Erro de conexão com o servidor.');
     }
   };
+
 
   return (
     <>
