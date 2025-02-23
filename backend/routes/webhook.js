@@ -3,7 +3,7 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import moment from 'moment-timezone';
 import Message from '../models/Message.js';
-import { enviarEmailCliente, enviarEmailFinalizacao, enviarEmailNovoContato } from '../controllers/emailcontroller.jsm';
+import { enviarEmailCliente, enviarEmailFinalizacao, enviarEmailNovoContato } from '../controllers/emailController.js';
 
 dotenv.config();
 
