@@ -13,11 +13,15 @@ import User from './models/User.js';
 import Company from './models/Company.js';
 import Message from './models/Message.js'; // Certifique‑se de criar esse modelo conforme instruído
 import { MongoClient } from 'mongodb';
+import webhookRouter from './routes/webhook.js'; // ajuste o caminho se necessário
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+// Monta o router do webhook em uma rota pública, por exemplo, /webhook
+app.use('/webhook', webhookRouter);
 
 // Indica que o Express deve confiar no proxy (necessário para ambientes como o Heroku)
 app.set('trust proxy', 1);
